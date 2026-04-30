@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background-primary:   #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-tertiary:  #f1f5f9;
+  --color-text-primary:         #0f172a;
+  --color-text-secondary:       #475569;
+  --color-text-tertiary:        #94a3b8;
+  --color-border-tertiary:      #e2e8f0;
+  --color-border-secondary:     #cbd5e1;
+}
+
+* { box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; }
