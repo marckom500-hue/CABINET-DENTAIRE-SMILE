@@ -278,9 +278,9 @@ export default function Rappels() {
             </div>
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-700">
-              <strong>Intégration SMS requise :</strong> Pour activer l'envoi réel, configurez un fournisseur SMS
-              dans l'Edge Function Supabase <code>send-rappel-rdv</code>.
-              Fournisseurs compatibles : <strong>Twilio</strong>, <strong>Orange SMS API</strong> (Cameroun), <strong>Africa's Talking</strong>.
+              <strong>Configuration Twilio :</strong> Pour activer l'envoi réel, renseignez les secrets
+              <code> SMS_PROVIDER</code>, <code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code> et
+              <code> TWILIO_FROM_NUMBER</code> dans l'Edge Function Supabase <code>send-rappel-rdv</code>.
             </div>
 
             <button

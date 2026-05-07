@@ -12,6 +12,7 @@ import Stock from './pages/Stock'
 import Rappels from './pages/Rappels'
 import Rapports from './pages/Rapports'
 import Utilisateurs from './pages/Utilisateurs'
+import { NotificationsProvider } from './hooks/NotificationsContext'
 
 function AppRoutes() {
   const { user, loading } = useAuthContext()
@@ -49,7 +50,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <NotificationsProvider>
+          <AppRoutes />
+        </NotificationsProvider>
       </AuthProvider>
     </BrowserRouter>
   )

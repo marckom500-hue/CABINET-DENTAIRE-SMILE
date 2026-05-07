@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useNotifications } from './NotificationsContext'
 
 export function useRendezVous() {
   const [rendezVous, setRendezVous] = useState([])
   const [loading,    setLoading]    = useState(true)
+  const { notify } = useNotifications()
 
   const fetch = async () => {
     setLoading(true)
@@ -17,9 +19,36 @@ export function useRendezVous() {
 
   useEffect(() => { fetch() }, [])
 
-  const ajouterRdv    = async (r)     => { await supabase.from('rendez_vous').insert(r); fetch() }
-  const modifierRdv   = async (id, r) => { await supabase.from('rendez_vous').update(r).eq('id', id); fetch() }
-  const supprimerRdv  = async (id)    => { await supabase.from('rendez_vous').delete().eq('id', id); fetch() }
+  const ajouterRdv = async (r) => {
+    const { error } = await supabase.from('rendez_vous').insert(r)
+    if (error) {
+      notify({ type:'error', message:`RDV non ajoute : ${error.message}` })
+      throw error
+    }
+    notify({ type:'rdv', message:`RDV ajoute le ${r.date} a ${r.heure}` })
+    await fetch()
+  }
+
+  const modifierRdv = async (id, r) => {
+    const { error } = await supabase.from('rendez_vous').update(r).eq('id', id)
+    if (error) {
+      notify({ type:'error', message:`RDV non modifie : ${error.message}` })
+      throw error
+    }
+    notify({ type:'rdv', message:`RDV modifie le ${r.date} a ${r.heure}` })
+    await fetch()
+  }
+
+  const supprimerRdv = async (id) => {
+    const rdv = rendezVous.find(r => r.id === id)
+    const { error } = await supabase.from('rendez_vous').delete().eq('id', id)
+    if (error) {
+      notify({ type:'error', message:`RDV non supprime : ${error.message}` })
+      throw error
+    }
+    notify({ type:'rdv', message:`RDV supprime${rdv ? ` : ${rdv.date} a ${rdv.heure}` : ''}` })
+    await fetch()
+  }
 
   return { rendezVous, loading, ajouterRdv, modifierRdv, supprimerRdv, refresh: fetch }
 }

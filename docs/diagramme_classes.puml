@@ -1,0 +1,152 @@
+@startuml
+left header Cabinet Dentaire SMILE
+right header Diagramme de Classes
+footer Page %page% sur %lastpage%
+
+title Diagramme de Classes - Modèle de Données
+
+' Configuration simple et claire
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor DeepSkyBlue
+  ArrowColor DeepSkyBlue
+  AttributeIconColor White
+  AttributeBackgroundColor White
+  MethodIconColor White
+  MethodBackgroundColor White
+  RoundCorner 10
+}
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' === CLASSES PRINCIPALES ===
+
+class Utilisateur {
+  - id: UUID
+  - nom: String
+  - prenom: String
+  - email: String
+  - role: String
+  - actif: Boolean
+  + sAuthentifier(): Boolean
+  + deconnecter(): Void
+  + gererProfil(): Void
+}
+
+class Patient {
+  - id: UUID
+  - nom: String
+  - prenom: String
+  - telephone: String
+  - email: String
+  - dateNaissance: Date
+  - groupeSanguin: String
+  - adresse: String
+  - statut: String
+  + consulterDossier(): Dossier
+  + modifierInfos(): Void
+  + supprimer(): Void
+}
+
+class RendezVous {
+  - id: UUID
+  - date: Date
+  - heure: String
+  - typeActe: String
+  - duree: Integer
+  - statut: String
+  - notes: String
+  + planifier(): Boolean
+  + modifier(): Void
+  + annuler(): Void
+  + confirmer(): Void
+}
+
+class Ordonnance {
+  - id: UUID
+  - medicaments: String
+  - posologie: String
+  - duree: String
+  - notes: String
+  + creer(): Void
+  + modifier(): Void
+  + genererPDF(): Fichier
+  + ajouterSignature(): Void
+}
+
+class Facture {
+  - id: UUID
+  - acte: String
+  - montant: Decimal
+  - date: Date
+  - statut: String
+  + creer(): Void
+  + modifier(): Void
+  + marquerPayee(): Void
+  + genererPDF(): Fichier
+}
+
+class Produit {
+  - id: UUID
+  - nomProduit: String
+  - quantite: Integer
+  - max: Integer
+  - seuil: Integer
+  - couleur: String
+  + ajouter(): Void
+  + modifier(): Void
+  + supprimer(): Void
+  + verifierStock(): Boolean
+}
+
+class RappelSMS {
+  - id: UUID
+  - rdvId: UUID
+  - statut: String
+  - message: String
+  - erreur: String
+  + envoyer(): Boolean
+  + verifierStatut(): String
+}
+
+' === RELATIONS ===
+
+Utilisateur "1" -- "0..*" Patient : gère >
+Utilisateur "1" -- "0..*" RendezVous : planifie >
+Utilisateur "1" -- "0..*" Ordonnance : prescrit >
+Utilisateur "1" -- "0..*" Facture : édite >
+
+Patient "1" -- "0..*" RendezVous : possède >
+Patient "1" -- "0..*" Ordonnance : reçoit >
+Patient "1" -- "0..*" Facture : reçoit >
+
+RendezVous "1" -- "0..1" Ordonnance : génère >
+RendezVous "1" -- "0..1" Facture : génère >
+RendezVous "1" -- "0..*" RappelSMS : déclenche >
+
+note top of Utilisateur
+  <b>Rôles possibles :</b>
+  - SuperAdmin
+  - Médecin
+  - Secrétaire
+  - Comptable
+  - Assistant
+end note
+
+note bottom of RendezVous
+  <b>Statuts :</b>
+  - attente
+  - confirme
+  - urgent
+  - annule
+end note
+
+note right of Facture
+  <b>Statuts :</b>
+  - attente
+  - paye
+  - annule
+end note
+
+@enduml

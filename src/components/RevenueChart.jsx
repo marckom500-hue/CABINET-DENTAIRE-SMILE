@@ -1,17 +1,40 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-const data = [
-  { mois:'Jan', revenus:520000 },{ mois:'Fév', revenus:680000 },
-  { mois:'Mar', revenus:750000 },{ mois:'Avr', revenus:620000 },
-  { mois:'Mai', revenus:890000 },{ mois:'Jun', revenus:840000 },
-]
+const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
-export default function RevenueChart() {
+export default function RevenueChart({ factures = [], loading = false }) {
+  // Calculate monthly revenue from real data
+  const currentYear = new Date().getFullYear()
+  
+  // Group factures by month for the current year
+  const monthlyData = MONTHS.map((mois, index) => {
+    const monthRevenue = factures
+      .filter(f => {
+        const fDate = new Date(f.date)
+        return fDate.getFullYear() === currentYear && fDate.getMonth() === index
+      })
+      .reduce((sum, f) => sum + (f.montant || 0), 0)
+    
+    return { mois, revenus: monthRevenue }
+  })
+
+  // Filter to show only months up to current month
+  const currentMonth = new Date().getMonth()
+  const displayData = monthlyData.slice(0, currentMonth + 1)
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+        Chargement des revenus...
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5">
       <h3 className="text-sm font-semibold text-gray-900 mb-4">Revenus mensuels (FCFA)</h3>
       <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={data} margin={{ top:4, right:4, left:0, bottom:0 }}>
+        <BarChart data={displayData} margin={{ top:4, right:4, left:0, bottom:0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
           <XAxis dataKey="mois" tick={{ fontSize:11, fill:'#94a3b8' }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize:10, fill:'#94a3b8' }} axisLine={false} tickLine={false}

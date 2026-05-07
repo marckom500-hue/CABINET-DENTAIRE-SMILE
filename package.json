@@ -9,10 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pdfme/common": "^6.1.1",
+    "@pdfme/generator": "^6.1.1",
+    "@pdfme/schemas": "^6.1.1",
     "@supabase/supabase-js": "^2.39.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
+    "react-signature-canvas": "^1.1.0-alpha.2",
     "recharts": "^2.12.0"
   },
   "devDependencies": {

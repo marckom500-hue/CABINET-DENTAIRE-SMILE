@@ -1,0 +1,128 @@
+@startuml
+left header Cabinet Dentaire SMILE
+right header Diagramme de Séquence
+footer Page %page% sur %lastpage%
+
+title Diagramme de Séquence - Réaliser une Consultation
+
+' Configuration simple et claire
+skinparam actorStyle awesome
+skinparam sequence {
+  LifeLineBackgroundColor White
+  LifeLineBorderColor DeepSkyBlue
+  ArrowColor DeepSkyBlue
+  ParticipantBackgroundColor LightYellow
+  ParticipantBorderColor DeepSkyBlue
+  ParticipantPadding 10
+  BarBorderColor DeepSkyBlue
+  BarBackgroundColor White
+}
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' === PARTICIPANTS ===
+participant "Médecin" as medecin #RoyalBlue
+participant "Système SMILE" as system #DeepSkyBlue
+participant "Base de données" as db #Green
+participant "Service SMS" as sms #Orange
+
+' === SÉQUENCE PRINCIPALE ===
+
+medecin -> system : 1. Ouvrir dossier patient
+activate system
+system -> db : 2. Charger informations patient
+activate db
+db --> system : 3. Données patient + historique
+deactivate db
+system --> medecin : 4. Affiche dossier complet
+deactivate system
+
+medecin -> system : 5. Consulter rendez-vous précédent
+activate system
+system -> db : 6. Historique des RDV
+activate db
+db --> system : 7. Liste des RDV passés
+deactivate db
+system --> medecin : 8. Affiche historique
+deactivate system
+
+medecin -> system : 9. Saisir diagnostic
+activate system
+system -> db : 10. Enregistrer diagnostic
+activate db
+db --> system : 11. Diagnostic enregistré
+deactivate db
+deactivate system
+
+medecin -> system : 12. Créer ordonnance
+activate system
+system --> medecin : 13. Formulaire ordonnance
+deactivate system
+
+medecin -> system : 14. Remplir médicaments
+activate system
+system -> db : 15. Vérifier interactions
+activate db
+db --> system : 16. Pas d'interactions
+deactivate db
+deactivate system
+
+medecin -> system : 17. Signer ordonnance
+activate system
+system -> db : 18. Enregistrer signature
+activate db
+db --> system : 19. Ordonnance signée
+deactivate db
+deactivate system
+
+medecin -> system : 20. Générer PDF
+activate system
+system -> system : 21. Créer PDF ordonnance
+system --> medecin : 22. PDF généré
+deactivate system
+
+medecin -> system : 23. Créer facture consultation
+activate system
+system -> db : 24. Récupérer tarifs
+activate db
+db --> system : 25. Tarifs en vigueur
+deactivate db
+system --> medecin : 26. Affiche montant
+deactivate system
+
+medecin -> system : 27. Marquer RDV comme terminé
+activate system
+system -> db : 28. Mettre à jour statut RDV
+activate db
+db --> system : 29. RDV terminé
+deactivate db
+deactivate system
+
+medecin -> system : 30. Programmer rappel
+activate system
+system -> sms : 31. Planifier SMS rappel
+activate sms
+sms --> system : 32. Rappel programmé
+deactivate sms
+system --> medecin : 33. Consultation terminée
+deactivate system
+
+note right of medecin
+  <b>Fin de la consultation</b>
+  - Diagnostic enregistré
+  - Ordonnance signée et PDF généré
+  - Facture créée
+  - Rappel programmé
+end note
+
+@enduml
+
+/* src/styles/global.css */
+
+@media (min-width: 768px) {
+  /* styles pour tablettes et ordinateurs */
+}
+
+@media (max-width: 480px) {
+  /* styles pour téléphones */
+}

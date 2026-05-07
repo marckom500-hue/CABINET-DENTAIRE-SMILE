@@ -1,26 +1,229 @@
-export default function FormField({ label, type = 'text', value, onChange, options, required, placeholder, hint }) {
-  const base = 'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white'
+// // src/components/FormField.jsx
+// import { useState } from 'react'
+
+// export default function FormField({
+//   label,
+//   type = 'text',
+//   value,
+//   onChange,
+//   placeholder = '',
+//   required = false,
+//   inputMode,
+//   maxLength,
+//   pattern,
+//   validationState, // 'success', 'error', ou undefined
+//   validationMessage = '',
+//   options = [], // Pour les select
+//   rows = 3, // Pour les textarea
+//   disabled = false,
+//   className = ''
+// }) {
+//   const [touched, setTouched] = useState(false)
+
+//   const handleBlur = () => setTouched(true)
+
+//   const showValidation = touched && validationState
+//   const isValid = validationState === 'success'
+//   const isInvalid = validationState === 'error'
+
+//   // Styles de base
+//   const baseInputClass = `w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors disabled:bg-gray-50 disabled:text-gray-400 ${className}`
+  
+//   const inputClass = `${baseInputClass} ${
+//     showValidation
+//       ? isValid
+//         ? 'border-green-500 focus:border-green-500'
+//         : isInvalid
+//         ? 'border-red-500 focus:border-red-500'
+//         : 'border-gray-200'
+//       : 'border-gray-200'
+//   }`
+
+//   // Rendu selon le type
+//   const renderInput = () => {
+//     switch (type) {
+//       case 'textarea':
+//         return (
+//           <textarea
+//             value={value}
+//             onChange={(e) => onChange(e.target.value)}
+//             onBlur={handleBlur}
+//             placeholder={placeholder}
+//             rows={rows}
+//             disabled={disabled}
+//             className={inputClass}
+//           />
+//         )
+
+//       case 'select':
+//         return (
+//           <select
+//             value={value}
+//             onChange={(e) => onChange(e.target.value)}
+//             onBlur={handleBlur}
+//             disabled={disabled}
+//             className={inputClass}
+//           >
+//             {options.map((opt, idx) => {
+//               // Support à la fois les options string et objets {value, label}
+//               const optionValue = typeof opt === 'object' ? opt.value : opt
+//               const optionLabel = typeof opt === 'object' ? opt.label : opt
+//               return (
+//                 <option key={idx} value={optionValue}>
+//                   {optionLabel}
+//                 </option>
+//               )
+//             })}
+//           </select>
+//         )
+
+//       default:
+//         return (
+//           <input
+//             type={type}
+//             value={value}
+//             onChange={(e) => onChange(e.target.value)}
+//             onBlur={handleBlur}
+//             placeholder={placeholder}
+//             required={required}
+//             inputMode={inputMode}
+//             maxLength={maxLength}
+//             pattern={pattern}
+//             disabled={disabled}
+//             className={inputClass}
+//           />
+//         )
+//     }
+//   }
+
+//   return (
+//     <div className="mb-3">
+//       <label className="block text-xs font-medium text-gray-700 mb-1">
+//         {label}
+//         {required && <span className="text-red-500 ml-1">*</span>}
+//       </label>
+      
+//       {renderInput()}
+      
+//       {/* Message de validation */}
+//       {showValidation && validationMessage && (
+//         <p className={`text-xs mt-1 ${isValid ? 'text-green-600' : 'text-red-500'}`}>
+//           {validationMessage}
+//         </p>
+//       )}
+//     </div>
+//   )
+// }
+
+// src/components/FormField.jsx
+import { useState } from 'react'
+
+export default function FormField({
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder = '',
+  required = false,
+  inputMode,
+  maxLength,
+  pattern,
+  validationState,
+  validationMessage = '',
+  options = [],
+  rows = 3,
+  disabled = false,
+  className = ''
+}) {
+  const [touched, setTouched] = useState(false)
+
+  const handleBlur = () => setTouched(true)
+
+  const showValidation = touched && validationState
+  const isValid = validationState === 'success'
+  const isInvalid = validationState === 'error'
+
+  const baseInputClass = `w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors disabled:bg-gray-50 disabled:text-gray-400 ${className}`
+  
+  const inputClass = `${baseInputClass} ${
+    showValidation
+      ? isValid
+        ? 'border-green-500 focus:border-green-500'
+        : isInvalid
+        ? 'border-red-500 focus:border-red-500'
+        : 'border-gray-200'
+      : 'border-gray-200'
+  }`
+
+  const renderInput = () => {
+    switch (type) {
+      case 'textarea':
+        return (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={handleBlur}
+            placeholder={placeholder}
+            rows={rows}
+            disabled={disabled}
+            className={inputClass}
+          />
+        )
+
+      case 'select':
+        return (
+          <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={handleBlur}
+            disabled={disabled}
+            className={inputClass}
+          >
+            {options.map((opt, idx) => {
+              const optionValue = typeof opt === 'object' ? opt.value : opt
+              const optionLabel = typeof opt === 'object' ? opt.label : opt
+              return (
+                <option key={idx} value={optionValue}>
+                  {optionLabel}
+                </option>
+              )
+            })}
+          </select>
+        )
+
+      default:
+        return (
+          <input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={handleBlur}
+            placeholder={placeholder}
+            required={required}
+            inputMode={inputMode}
+            maxLength={maxLength}
+            pattern={pattern}
+            disabled={disabled}
+            className={inputClass}
+          />
+        )
+    }
+  }
+
   return (
-    <div>
+    <div className="mb-3">
       <label className="block text-xs font-medium text-gray-700 mb-1">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {type === 'select' ? (
-        <select value={value} onChange={e => onChange(e.target.value)} className={base}>
-          <option value="">-- Choisir --</option>
-          {options?.map(o => (
-            <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>
-          ))}
-        </select>
-      ) : type === 'textarea' ? (
-        <textarea value={value} onChange={e => onChange(e.target.value)}
-          rows={3} placeholder={placeholder}
-          className={base + ' resize-none'} />
-      ) : (
-        <input type={type} value={value} onChange={e => onChange(e.target.value)}
-          placeholder={placeholder} className={base} />
+      
+      {renderInput()}
+      
+      {showValidation && validationMessage && (
+        <p className={`text-xs mt-1 ${isValid ? 'text-green-600' : 'text-red-500'}`}>
+          {validationMessage}
+        </p>
       )}
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
     </div>
   )
 }

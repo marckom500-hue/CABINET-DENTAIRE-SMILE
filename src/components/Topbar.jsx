@@ -59,12 +59,12 @@ export default function Topbar() {
         )}
       </div>
 
-      <Modal isOpen={modalRdv} onClose={() => setModalRdv(false)} title="Nouveau rendez-vous">
+      <Modal isOpen={modalRdv} onClose={() => setModalRdv(false)} title="Nouveau rendez-vous" confirmOnClose>
         <FormulaireRdv
           onSubmit={async (d) => { await ajouterRdv(d); setModalRdv(false); navigate('/rendez-vous') }}
           onCancel={() => setModalRdv(false)} />
       </Modal>
-      <Modal isOpen={modalPatient} onClose={() => setModalPatient(false)} title="Nouveau patient">
+      <Modal isOpen={modalPatient} onClose={() => setModalPatient(false)} title="Nouveau patient" confirmOnClose>
         <FormulairePatient
           onSubmit={async (d) => { await ajouterPatient(d); setModalPatient(false); navigate('/patients') }}
           onCancel={() => setModalPatient(false)} />

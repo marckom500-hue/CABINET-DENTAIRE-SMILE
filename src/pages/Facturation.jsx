@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useFactures } from '../hooks/useFactures'
+import { usePatients } from '../hooks/usePatients'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { PermissionGate } from '../components/RoleGuard'
+import { ACTES_OPTIONS } from '../lib/actes'
 
 const STATUS_MAP = {
   paye:    { label:'Payé',       cls:'bg-teal-100 text-teal-700'   },
@@ -11,25 +13,55 @@ const STATUS_MAP = {
 }
 
 const empty = { patient_id:'', acte:'', montant:'', date: new Date().toISOString().split('T')[0], statut:'attente' }
+const today = new Date().toISOString().split('T')[0]
+
+function normalizeFacture(facture) {
+  if (!facture) return empty
+  return {
+    patient_id: facture.patient_id ?? '',
+    acte: facture.acte ?? '',
+    montant: facture.montant ?? '',
+    date: facture.date ?? new Date().toISOString().split('T')[0],
+    statut: facture.statut ?? 'attente',
+  }
+}
 
 export default function Facturation() {
   const { factures, loading, total, encaisse, ajouterFacture, modifierFacture, supprimerFacture } = useFactures()
+  const { patients, loading: loadingPatients } = usePatients()
   const [modal, setModal]     = useState(false)
   const [editF, setEditF]     = useState(null)
   const [confirmD, setConfirmD] = useState(null)
   const [form, setForm]       = useState(empty)
   const [filtre, setFiltre]   = useState('tous')
+  const [saving, setSaving]   = useState(false)
   const set = (k) => (v) => setForm(f => ({ ...f, [k]: v }))
 
   const filtered = factures.filter(f => filtre === 'tous' || f.statut === filtre)
+  const patientOptions = patients.map(p => ({
+    value: p.id,
+    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${p.telephone}` : ''}`.trim(),
+  }))
+  const dateTouched = Boolean(form.date)
+  const dateIsValid = form.date ? form.date <= today : false
+  const canSubmit = Boolean(form.patient_id && form.acte && form.montant !== '' && dateIsValid)
 
   const openCreate = () => { setEditF(null); setForm(empty); setModal(true) }
-  const openEdit   = (f) => { setEditF(f); setForm(f); setModal(true) }
+  const openEdit   = (f) => { setEditF(f); setForm(normalizeFacture(f)); setModal(true) }
 
   const handleSubmit = async () => {
-    if (editF) await modifierFacture(editF.id, form)
-    else       await ajouterFacture(form)
-    setModal(false)
+    if (!canSubmit) return
+    setSaving(true)
+    try {
+      const payload = { ...form, montant: Number(form.montant ?? 0) }
+      if (editF) await modifierFacture(editF.id, payload)
+      else       await ajouterFacture(payload)
+      setModal(false)
+    } catch {
+      // Le hook affiche deja la notification d'erreur.
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -121,20 +153,50 @@ export default function Facturation() {
         </div>
       </div>
 
-      <Modal isOpen={modal} onClose={() => setModal(false)} title={editF ? 'Modifier la facture' : 'Nouvelle facture'}>
+      <Modal isOpen={modal} onClose={() => setModal(false)} title={editF ? 'Modifier la facture' : 'Nouvelle facture'} confirmOnClose>
         <div className="space-y-3">
-          {[
-            { label:'ID Patient', key:'patient_id' },
-            { label:'Acte',       key:'acte'       },
-            { label:'Montant (FCFA)', key:'montant', type:'number' },
-            { label:'Date',       key:'date',  type:'date' },
-          ].map(({ label, key, type='text' }) => (
-            <div key={key}>
-              <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
-              <input type={type} value={form[key] ?? ''} onChange={e => set(key)(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-            </div>
-          ))}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Patient</label>
+            <select value={form.patient_id} onChange={e => set('patient_id')(e.target.value)} disabled={loadingPatients}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white disabled:bg-gray-50 disabled:text-gray-400">
+              <option value="">-- Choisir un patient --</option>
+              {patientOptions.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+            <p className="text-xs text-gray-400 mt-1">
+              {loadingPatients ? 'Chargement des patients...' : 'Selectionnez un patient deja enregistre'}
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Acte</label>
+            <select value={form.acte} onChange={e => set('acte')(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+              <option value="">-- Choisir un acte --</option>
+              {ACTES_OPTIONS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Montant (FCFA)</label>
+            <input type="number" value={form.montant ?? ''} onChange={e => set('montant')(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+            <input type="date" value={form.date ?? ''} onChange={e => set('date')(e.target.value)} max={today}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 bg-white ${
+                dateTouched
+                  ? (dateIsValid ? 'border-teal-300 focus:ring-teal-500' : 'border-red-300 focus:ring-red-500')
+                  : 'border-gray-200 focus:ring-teal-500'
+              }`} />
+            <p className={`text-xs mt-1 ${
+              dateTouched
+                ? (dateIsValid ? 'text-teal-600' : 'text-red-600')
+                : 'text-gray-400'
+            }`}>
+              {dateTouched
+                ? (dateIsValid ? 'Date valide' : "Date invalide : elle ne peut pas etre superieure a aujourd'hui")
+                : "Les dates futures sont bloquees dans le calendrier"}
+            </p>
+          </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Statut</label>
             <select value={form.statut} onChange={e => set('statut')(e.target.value)}
@@ -146,13 +208,13 @@ export default function Facturation() {
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={() => setModal(false)} className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Annuler</button>
-            <button onClick={handleSubmit} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
-              {editF ? 'Modifier' : 'Ajouter'}
+            <button onClick={handleSubmit} disabled={saving || !canSubmit} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors disabled:opacity-50">
+              {saving ? 'Enregistrement...' : (editF ? 'Modifier' : 'Ajouter')}
             </button>
           </div>
         </div>
       </Modal>
-      <ConfirmDialog isOpen={!!confirmD} onConfirm={() => { supprimerFacture(confirmD.id); setConfirmD(null) }}
+      <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimerFacture(confirmD.id); setConfirmD(null) } catch {} }}
         onCancel={() => setConfirmD(null)} title="Supprimer la facture" message="Supprimer définitivement cette facture ?" />
     </div>
   )

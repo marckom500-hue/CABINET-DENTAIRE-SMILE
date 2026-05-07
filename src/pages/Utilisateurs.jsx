@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { ROLES_LABELS, ROLES_COLORS } from '../lib/roles'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { useNotifications } from '../hooks/NotificationsContext'
 
 const ROLE_OPTIONS = Object.entries(ROLES_LABELS).map(([v, l]) => ({ value: v, label: l }))
 
@@ -16,6 +17,7 @@ export default function Utilisateurs() {
   const [form, setForm]       = useState({ nom:'', prenom:'', email:'', role:'secretaire', actif:true })
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
+  const { notify } = useNotifications()
 
   const fetch = async () => {
     setLoading(true)
@@ -44,20 +46,32 @@ export default function Utilisateurs() {
         })
         if (e) throw e
       }
+      notify({ type:'user', message: editU ? 'Utilisateur modifie' : 'Utilisateur ajoute' })
       await fetch(); setModal(false)
     } catch (err) {
       setError(err.message ?? 'Erreur lors de la sauvegarde')
+      notify({ type:'error', message:`Utilisateur non sauvegarde : ${err.message ?? 'Erreur inconnue'}` })
     }
     setSaving(false)
   }
 
   const handleToggleActif = async (u) => {
-    await supabase.from('users_profiles').update({ actif: !u.actif }).eq('id', u.id)
+    const { error } = await supabase.from('users_profiles').update({ actif: !u.actif }).eq('id', u.id)
+    if (error) {
+      notify({ type:'error', message:`Statut utilisateur non modifie : ${error.message}` })
+      return
+    }
+    notify({ type:'user', message:`Utilisateur ${!u.actif ? 'active' : 'desactive'}` })
     fetch()
   }
 
   const handleDelete = async () => {
-    await supabase.from('users_profiles').delete().eq('id', confirmD.id)
+    const { error } = await supabase.from('users_profiles').delete().eq('id', confirmD.id)
+    if (error) {
+      notify({ type:'error', message:`Utilisateur non supprime : ${error.message}` })
+      return
+    }
+    notify({ type:'user', message:'Utilisateur supprime' })
     setConfirmD(null); fetch()
   }
 
@@ -154,7 +168,7 @@ export default function Utilisateurs() {
         </div>
       </div>
 
-      <Modal isOpen={modal} onClose={() => setModal(false)} title={editU ? "Modifier l'utilisateur" : 'Nouvel utilisateur'}>
+      <Modal isOpen={modal} onClose={() => setModal(false)} title={editU ? "Modifier l'utilisateur" : 'Nouvel utilisateur'} confirmOnClose>
         <div className="space-y-3">
           {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{error}</div>}
           <div className="grid grid-cols-2 gap-3">

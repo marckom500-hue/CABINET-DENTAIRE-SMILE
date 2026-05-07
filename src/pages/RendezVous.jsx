@@ -127,10 +127,10 @@ export default function RendezVous() {
         </div>
       </div>
 
-      <Modal isOpen={modal} onClose={() => setModal(false)} title={editR ? 'Modifier le RDV' : 'Nouveau rendez-vous'}>
+      <Modal isOpen={modal} onClose={() => setModal(false)} title={editR ? 'Modifier le RDV' : 'Nouveau rendez-vous'} confirmOnClose>
         <FormulaireRdv rdv={editR} onSubmit={handleSubmit} onCancel={() => setModal(false)} />
       </Modal>
-      <ConfirmDialog isOpen={!!confirmD} onConfirm={() => { supprimerRdv(confirmD.id); setConfirmD(null) }}
+      <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimerRdv(confirmD.id); setConfirmD(null) } catch {} }}
         onCancel={() => setConfirmD(null)} title="Supprimer le RDV"
         message="Supprimer définitivement ce rendez-vous ?" />
     </div>

@@ -1,0 +1,84 @@
+@startuml
+left header Cabinet Dentaire SMILE
+right header Cas d'Utilisation : Prendre un Rendez-vous
+footer Page %page% sur %lastpage%
+
+title Cas d'Utilisation : Prendre un Rendez-vous
+
+' Configuration très simple et aérée
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DeepSkyBlue
+  ArrowColor DeepSkyBlue
+  FontSize 14
+  FontName Arial
+  RoundCorner 15
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor DeepSkyBlue
+  FontSize 14
+  FontName Arial
+}
+skinparam package {
+  BackgroundColor LightYellow
+  BorderColor DeepSkyBlue
+  FontSize 16
+  FontName Arial
+  FontStyle bold
+  RoundCorner 15
+}
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' === ACTEURS ===
+actor "Secrétaire" as secretaire #OrangeRed
+actor "Patient" as patient #Gray
+
+package "Fonctionnalité : Prendre un Rendez-vous" {
+  
+  usecase "Consulter les disponibilités" as UC_Consulter
+  usecase "Prendre un rendez-vous" as UC_Prendre
+  usecase "Confirmer le rendez-vous" as UC_Confirmer
+  usecase "Annuler un rendez-vous" as UC_Annuler
+}
+
+' === LIENS SIMPLES SANS CROISEMENT ===
+secretaire ---> UC_Consulter
+secretaire ---> UC_Prendre
+secretaire ---> UC_Confirmer
+secretaire ---> UC_Annuler
+
+patient ..> UC_Consulter : (consulter)
+patient ..> UC_Prendre : (demander)
+
+' === RELATIONS ENTRE CAS D'UTILISATION ===
+UC_Prendre ..> UC_Consulter : <<include>>
+UC_Confirmer ..> UC_Prendre : <<extend>>
+UC_Annuler ..> UC_Prendre : <<extend>>
+
+note right of UC_Prendre
+  <b>Scénario principal :</b>
+  1. Consulter les disponibilités
+  2. Sélectionner un créneau
+  3. Choisir le patient
+  4. Sélectionner le type d'acte
+  5. Confirmer le rendez-vous
+end note
+
+note left of UC_Confirmer
+  <b>Confirmation :</b>
+  - Envoi d'un SMS/email
+  - Ajout au calendrier
+  - Notification au patient
+end note
+
+note bottom of UC_Annuler
+  <b>Annulation :</b>
+  - Libérer le créneau
+  - Notifier le patient
+  - Mettre à jour l'agenda
+end note
+
+@enduml

@@ -22,9 +22,15 @@ export default function Stock() {
 
   const handleSubmit = async () => {
     setSaving(true)
-    if (editS) await modifierArticle(editS.id, form)
-    else       await ajouterArticle(form)
-    setSaving(false); setModal(false)
+    try {
+      if (editS) await modifierArticle(editS.id, form)
+      else       await ajouterArticle(form)
+      setModal(false)
+    } catch {
+      // Le hook affiche deja la notification d'erreur.
+    } finally {
+      setSaving(false)
+    }
   }
 
   const critiques = stock.filter(s => s.quantite <= s.seuil).length
@@ -66,20 +72,20 @@ export default function Stock() {
                     <span className="text-xs text-red-500 font-medium">⚠ Stock critique</span>
                   )}
                 </div>
-                <PermissionGate module="stock" requireWrite>
-                  <div className="flex gap-1 ml-2">
-                    <button onClick={() => openEdit(s)} className="p-1 text-gray-400 hover:text-teal-600 rounded transition-colors">
+                <div className="flex gap-1 ml-2">
+                  <PermissionGate module="stock" requireWrite>
+                    <button onClick={() => openEdit(s)} className="p-1 text-gray-400 hover:text-teal-600 rounded transition-colors" title="Modifier">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button onClick={() => setConfirmD(s)} className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors">
+                    <button onClick={() => setConfirmD(s)} className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors" title="Supprimer">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
-                  </div>
-                </PermissionGate>
+                  </PermissionGate>
+                </div>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mb-1.5">
                 <span>Quantité : <strong className={critique ? 'text-red-500' : 'text-gray-800'}>{s.quantite}</strong></span>
@@ -95,7 +101,7 @@ export default function Stock() {
         })}
       </div>
 
-      <Modal isOpen={modal} onClose={() => setModal(false)} title={editS ? 'Modifier l\'article' : 'Ajouter un article'}>
+      <Modal isOpen={modal} onClose={() => setModal(false)} title={editS ? 'Modifier l\'article' : 'Ajouter un article'} confirmOnClose>
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Nom du produit</label>
@@ -130,7 +136,7 @@ export default function Stock() {
         </div>
       </Modal>
 
-      <ConfirmDialog isOpen={!!confirmD} onConfirm={() => { supprimerArticle(confirmD.id); setConfirmD(null) }}
+      <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimerArticle(confirmD.id); setConfirmD(null) } catch {} }}
         onCancel={() => setConfirmD(null)} title="Supprimer l'article"
         message={`Supprimer "${confirmD?.nom_produit}" du stock ?`} />
     </div>

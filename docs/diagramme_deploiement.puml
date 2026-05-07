@@ -1,0 +1,93 @@
+@startuml
+left header Cabinet Dentaire SMILE
+right header Diagramme de Déploiement
+footer Page %page% sur %lastpage%
+
+title Diagramme de Déploiement - Architecture du Système
+
+' Configuration simple et claire
+skinparam node {
+  BackgroundColor WhiteSmoke
+  BorderColor DeepSkyBlue
+  RoundCorner 10
+}
+skinparam artifact {
+  BackgroundColor White
+  BorderColor DeepSkyBlue
+  RoundCorner 5
+}
+skinparam cloud {
+  BackgroundColor LightCyan
+  BorderColor DeepSkyBlue
+}
+skinparam database {
+  BackgroundColor White
+  BorderColor DeepSkyBlue
+}
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' === NŒUDS DE DÉPLOIEMENT ===
+
+cloud "Internet" as internet
+
+node "Poste Secrétaire" as poste_secretaire {
+  artifact "Navigateur Web" as navigateur
+}
+
+node "Poste Médecin" as poste_medecin {
+  artifact "Navigateur Web" as navigateur_med
+}
+
+node "Poste Comptable" as poste_comptable {
+  artifact "Navigateur Web" as navigateur_compta
+}
+
+node "Serveur Supabase" as supabase {
+  database "Base de données PostgreSQL" as db
+  artifact "Authentification" as auth
+  artifact "Storage" as storage
+  artifact "Edge Functions" as functions
+}
+
+node "Services Externes" as externes {
+  artifact "API SMS" as sms_api
+  artifact "pg_cron" as cron
+}
+
+' === CONNEXIONS ===
+
+internet -[hidden]down-> poste_secretaire
+poste_secretaire -[hidden]down-> poste_medecin
+poste_medecin -[hidden]down-> poste_comptable
+
+navigateur --> supabase : HTTPS
+navigateur_med --> supabase : HTTPS
+navigateur_compta --> supabase : HTTPS
+
+supabase -[hidden]down-> externes
+
+auth --> db : Utilise
+storage --> db : Stocke
+functions --> db : Interroge
+functions --> sms_api : Envoie SMS
+cron --> functions : Planifie
+
+note top of poste_secretaire
+  <b>Côté Client</b>
+  Application React/Vite
+  dans le navigateur
+end note
+
+note right of supabase
+  <b>Backend</b>
+  Supabase
+  PostgreSQL + Auth + Storage
+end note
+
+note left of externes
+  <b>Services tiers</b>
+  SMS et automatisation
+end note
+
+@enduml

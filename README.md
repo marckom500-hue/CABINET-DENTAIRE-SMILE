@@ -45,9 +45,13 @@ npm run build
    npx supabase functions deploy send-rappel-rdv
    ```
 4. Configurer les secrets de l'Edge Function dans Supabase → Edge Functions → Secrets :
-   - `SMS_API_KEY` — clé API Africa's Talking (ou autre fournisseur)
-   - `SMS_USERNAME` — nom d'utilisateur Africa's Talking
-   - `SMS_SENDER_ID` — identifiant expéditeur (ex: SMILE)
+   - `SUPABASE_URL` — URL du projet Supabase
+   - `SUPABASE_SERVICE_ROLE_KEY` — clé service role Supabase
+   - `SMS_PROVIDER=twilio`
+   - `TWILIO_ACCOUNT_SID` — Account SID Twilio
+   - `TWILIO_AUTH_TOKEN` — Auth Token Twilio
+   - `TWILIO_FROM_NUMBER` — numéro Twilio au format international, ex: `+15551234567`
+   - `TWILIO_MESSAGING_SERVICE_SID` — optionnel, à utiliser à la place de `TWILIO_FROM_NUMBER`
 
 ### Fournisseurs SMS compatibles (Cameroun)
 | Fournisseur | Site | Notes |

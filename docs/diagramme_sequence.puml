@@ -1,0 +1,75 @@
+@startuml
+left header Cabinet Dentaire SMILE
+right header Diagramme de Séquence
+footer Page %page% sur %lastpage%
+
+title Diagramme de Séquence - Prendre un Rendez-vous
+
+' Configuration simple et claire
+skinparam actorStyle awesome
+skinparam sequence {
+  LifeLineBackgroundColor White
+  LifeLineBorderColor DeepSkyBlue
+  ArrowColor DeepSkyBlue
+  ParticipantBackgroundColor LightYellow
+  ParticipantBorderColor DeepSkyBlue
+  ParticipantPadding 10
+  BarBorderColor DeepSkyBlue
+  BarBackgroundColor White
+}
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' === PARTICIPANTS ===
+participant "Secrétaire" as secretaire #OrangeRed
+participant "Système SMILE" as system #DeepSkyBlue
+participant "Base de données" as db #Green
+
+' === SÉQUENCE PRINCIPALE ===
+secretaire -> system : 1. Consulter disponibilités
+activate system
+system -> db : 2. Requête créneaux libres
+activate db
+db --> system : 3. Liste des créneaux
+deactivate db
+system --> secretaire : 4. Affiche les disponibilités
+deactivate system
+
+secretaire -> system : 5. Sélectionner créneau
+activate system
+system -> db : 6. Vérifier disponibilité
+activate db
+db --> system : 7. Créneau disponible
+deactivate db
+
+system -> secretaire : 8. Formulaire de réservation
+deactivate system
+
+secretaire -> system : 9. Remplir informations patient
+activate system
+system -> db : 10. Rechercher patient
+activate db
+db --> system : 11. Infos patient
+deactivate db
+
+system -> secretaire : 12. Confirmer les détails
+deactivate system
+
+secretaire -> system : 13. Confirmer le RDV
+activate system
+system -> db : 14. Enregistrer le RDV
+activate db
+db --> system : 15. RDV enregistré
+deactivate db
+
+system -> system : 16. Envoyer SMS de confirmation
+system --> secretaire : 17. RDV confirmé
+deactivate system
+
+note right of secretaire
+  <b>Fin du scénario</b>
+  Le rendez-vous est planifié
+  et le patient reçoit une confirmation
+end note
+
+@enduml

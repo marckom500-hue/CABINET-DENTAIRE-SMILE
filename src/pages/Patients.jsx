@@ -111,10 +111,10 @@ export default function Patients() {
         </div>
       </div>
 
-      <Modal isOpen={modal} onClose={() => setModal(false)} title={editP ? 'Modifier le patient' : 'Nouveau patient'}>
+      <Modal isOpen={modal} onClose={() => setModal(false)} title={editP ? 'Modifier le patient' : 'Nouveau patient'} confirmOnClose>
         <FormulairePatient patient={editP} onSubmit={handleSubmit} onCancel={() => setModal(false)} />
       </Modal>
-      <ConfirmDialog isOpen={!!confirmD} onConfirm={() => { supprimerPatient(confirmD.id); setConfirmD(null) }}
+      <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimerPatient(confirmD.id); setConfirmD(null) } catch {} }}
         onCancel={() => setConfirmD(null)} title="Supprimer le patient"
         message={`Supprimer définitivement ${confirmD?.prenom} ${confirmD?.nom} ?`} />
     </div>

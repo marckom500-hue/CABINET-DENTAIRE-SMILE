@@ -1,49 +1,109 @@
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
+import { useFactures } from '../hooks/useFactures'
+import { usePatients } from '../hooks/usePatients'
+import { useRendezVous } from '../hooks/useRendezVous'
 
-const dataRevenus = [
-  { mois:'Jan', revenus:520000, objectif:600000 },
-  { mois:'Fév', revenus:680000, objectif:600000 },
-  { mois:'Mar', revenus:750000, objectif:650000 },
-  { mois:'Avr', revenus:620000, objectif:650000 },
-  { mois:'Mai', revenus:890000, objectif:700000 },
-  { mois:'Jun', revenus:840000, objectif:700000 },
-]
+const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
-const dataPatients = [
-  { mois:'Jan', nouveaux:12, retours:28 },
-  { mois:'Fév', nouveaux:18, retours:31 },
-  { mois:'Mar', nouveaux:15, retours:35 },
-  { mois:'Avr', nouveaux:22, retours:29 },
-  { mois:'Mai', nouveaux:19, retours:38 },
-  { mois:'Jun', nouveaux:25, retours:42 },
-]
+// Objectifs mensuels (peut être déplacé dans une table de configuration)
+const OBJECTIFS = [600000, 600000, 650000, 650000, 700000, 700000, 750000, 750000, 800000, 800000, 850000, 850000]
 
-const dataActes = [
-  { name:'Consultation', value:35, color:'#0d9488' },
-  { name:'Détartrage',   value:25, color:'#3b82f6' },
-  { name:'Extraction',   value:20, color:'#f59e0b' },
-  { name:'Implant',      value:12, color:'#8b5cf6' },
-  { name:'Autre',        value:8,  color:'#94a3b8' },
-]
+function getColorForActe(name) {
+  const colors = {
+    'Consultation': '#0d9488',
+    'Détartrage': '#3b82f6',
+    'Extraction': '#f59e0b',
+    'Implant': '#8b5cf6',
+    'Radiographie': '#ec4899',
+    'Urgence': '#ef4444',
+  }
+  return colors[name] || '#94a3b8'
+}
 
 export default function Rapports() {
+  const { factures, loading: facturesLoading } = useFactures()
+  const { patients, loading: patientsLoading } = usePatients()
+  const { rendezVous, loading: rdvLoading } = useRendezVous()
+
+  const currentYear = new Date().getFullYear()
+  const currentMonth = new Date().getMonth()
+
+  // Calculate monthly revenue data from real factures
+  const dataRevenus = MONTHS.slice(0, currentMonth + 1).map((mois, index) => {
+    const monthRevenue = factures
+      .filter(f => {
+        const fDate = new Date(f.date)
+        return fDate.getFullYear() === currentYear && fDate.getMonth() === index
+      })
+      .reduce((sum, f) => sum + (f.montant || 0), 0)
+    
+    return { mois, revenus: monthRevenue, objectif: OBJECTIFS[index] || 700000 }
+  })
+
+  // Calculate patient evolution (nouveaux = created this month, retours = had RDV this month)
+  const dataPatients = MONTHS.slice(0, currentMonth + 1).map((mois, index) => {
+    // Nouveaux patients: created in this month
+    const nouveaux = patients.filter(p => {
+      const pDate = new Date(p.created_at)
+      return pDate.getFullYear() === currentYear && pDate.getMonth() === index
+    }).length
+
+    // Patients de retour: had at least one RDV in this month
+    const retours = rendezVous.filter(r => {
+      const rDate = new Date(r.date)
+      return rDate.getFullYear() === currentYear && rDate.getMonth() === index && r.statut !== 'annule'
+    }).length
+
+    return { mois, nouveaux, retours }
+  })
+
+  // Calculate procedure distribution from rendez-vous
+  const actesCount = {}
+  rendezVous.forEach(r => {
+    if (r.statut !== 'annule') {
+      const type = r.type_acte || 'Autre'
+      actesCount[type] = (actesCount[type] || 0) + 1
+    }
+  })
+
+  const totalActes = Object.values(actesCount).reduce((s, v) => s + v, 0)
+  const dataActes = Object.entries(actesCount).map(([name, value]) => ({
+    name,
+    value: totalActes > 0 ? Math.round((value / totalActes) * 100) : 0,
+    color: getColorForActe(name)
+  })).sort((a, b) => b.value - a.value)
+
+  // If no data, show empty state
+  if (facturesLoading || patientsLoading || rdvLoading) {
+    return (
+      <div className="p-4 md:p-6 flex items-center justify-center min-h-screen">
+        <div className="text-gray-400 text-xl">Chargement des rapports...</div>
+      </div>
+    )
+  }
+
   const totalRevenus = dataRevenus.reduce((s, d) => s + d.revenus, 0)
-  const totalPatients = dataPatients.reduce((s, d) => s + d.nouveaux + d.retours, 0)
+  const totalPatientsSeen = dataPatients.reduce((s, d) => s + d.nouveaux + d.retours, 0)
+  const totalEncaisse = factures.filter(f => f.statut === 'paye').reduce((s, f) => s + (f.montant || 0), 0)
+  const tauxRecouvrement = totalRevenus > 0 ? Math.round((totalEncaisse / totalRevenus) * 100) : 0
+  const rdvHonores = rendezVous.filter(r => r.statut === 'confirme').length
+  const totalRdv = rendezVous.filter(r => r.statut !== 'annule').length
+  const tauxRdvHonores = totalRdv > 0 ? Math.round((rdvHonores / totalRdv) * 100) : 0
 
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-serif">Rapports</h2>
-        <p className="text-sm text-gray-500">Analyse de l'activité du cabinet — 6 derniers mois</p>
+        <p className="text-sm text-gray-500">Analyse de l'activité du cabinet — {currentYear}</p>
       </div>
 
       {/* KPIs rapides */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label:'Revenus totaux',    value:`${(totalRevenus/1000).toFixed(0)}k FCFA`, color:'teal'   },
-          { label:'Patients vus',      value:totalPatients,                              color:'blue'   },
-          { label:'Taux recouvrement', value:'87%',                                      color:'green'  },
-          { label:'RDV honorés',       value:'94%',                                      color:'purple' },
+          { label:'Patients vus',      value:totalPatientsSeen,                          color:'blue'   },
+          { label:'Taux recouvrement', value:`${tauxRecouvrement}%`,                      color:'green'  },
+          { label:'RDV honorés',       value:`${tauxRdvHonores}%`,                        color:'purple' },
         ].map(k => (
           <div key={k.label} className={`bg-${k.color}-50 rounded-xl p-4`}>
             <p className="text-xs text-gray-500 mb-1">{k.label}</p>
@@ -118,7 +178,7 @@ export default function Rapports() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {dataRevenus.map((d, i) => {
-                  const p = dataPatients[i]
+                  const p = dataPatients[i] || { nouveaux: 0, retours: 0 }
                   const ecart = d.revenus - d.objectif
                   return (
                     <tr key={d.mois}>

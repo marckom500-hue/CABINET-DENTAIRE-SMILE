@@ -1,0 +1,94 @@
+@startuml
+left header Cabinet Dentaire SMILE
+right header Diagramme d'État-Transition
+footer Page %page% sur %lastpage%
+
+title Diagramme d'État-Transition - Cycle de vie d'un Rendez-vous
+
+' Configuration simple et claire
+skinparam state {
+  BackgroundColor White
+  BorderColor DeepSkyBlue
+  ArrowColor DeepSkyBlue
+  RoundCorner 10
+  StartColor DeepSkyBlue
+  EndColor Red
+}
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' === ÉTATS DU RENDEZ-VOUS ===
+
+[*] --> EnAttente : Création du RDV
+
+state EnAttente {
+  note right
+    <b>État initial</b>
+    Le RDV is planned
+    mais pas encore confirmé
+  end note
+}
+
+EnAttente --> Confirme : Confirmation
+EnAttente --> Annule : Annulation
+
+state Confirme {
+  note right
+    <b>RDV confirmé</b>
+    SMS envoyé au patient
+    Créneau réservé
+  end note
+}
+
+Confirme --> EnCours : Jour du RDV
+Confirme --> Annule : Annulation
+Confirme --> Reporte : Report demandé
+
+state EnCours {
+  note right
+    <b>RDV en cours</b>
+    Patient en consultation
+  end note
+}
+
+EnCours --> Termine : Consultation terminée
+EnCours --> Annule : Patient absent
+
+state Termine {
+  note right
+    <b>RDV terminé</b>
+    Ordonnance créée
+    Facture générée
+  end note
+}
+
+Termine --> Archive : Archivage
+
+state Archive {
+  note right
+    <b>RDV archivé</b>
+    Historique conservé
+  end note
+}
+
+Archive --> [*] : Fin du cycle
+
+state Annule {
+  note right
+    <b>RDV annulé</b>
+    Créneau libéré
+  end note
+}
+
+Annule --> [*] : Fin du cycle
+
+state Reporte {
+  note right
+    <b>RDV reporté</b>
+    Nouveau RDV à planifier
+  end note
+}
+
+Reporte --> EnAttente : Nouvelle planification
+
+@enduml
