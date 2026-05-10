@@ -100,45 +100,42 @@ export default function Layout({ children }) {
   }, [])
 
   return (
-    <div className="flex h-screen overflow-hidden has-bg-dental" id="main-layout">
+    <div className="flex h-screen overflow-hidden" id="main-layout">
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          SIDEBAR DESKTOP — dans le flux normal, toujours visible
-      ══════════════════════════════════════════════════════════════════════ */}
-      <aside className="hidden lg:block lg:flex-shrink-0">
+      {/* ── Sidebar desktop : dans le flux, fond blanc isolé du thème ────────── */}
+      <aside
+        className="hidden lg:block lg:flex-shrink-0 relative z-10"
+        style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+      >
         <Sidebar onClose={null} />
       </aside>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          SIDEBAR MOBILE — overlay fixe par-dessus le contenu
-      ══════════════════════════════════════════════════════════════════════ */}
-      <div className={`
-        lg:hidden fixed inset-0 z-40
-        transition-all duration-300
-        ${sidebarOpen ? 'visible' : 'invisible pointer-events-none'}
-      `}>
-        {/* Fond sombre */}
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}
-        />
-        {/* Panneau */}
-        <aside className={`
-          absolute inset-y-0 left-0
-          transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}>
-          <Sidebar onClose={() => setSidebarOpen(false)} />
-        </aside>
-      </div>
+      {/* ── Sidebar mobile : overlay complet par-dessus tout ─────────────────── */}
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* Fond sombre */}
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setSidebarOpen(false)}
+          />
+          {/* Panneau sidebar — fond blanc isolé du thème */}
+          <div
+            className="absolute inset-y-0 left-0 z-10"
+            style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+          >
+            <Sidebar onClose={() => setSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          ZONE PRINCIPALE — occupe tout l'écran sur mobile
-      ══════════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* ── Zone principale : reçoit le thème de fond ────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden has-bg-dental" id="theme-area">
 
         {/* Topbar mobile */}
-        <header className="lg:hidden flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <header
+          className="lg:hidden flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200"
+          style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 -ml-2 rounded-xl text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
@@ -156,7 +153,7 @@ export default function Layout({ children }) {
           </div>
         </header>
 
-        {/* Contenu scrollable */}
+        {/* Contenu scrollable — le thème s'affiche ici */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8">
             {children}

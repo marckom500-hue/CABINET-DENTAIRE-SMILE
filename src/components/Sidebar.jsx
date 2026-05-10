@@ -318,7 +318,11 @@ export default function Sidebar({ onClose }) {
   }
 
   return (
-    <div className="w-72 h-full bg-white border-r border-gray-200 flex flex-col shadow-xl lg:shadow-none">
+    // style inline pour forcer le fond blanc même si un thème CSS l'override
+    <div
+      className="w-72 h-full flex flex-col border-r border-gray-200 shadow-xl lg:shadow-none"
+      style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+    >
 
       {/* ── Logo ─────────────────────────────────────────────────────────────── */}
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
@@ -332,7 +336,6 @@ export default function Sidebar({ onClose }) {
           </div>
         </div>
 
-        {/* Bouton fermer — mobile uniquement */}
         {onClose && (
           <button
             onClick={onClose}
@@ -411,4 +414,3 @@ export default function Sidebar({ onClose }) {
     </div>
   )
 }
-
