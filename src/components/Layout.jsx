@@ -37,10 +37,10 @@ export default function Layout({ children }) {
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 sm:w-72 z-30
+          fixed inset-y-0 left-0 z-30
+          lg:static lg:z-auto lg:flex-shrink-0
           transition-transform duration-300 ease-in-out
-          lg:relative lg:translate-x-0 lg:z-auto lg:flex-shrink-0
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
@@ -81,6 +81,7 @@ export default function Layout({ children }) {
     </div>
   )
 }
+
 
 // import { useState, useEffect } from 'react'
 // import Sidebar from './Sidebar'
