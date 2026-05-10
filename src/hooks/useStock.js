@@ -81,6 +81,8 @@
 //   return { stock, loading, ajouterArticle, modifierArticle, supprimerArticle }
 // }
 
+
+
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNotifications } from './NotificationsContext'
