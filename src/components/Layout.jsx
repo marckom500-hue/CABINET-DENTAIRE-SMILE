@@ -64,7 +64,12 @@ export default function Layout({ children }) {
             Dr. Boutchouang & Associés
           </span>
         </div> */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+          <div className="flex-1 overflow-y-auto">
+          <div className="p-4 md:p-6 lg:p-8">
+            {children}
+          </div>
+        </div>
+        {/* <main className="flex-1 overflow-y-auto">{children}</main> */}
       </div>
     </div>
   )
@@ -130,11 +135,11 @@ export default function Layout({ children }) {
         // </div>
 
         {/* Topbar Desktop + Contenu */}
-//         <div className="flex-1 overflow-y-auto">
-//           <div className="p-4 md:p-6 lg:p-8">
-//             {children}
-//           </div>
-//         </div>
+        // <div className="flex-1 overflow-y-auto">
+        //   <div className="p-4 md:p-6 lg:p-8">
+        //     {children}
+        //   </div>
+        // </div>
 //       </div>
 //     </div>
 //   )
