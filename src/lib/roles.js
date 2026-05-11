@@ -43,7 +43,7 @@ export function getNavItems(role) {
   if (!role) return []
   const all = [
     { path:'/',             label:'Tableau de bord', module:'dashboard',     icon:'home'     },
-    { path:'/rendez-vous',  label:'Rendez-vous',     module:'rendez_vous',   icon:'calendar', badge:3 },
+    { path:'/rendez-vous',  label:'Rendez-vous',     module:'rendez_vous',   icon:'calendar' },
     { path:'/patients',     label:'Patients',         module:'patients',      icon:'users'    },
     { path:'/ordonnances',  label:'Ordonnances',      module:'ordonnances',   icon:'document' },
     { path:'/facturation',  label:'Facturation',      module:'facturation',   icon:'invoice'  },

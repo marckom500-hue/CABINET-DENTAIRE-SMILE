@@ -146,7 +146,7 @@ export default function Layout({ children }) {
             </svg>
           </button>
 
-          <span className="font-semibold text-teal-700 font-serif">Cabinet SMILE</span>
+          <span className="font-semibold text-teal-700 font-serif">Cabinet DENTAIRE SMILE</span>
 
           <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold select-none">
             {profile?.prenom?.[0]?.toUpperCase() || 'U'}
