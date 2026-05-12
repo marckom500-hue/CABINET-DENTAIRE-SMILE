@@ -7,78 +7,96 @@
 // import { useRendezVous } from '../hooks/useRendezVous'
 
 // const PAGE_TITLES = {
-//   '/': 'Tableau de bord', '/rendez-vous': 'Rendez-vous',
-//   '/patients': 'Patients', '/ordonnances': 'Ordonnances',
-//   '/facturation': 'Facturation', '/stock': 'Stock',
-//   '/rappels': 'Rappels SMS', '/rapports': 'Rapports', '/utilisateurs': 'Utilisateurs',
+//   '/': 'Tableau de bord',
+//   '/rendez-vous': 'Rendez-vous',
+//   '/patients': 'Patients',
+//   '/ordonnances': 'Ordonnances',
+//   '/facturation': 'Facturation',
+//   '/stock': 'Stock',
+//   '/rappels': 'Rappels SMS',
+//   '/rapports': 'Rapports',
+//   '/utilisateurs': 'Utilisateurs',
 // }
 
 // export default function Topbar() {
 //   const { pathname } = useLocation()
 //   const navigate = useNavigate()
 //   const { ajouterPatient } = usePatients()
-//   const { ajouterRdv }     = useRendezVous()
-//   const [modalPatient, setModalPatient] = useState(false)
-//   const [modalRdv,     setModalRdv]     = useState(false)
+//   const { ajouterRdv } = useRendezVous()
 
-//   const masquerBoutons = ['/rendez-vous', '/patients'].includes(pathname)
+//   const [modalPatient, setModalPatient] = useState(false)
+//   const [modalRdv, setModalRdv] = useState(false)
+
+//   const title = PAGE_TITLES[pathname] || 'Dashboard'
+//   const showButtons = !['/rendez-vous', '/patients'].includes(pathname)
 
 //   const today = new Date().toLocaleDateString('fr-FR', {
-//     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+//     weekday: 'long',
+//     day: 'numeric',
+//     month: 'long'
 //   })
 
 //   return (
 //     <>
-//       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+//       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
 //         <div>
-//           <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-serif">
-//             {PAGE_TITLES[pathname] ?? 'Dashboard'}
-//           </h2>
-//           <p className="text-xs md:text-sm text-gray-500 capitalize">{today}</p>
+//           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-serif tracking-tight">
+//             {title}
+//           </h1>
+//           <p className="text-sm text-gray-500 mt-1 capitalize">{today}</p>
 //         </div>
-//         {!masquerBoutons && (
-//           <div className="flex gap-2">
-//             <button onClick={() => setModalRdv(true)}
-//               className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs md:text-sm font-medium px-3 md:px-4 py-2 rounded-lg transition-colors">
-//               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+//         {showButtons && (
+//           <div className="flex flex-wrap gap-2">
+//             <button
+//               onClick={() => setModalRdv(true)}
+//               className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
+//             >
+//               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 //                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
 //               </svg>
-//               <span className="hidden xs:inline">Nouveau RDV</span>
-//               <span className="xs:hidden">RDV</span>
+//               <span>Nouveau RDV</span>
 //             </button>
-//             <button onClick={() => setModalPatient(true)}
-//               className="flex items-center gap-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs md:text-sm font-medium px-3 md:px-4 py-2 rounded-lg transition-colors">
-//               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-//                   d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+
+//             <button
+//               onClick={() => setModalPatient(true)}
+//               className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
+//             >
+//               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
 //               </svg>
-//               <span className="hidden xs:inline">Nouveau patient</span>
-//               <span className="xs:hidden">Patient</span>
+//               <span>Nouveau Patient</span>
 //             </button>
 //           </div>
 //         )}
 //       </div>
 
-//       <Modal isOpen={modalRdv} onClose={() => setModalRdv(false)} title="Nouveau rendez-vous" confirmOnClose>
+//       {/* Modals */}
+//       <Modal isOpen={modalRdv} onClose={() => setModalRdv(false)} title="Nouveau rendez-vous">
 //         <FormulaireRdv
 //           onSubmit={async (d) => { await ajouterRdv(d); setModalRdv(false); navigate('/rendez-vous') }}
-//           onCancel={() => setModalRdv(false)} />
+//           onCancel={() => setModalRdv(false)}
+//         />
 //       </Modal>
-//       <Modal isOpen={modalPatient} onClose={() => setModalPatient(false)} title="Nouveau patient" confirmOnClose>
+
+//       <Modal isOpen={modalPatient} onClose={() => setModalPatient(false)} title="Nouveau patient">
 //         <FormulairePatient
 //           onSubmit={async (d) => { await ajouterPatient(d); setModalPatient(false); navigate('/patients') }}
-//           onCancel={() => setModalPatient(false)} />
+//           onCancel={() => setModalPatient(false)}
+//         />
 //       </Modal>
 //     </>
 //   )
 // }
 
 
+
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Modal from './Modal'
 import FormulairePatient from './FormulairePatient'
 import FormulaireRdv from './FormulaireRdv'
+import ConfirmDialog from './ConfirmDialog'
 import { usePatients } from '../hooks/usePatients'
 import { useRendezVous } from '../hooks/useRendezVous'
 
@@ -94,26 +112,81 @@ const PAGE_TITLES = {
   '/utilisateurs': 'Utilisateurs',
 }
 
+const EMPTY_PATIENT = {
+  nom: '', prenom: '', telephone: '', email: '',
+  date_naissance: '', adresse: '', groupe_sanguin: '',
+}
+
+const EMPTY_RDV = {
+  patient_id: '', date: '', heure: '', motif: '', notes: '', statut: '',
+}
+
 export default function Topbar() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { ajouterPatient } = usePatients()
   const { ajouterRdv } = useRendezVous()
 
+  // ── État des modales ────────────────────────────────────────
   const [modalPatient, setModalPatient] = useState(false)
-  const [modalRdv, setModalRdv] = useState(false)
+  const [modalRdv, setModalRdv]         = useState(false)
 
-  const title = PAGE_TITLES[pathname] || 'Dashboard'
+  // ── État des formulaires (pour détecter dirty) ──────────────
+  const [formPatient, setFormPatient] = useState(EMPTY_PATIENT)
+  const [formRdv, setFormRdv]         = useState(EMPTY_RDV)
+
+  // ── Confirmation d'abandon ──────────────────────────────────
+  const [confirmPatient, setConfirmPatient] = useState(false)
+  const [confirmRdv, setConfirmRdv]         = useState(false)
+
+  const title      = PAGE_TITLES[pathname] || 'Dashboard'
   const showButtons = !['/rendez-vous', '/patients'].includes(pathname)
 
   const today = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long'
+    weekday: 'long', day: 'numeric', month: 'long',
   })
+
+  // ── Helpers dirty ───────────────────────────────────────────
+  const isDirty = (form, empty) =>
+    Object.keys(empty).some((k) => (form[k] ?? '') !== (empty[k] ?? ''))
+
+  // ── Ouverture des modales (réinitialise le form) ────────────
+  const openPatient = () => { setFormPatient(EMPTY_PATIENT); setModalPatient(true) }
+  const openRdv     = () => { setFormRdv(EMPTY_RDV);         setModalRdv(true) }
+
+  // ── Tentative de fermeture (avec ou sans confirmation) ──────
+  const requestClosePatient = useCallback(() => {
+    if (isDirty(formPatient, EMPTY_PATIENT)) {
+      setConfirmPatient(true)
+    } else {
+      setModalPatient(false)
+    }
+  }, [formPatient])
+
+  const requestCloseRdv = useCallback(() => {
+    if (isDirty(formRdv, EMPTY_RDV)) {
+      setConfirmRdv(true)
+    } else {
+      setModalRdv(false)
+    }
+  }, [formRdv])
+
+  // ── Fermeture confirmée ─────────────────────────────────────
+  const forceClosePatient = () => {
+    setConfirmPatient(false)
+    setModalPatient(false)
+    setFormPatient(EMPTY_PATIENT)
+  }
+
+  const forceCloseRdv = () => {
+    setConfirmRdv(false)
+    setModalRdv(false)
+    setFormRdv(EMPTY_RDV)
+  }
 
   return (
     <>
+      {/* ── En-tête ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-serif tracking-tight">
@@ -125,7 +198,7 @@ export default function Topbar() {
         {showButtons && (
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setModalRdv(true)}
+              onClick={openRdv}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +208,7 @@ export default function Topbar() {
             </button>
 
             <button
-              onClick={() => setModalPatient(true)}
+              onClick={openPatient}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,20 +220,66 @@ export default function Topbar() {
         )}
       </div>
 
-      {/* Modals */}
-      <Modal isOpen={modalRdv} onClose={() => setModalRdv(false)} title="Nouveau rendez-vous">
+      {/* ── Modale RDV ── */}
+      <Modal
+        isOpen={modalRdv}
+        onClose={requestCloseRdv}   /* clic sur la croix ou hors modale → confirmation si dirty */
+        title="Nouveau rendez-vous"
+      >
         <FormulaireRdv
-          onSubmit={async (d) => { await ajouterRdv(d); setModalRdv(false); navigate('/rendez-vous') }}
-          onCancel={() => setModalRdv(false)}
+          /* On remonte les changements du formulaire pour détecter dirty */
+          onFormChange={setFormRdv}
+          onSubmit={async (d) => {
+            await ajouterRdv(d)
+            setModalRdv(false)
+            setFormRdv(EMPTY_RDV)
+            navigate('/rendez-vous')
+          }}
+          onCancel={requestCloseRdv}
         />
       </Modal>
 
-      <Modal isOpen={modalPatient} onClose={() => setModalPatient(false)} title="Nouveau patient">
+      {/* ── Modale Patient ── */}
+      <Modal
+        isOpen={modalPatient}
+        onClose={requestClosePatient}
+        title="Nouveau patient"
+      >
         <FormulairePatient
-          onSubmit={async (d) => { await ajouterPatient(d); setModalPatient(false); navigate('/patients') }}
-          onCancel={() => setModalPatient(false)}
+          onFormChange={setFormPatient}
+          onSubmit={async (d) => {
+            await ajouterPatient(d)
+            setModalPatient(false)
+            setFormPatient(EMPTY_PATIENT)
+            navigate('/patients')
+          }}
+          onCancel={requestClosePatient}
         />
       </Modal>
+
+      {/* ── ConfirmDialog abandon Patient ── */}
+      <ConfirmDialog
+        isOpen={confirmPatient}
+        tone="warning"
+        title="Abandonner le formulaire ?"
+        message="Les informations saisies ne seront pas enregistrées. Voulez-vous vraiment fermer ce formulaire ?"
+        confirmLabel="Abandonner"
+        cancelLabel="Continuer la saisie"
+        onConfirm={forceClosePatient}
+        onCancel={() => setConfirmPatient(false)}
+      />
+
+      {/* ── ConfirmDialog abandon RDV ── */}
+      <ConfirmDialog
+        isOpen={confirmRdv}
+        tone="warning"
+        title="Abandonner le formulaire ?"
+        message="Les informations saisies ne seront pas enregistrées. Voulez-vous vraiment fermer ce formulaire ?"
+        confirmLabel="Abandonner"
+        cancelLabel="Continuer la saisie"
+        onConfirm={forceCloseRdv}
+        onCancel={() => setConfirmRdv(false)}
+      />
     </>
   )
 }

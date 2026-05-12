@@ -13,6 +13,7 @@
     "@pdfme/generator": "^6.1.1",
     "@pdfme/schemas": "^6.1.1",
     "@supabase/supabase-js": "^2.39.0",
+    "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "react": "^18.2.0",
