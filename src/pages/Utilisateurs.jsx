@@ -262,6 +262,7 @@ export default function Utilisateurs() {
   const [search, setSearch]     = useState('')
   const [modal, setModal]       = useState(false)
   const [editU, setEditU]       = useState(null)
+  const [viewU, setViewU]       = useState(null)
   const [confirmD, setConfirmD] = useState(null)
   const [form, setForm]         = useState({ nom:'', prenom:'', email:'', role:'secretaire', actif:true })
   const [saving, setSaving]     = useState(false)
@@ -291,6 +292,9 @@ export default function Utilisateurs() {
     setForm({ nom:u.nom, prenom:u.prenom, email:u.email, role:u.role, actif:u.actif })
     setError('')
     setModal(true)
+  }
+  const openProfile = (u) => {
+    setViewU(u)
   }
 
   const handleSave = async () => {
@@ -444,6 +448,15 @@ export default function Utilisateurs() {
                     {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
+                        <button onClick={() => openProfile(u)}
+                          className="p-1.5 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                          title="Voir le profil"
+                          aria-label={`Voir le profil de ${u.prenom ?? ''} ${u.nom ?? ''}`.trim()}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </button>
                         <button onClick={() => openEdit(u)}
                           className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                           title="Modifier">
@@ -520,6 +533,69 @@ export default function Utilisateurs() {
             </button>
           </div>
         </div>
+      </Modal>
+
+      <Modal isOpen={!!viewU} onClose={() => setViewU(null)}
+        title={`Profil de ${viewU?.prenom ?? ''} ${viewU?.nom ?? ''}`.trim()}>
+        {viewU && (() => {
+          const rc = ROLES_COLORS[viewU.role] ?? ROLES_COLORS.assistant
+          const initials = `${viewU.prenom?.[0] ?? ''}${viewU.nom?.[0] ?? ''}`.toUpperCase() || '??'
+          const lastConn = formatLastSignIn(viewU.last_sign_in)
+          const createdAt = viewU.created_at
+            ? new Date(viewU.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })
+            : 'Non renseigne'
+
+          return (
+            <div className="space-y-5">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-teal-600 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+                  {initials}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg font-semibold text-gray-900 truncate">{viewU.prenom} {viewU.nom}</p>
+                  <p className="text-sm text-gray-500 truncate">{viewU.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="border border-gray-100 rounded-lg p-3">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Role</p>
+                  <span className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${rc.bg} ${rc.text}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${rc.dot}`} />
+                    {ROLES_LABELS[viewU.role] ?? viewU.role}
+                  </span>
+                </div>
+
+                <div className="border border-gray-100 rounded-lg p-3">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Statut</p>
+                  <span className={`mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full ${
+                    viewU.actif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${viewU.actif ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    {viewU.actif ? 'Actif' : 'Inactif'}
+                  </span>
+                </div>
+
+                <div className="border border-gray-100 rounded-lg p-3">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Derniere connexion</p>
+                  <p className={`mt-2 text-sm ${lastConn?.recent ? 'text-emerald-600 font-medium' : 'text-gray-700'}`}>
+                    {lastConn?.label ?? 'Jamais connecte'}
+                  </p>
+                </div>
+
+                <div className="border border-gray-100 rounded-lg p-3">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Date de creation</p>
+                  <p className="mt-2 text-sm text-gray-700">{createdAt}</p>
+                </div>
+              </div>
+
+              <button onClick={() => setViewU(null)}
+                className="w-full px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
+                Fermer
+              </button>
+            </div>
+          )
+        })()}
       </Modal>
 
       <ConfirmDialog isOpen={!!confirmD} onConfirm={handleDelete} onCancel={() => setConfirmD(null)}

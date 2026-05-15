@@ -327,15 +327,15 @@ export default function Sidebar({ onClose }) {
       {/* ── Logo ─────────────────────────────────────────────────────────────── */}
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-          <img
-            src="/SMILE.jpg"
-            alt="Logo filigrane"
-            className="w-96 h-96 object-contain"
-          />
+          <div className="w-16 h-16 rounded-full border-2 border-teal-100 bg-white p-2 shadow-lg shadow-teal-900/10 ring-4 ring-teal-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img
+              src="/SMILE.jpg"
+              alt="Logo SMILE"
+              className="w-full h-full rounded-full object-contain"
+            />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900 font-serif leading-none">CABINET DENTAIRE SMILE</h1>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold text-gray-900 font-serif leading-tight">CABINET DENTAIRE SMILE</h1>
             <p className="text-xs text-teal-600">Dr. Boutchouang & Associés</p>
           </div>
         </div>

@@ -2154,17 +2154,28 @@ export default function Login() {
 
               {/* Logo */}
               <div style={{
-                width:72, height:72, borderRadius:22,
-                background:"linear-gradient(135deg,rgba(224,247,250,0.9),rgba(178,235,242,0.7))",
+                width:108, height:108, borderRadius:"50%",
+                background:"rgba(255,255,255,0.94)",
                 border:"1.5px solid rgba(0,172,193,0.25)",
                 display:"flex", alignItems:"center", justifyContent:"center",
                 margin:"0 auto 22px",
-                boxShadow:"0 4px 20px rgba(0,172,193,0.18), 0 0 0 4px rgba(0,172,193,0.06)",
+                padding:14,
+                boxShadow:"0 12px 34px rgba(0,120,140,0.14), 0 0 0 5px rgba(0,172,193,0.06)",
                 overflow:"hidden",
                 opacity: mounted ? 1 : 0,
                 transition:"opacity 0.7s 0.3s",
               }}>
-                <img src="/SMILE.jpg" alt="SMILE" style={{ width:50, height:50, objectFit:"contain" }}/>
+                <img
+                  src="/SMILE.jpg"
+                  alt="SMILE"
+                  style={{
+                    width:"100%",
+                    height:"100%",
+                    objectFit:"contain",
+                    display:"block",
+                    borderRadius:"50%",
+                  }}
+                />
               </div>
 
               {/* Titre SMILE */}

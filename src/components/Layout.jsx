@@ -146,7 +146,12 @@ export default function Layout({ children }) {
             </svg>
           </button>
 
-          <span className="font-semibold text-teal-700 font-serif">Cabinet DENTAIRE SMILE</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-11 h-8 rounded-xl border border-teal-100 bg-white p-1 shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img src="/SMILE.jpg" alt="Logo SMILE" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-semibold text-teal-700 font-serif text-sm truncate">Cabinet DENTAIRE SMILE</span>
+          </div>
 
           <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold select-none">
             {profile?.prenom?.[0]?.toUpperCase() || 'U'}
