@@ -2149,7 +2149,7 @@ export default function Login() {
                 <span style={{
                   fontFamily:"'DM Sans', sans-serif", fontSize:10, fontWeight:600,
                   letterSpacing:"0.18em", textTransform:"uppercase", color:"#00838f",
-                }}>Cabinet Dentaire</span>
+                }}>Cabinet Dentaire SMILE</span>
               </div>
 
               {/* Logo */}
@@ -2220,7 +2220,7 @@ export default function Login() {
             <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
               <AnimatedField
                 id="email" label="Adresse email" type="email"
-                value={email} onChange={setEmail} placeholder="praticien@cabinet.fr"
+                value={email} onChange={setEmail} placeholder="personnel@gmail.com"
                 autoComplete="email" focused={focused==="email"}
                 onFocus={() => setFocused("email")} onBlur={() => setFocused(null)}
                 animDelay="1.1s" icon={EmailIcon}
@@ -2345,7 +2345,7 @@ export default function Login() {
                     Besoin d'aide ?{" "}
                   </span>
                   <a
-                    href="mailto:superadmin@smile-dental.fr"
+                    href="mailto:marc@gmail.com"
                     style={{
                       fontFamily:"'DM Sans', sans-serif", fontSize:12, fontWeight:600,
                       color:"#00838f", textDecoration:"none",
@@ -2393,7 +2393,7 @@ export default function Login() {
               color:"rgba(84,110,122,0.4)", letterSpacing:"0.05em",
               animation:"fieldIn 0.6s ease 1.6s both",
             }}>
-              © 2026 SMILE Dental · Accès réservé aux personnels
+              © 2026 SMILE  · Accès réservé aux personnels
             </p>
           </div>
         </div>
