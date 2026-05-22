@@ -3,6 +3,7 @@ import { usePatients } from '../hooks/usePatients'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import FormulairePatient from '../components/FormulairePatient'
+import MedicalRecord from '../components/MedicalRecord'
 import { PermissionGate } from '../components/RoleGuard'
 
 const STATUS_COLORS = { Actif:'bg-teal-100 text-teal-700', Urgent:'bg-red-100 text-red-700', Inactif:'bg-gray-100 text-gray-500', Nouveau:'bg-blue-100 text-blue-700' }
@@ -13,6 +14,8 @@ export default function Patients() {
   const [modal, setModal]       = useState(false)
   const [editP, setEditP]       = useState(null)
   const [confirmD, setConfirmD] = useState(null)
+  const [medicalRecordOpen, setMedicalRecordOpen] = useState(false)
+  const [selectedPatient, setSelectedPatient] = useState(null)
 
   const filtered = patients.filter(p =>
     `${p.nom} ${p.prenom} ${p.telephone}`.toLowerCase().includes(search.toLowerCase())
@@ -20,6 +23,7 @@ export default function Patients() {
 
   const openCreate = () => { setEditP(null); setModal(true) }
   const openEdit   = (p) => { setEditP(p);   setModal(true) }
+  const openMedicalRecord = (p) => { setSelectedPatient(p); setMedicalRecordOpen(true) }
 
   const handleSubmit = async (data) => {
     if (editP) await modifierPatient(editP.id, data)
@@ -91,6 +95,11 @@ export default function Patients() {
                   <td className="px-4 py-3">
                     <PermissionGate module="patients" requireWrite>
                       <div className="flex gap-1">
+                        <button onClick={() => openMedicalRecord(p)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Dossier médical">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </button>
                         <button onClick={() => openEdit(p)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -110,6 +119,12 @@ export default function Patients() {
           </table>
         </div>
       </div>
+
+        <MedicalRecord 
+          patient={selectedPatient} 
+          isOpen={medicalRecordOpen} 
+          onClose={() => setMedicalRecordOpen(false)} 
+        />
 
       <Modal isOpen={modal} onClose={() => setModal(false)} title={editP ? 'Modifier le patient' : 'Nouveau patient'} confirmOnClose>
         <FormulairePatient patient={editP} onSubmit={handleSubmit} onCancel={() => setModal(false)} />

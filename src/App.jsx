@@ -8,6 +8,7 @@ import RendezVous from './pages/RendezVous'
 import Patients from './pages/Patients'
 import Ordonnances from './pages/Ordonnances'
 import Facturation from './pages/Facturation'
+import Devis from './pages/Devis'
 import Stock from './pages/Stock'
 import Rappels from './pages/Rappels'
 import Rapports from './pages/Rapports'
@@ -36,6 +37,7 @@ function AppRoutes() {
         <Route path="/patients"     element={<RoleGuard module="patients"><Patients /></RoleGuard>} />
         <Route path="/ordonnances"  element={<RoleGuard module="ordonnances"><Ordonnances /></RoleGuard>} />
         <Route path="/facturation"  element={<RoleGuard module="facturation"><Facturation /></RoleGuard>} />
+        <Route path="/devis"        element={<RoleGuard module="devis"><Devis /></RoleGuard>} />
         <Route path="/stock"        element={<RoleGuard module="stock"><Stock /></RoleGuard>} />
         <Route path="/rappels"      element={<RoleGuard module="rappels"><Rappels /></RoleGuard>} />
         <Route path="/rapports"     element={<RoleGuard module="rapports"><Rapports /></RoleGuard>} />

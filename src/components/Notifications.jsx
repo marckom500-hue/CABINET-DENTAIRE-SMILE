@@ -10,17 +10,23 @@ const TYPE_MAP = {
   user:   { bg:'bg-indigo-50', dot:'bg-indigo-500' },
 }
 export default function Notifications({ notifications = [] }) {
+  const sortedNotifications = [...notifications].sort((a, b) => {
+    const dateA = new Date(a.created_at || 0)
+    const dateB = new Date(b.created_at || 0)
+    return dateB - dateA
+  })
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">Alertes</h3>
-      <div className="space-y-2">
-        {notifications.length === 0 && (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 h-full min-h-0 flex flex-col">
+      <h3 className="text-sm font-semibold text-gray-900 mb-3">Alertes</h3>
+      <div className="space-y-2 overflow-y-auto pr-1 max-h-44 lg:max-h-none">
+        {sortedNotifications.length === 0 && (
           <div className="text-sm text-gray-400 text-center py-8">Aucune alerte recente</div>
         )}
-        {notifications.map(n => {
+        {sortedNotifications.map(n => {
           const t = TYPE_MAP[n.type] ?? TYPE_MAP.rdv
           return (
-            <div key={n.id} className={`flex items-start gap-3 p-3 rounded-lg ${t.bg}`}>
+            <div key={n.id} className={`flex items-start gap-3 p-2.5 rounded-lg ${t.bg}`}>
               <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${t.dot}`} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-700">{n.message}</p>

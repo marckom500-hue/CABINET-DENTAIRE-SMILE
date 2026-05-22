@@ -1,172 +1,4 @@
-// import { useState } from 'react'
-// import { useStock } from '../hooks/useStock'
-// import Modal from '../components/Modal'
-// import ConfirmDialog from '../components/ConfirmDialog'
-// import { PermissionGate } from '../components/RoleGuard'
-
-// const COULEURS = ['#0d9488','#3b82f6','#f59e0b','#f43f5e','#8b5cf6','#94a3b8']
-// const empty = { nom_produit:'', quantite:0, max:100, seuil:20, couleur:'#0d9488' }
-
-// export default function Stock() {
-//   const { stock, loading, ajouterArticle, modifierArticle, supprimerArticle } = useStock()
-//   const [modal, setModal]   = useState(false)
-//   const [editS, setEditS]   = useState(null)
-//   const [confirmD, setConfirmD] = useState(null)
-//   const [form, setForm]     = useState(empty)
-//   const [saving, setSaving] = useState(false)
-
-//   const set = k => v => setForm(f => ({ ...f, [k]: v }))
-
-//   const openCreate = () => { setEditS(null); setForm(empty); setModal(true) }
-//   const openEdit   = s  => { setEditS(s); setForm(s); setModal(true) }
-
-//   const handleSubmit = async () => {
-//     setSaving(true)
-//     try {
-//       if (editS) await modifierArticle(editS.id, form)
-//       else       await ajouterArticle(form)
-//       setModal(false)
-//     } catch {
-//       // Le hook affiche deja la notification d'erreur.
-//     } finally {
-//       setSaving(false)
-//     }
-//   }
-
-//   const critiques = stock.filter(s => s.quantite <= s.seuil).length
-
-//   return (
-//     <div className="p-4 md:p-6 space-y-5">
-//       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-//         <div>
-//           <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-serif">Stock</h2>
-//           <p className="text-sm text-gray-500">{stock.length} article{stock.length > 1 ? 's' : ''}
-//             {critiques > 0 && <span className="ml-2 text-red-500 font-medium">· {critiques} en alerte</span>}
-//           </p>
-//         </div>
-//         <PermissionGate module="stock" requireWrite>
-//           <button onClick={openCreate}
-//             className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-//             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-//             </svg>
-//             Ajouter article
-//           </button>
-//         </PermissionGate>
-//       </div>
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-//         {loading ? (
-//           [1,2,3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse" />)
-//         ) : stock.length === 0 ? (
-//           <div className="col-span-3 text-center py-12 text-gray-400">Aucun article en stock</div>
-//         ) : stock.map(s => {
-//           const pct      = Math.min(100, Math.round((s.quantite / s.max) * 100))
-//           const critique = s.quantite <= s.seuil
-//           return (
-//             <div key={s.id} className={`bg-white rounded-xl border p-4 ${critique ? 'border-red-200' : 'border-gray-200'}`}>
-//               <div className="flex items-start justify-between mb-3">
-//                 <div className="flex-1 min-w-0">
-//                   <p className="text-sm font-semibold text-gray-900 truncate">{s.nom_produit}</p>
-//                   {critique && (
-//                     <span className="text-xs text-red-500 font-medium">⚠ Stock critique</span>
-//                   )}
-//                 </div>
-//                 <div className="flex gap-1 ml-2">
-//                   <PermissionGate module="stock" requireWrite>
-//                     <button onClick={() => openEdit(s)} className="p-1 text-gray-400 hover:text-teal-600 rounded transition-colors" title="Modifier">
-//                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-//                       </svg>
-//                     </button>
-//                     <button onClick={() => setConfirmD(s)} className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors" title="Supprimer">
-//                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-//                       </svg>
-//                     </button>
-//                   </PermissionGate>
-//                 </div>
-//               </div>
-//               <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-//                 <span>Quantité : <strong className={critique ? 'text-red-500' : 'text-gray-800'}>{s.quantite}</strong></span>
-//                 <span>Max : {s.max}</span>
-//               </div>
-//               <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-//                 <div className="h-full rounded-full transition-all"
-//                   style={{ width:`${pct}%`, backgroundColor: critique ? '#f43f5e' : (s.couleur ?? '#0d9488') }} />
-//               </div>
-//               <p className="text-xs text-gray-400 mt-1.5">Seuil alerte : {s.seuil}</p>
-//             </div>
-//           )
-//         })}
-//       </div>
-
-//       <Modal isOpen={modal} onClose={() => setModal(false)} title={editS ? 'Modifier l\'article' : 'Ajouter un article'} confirmOnClose>
-//         <div className="space-y-3">
-//           <div>
-//             <label className="block text-xs font-medium text-gray-700 mb-1">Nom du produit</label>
-//             <input value={form.nom_produit} onChange={e => set('nom_produit')(e.target.value)}
-//               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-//           </div>
-//           <div className="grid grid-cols-3 gap-3">
-//             {['quantite','max','seuil'].map(k => (
-//               <div key={k}>
-//                 <label className="block text-xs font-medium text-gray-700 mb-1 capitalize">{k === 'seuil' ? 'Seuil alerte' : k.charAt(0).toUpperCase() + k.slice(1)}</label>
-//                 <input type="number" value={form[k]} onChange={e => set(k)(Number(e.target.value))}
-//                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-//               </div>
-//             ))}
-//           </div>
-//           <div>
-//             <label className="block text-xs font-medium text-gray-700 mb-2">Couleur</label>
-//             <div className="flex gap-2">
-//               {COULEURS.map(c => (
-//                 <button key={c} onClick={() => set('couleur')(c)}
-//                   className={`w-7 h-7 rounded-full transition-transform ${form.couleur === c ? 'scale-125 ring-2 ring-offset-1 ring-gray-400' : ''}`}
-//                   style={{ backgroundColor: c }} />
-//               ))}
-//             </div>
-//           </div>
-//           <div className="flex gap-3 pt-2">
-//             <button onClick={() => setModal(false)} className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Annuler</button>
-//             <button onClick={handleSubmit} disabled={saving} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors disabled:opacity-50">
-//               {saving ? 'Enregistrement...' : (editS ? 'Modifier' : 'Ajouter')}
-//             </button>
-//           </div>
-//         </div>
-//       </Modal>
-
-//       <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimerArticle(confirmD.id); setConfirmD(null) } catch {} }}
-//         onCancel={() => setConfirmD(null)} title="Supprimer l'article"
-//         message={`Supprimer "${confirmD?.nom_produit}" du stock ?`} />
-//     </div>
-//   )
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { useState, useMemo } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useStock } from '../hooks/useStock'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -194,7 +26,7 @@ function IconHistory({ className = 'w-4 h-4' }) {
 }
 
 function fmtDate(iso) {
-  if (!iso) return '—'
+  if (!iso) return 'â€”'
   return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' })
 }
 
@@ -217,7 +49,7 @@ export default function Stock() {
   const [lignesCommande, setLignesCommande] = useState([])
   const [validating,     setValidating]     = useState(false)
 
-  // Confirmation "marquer reçu"
+  // Confirmation "marquer reÃ§u"
   const [confirmRecu, setConfirmRecu] = useState(null)  // commande object
 
   const set = k => v => setForm(f => ({ ...f, [k]: v }))
@@ -231,7 +63,7 @@ export default function Stock() {
       else       await ajouterArticle(form)
       setModal(false)
     } catch {
-      // hook gère la notif
+      // hook gÃ¨re la notif
     } finally {
       setSaving(false)
     }
@@ -240,13 +72,13 @@ export default function Stock() {
   const critiques = stock.filter(s => s.quantite <= s.seuil)
   const enAttente = commandes.filter(c => c.statut === 'en_attente')
 
-  // IDs déjà dans la liste de commande
+  // IDs dÃ©jÃ  dans la liste de commande
   const dejaDansCommande = useMemo(
     () => new Set(lignesCommande.map(l => l.articleId)),
     [lignesCommande]
   )
 
-  // Ajouter un article critique dans "À commander"
+  // Ajouter un article critique dans "Ã€ commander"
   const ajouterACommander = (article) => {
     setLignesCommande(prev => {
       if (prev.find(l => l.articleId === article.id)) return prev
@@ -272,7 +104,7 @@ export default function Stock() {
     setLignesCommande(prev => prev.filter(l => l.articleId !== articleId))
   }
 
-  // Valider la commande → Supabase
+  // Valider la commande â†’ Supabase
   const handleValider = async () => {
     if (lignesCommande.length === 0) return
     setValidating(true)
@@ -281,35 +113,35 @@ export default function Stock() {
       setLignesCommande([])
       setOnglet('historique')
     } catch {
-      // hook gère la notif
+      // hook gÃ¨re la notif
     } finally {
       setValidating(false)
     }
   }
 
-  // Marquer commande reçue → met à jour le stock
+  // Marquer commande reÃ§ue â†’ met Ã  jour le stock
   const handleMarquerRecu = async () => {
     if (!confirmRecu) return
     try {
       await marquerRecu(confirmRecu.id, confirmRecu.commande_lignes)
       setConfirmRecu(null)
     } catch {
-      // hook gère la notif
+      // hook gÃ¨re la notif
     }
   }
 
-  // ─── Rendu ──────────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Rendu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="p-4 md:p-6 space-y-5">
 
-      {/* En-tête */}
+      {/* En-tÃªte */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-serif">Stock</h2>
           <p className="text-sm text-gray-500">
             {stock.length} article{stock.length > 1 ? 's' : ''}
             {critiques.length > 0 && (
-              <span className="ml-2 text-red-500 font-medium">· {critiques.length} en alerte</span>
+              <span className="ml-2 text-red-500 font-medium">Â· {critiques.length} en alerte</span>
             )}
           </p>
         </div>
@@ -337,7 +169,7 @@ export default function Stock() {
           Stock
         </button>
 
-        {/* À commander */}
+        {/* Ã€ commander */}
         <button onClick={() => setOnglet('commander')}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
             onglet === 'commander'
@@ -345,7 +177,7 @@ export default function Stock() {
               : 'text-gray-500 hover:text-gray-700'
           }`}>
           <IconCart className="w-4 h-4" />
-          À commander
+          Ã€ commander
           {lignesCommande.length > 0 && (
             <span className="bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {lignesCommande.length}
@@ -370,7 +202,7 @@ export default function Stock() {
         </button>
       </div>
 
-      {/* ════════════════════════════════ ONGLET STOCK ════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ONGLET STOCK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {onglet === 'stock' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
@@ -386,7 +218,7 @@ export default function Stock() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{s.nom_produit}</p>
-                    {critique && <span className="text-xs text-red-500 font-medium">⚠ Stock critique</span>}
+                    {critique && <span className="text-xs text-red-500 font-medium">âš  Stock critique</span>}
                   </div>
                   <div className="flex gap-1 ml-2">
                     <PermissionGate module="stock" requireWrite>
@@ -409,7 +241,7 @@ export default function Stock() {
                 </div>
 
                 <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                  <span>Quantité : <strong className={critique ? 'text-red-500' : 'text-gray-800'}>{s.quantite}</strong></span>
+                  <span>QuantitÃ© : <strong className={critique ? 'text-red-500' : 'text-gray-800'}>{s.quantite}</strong></span>
                   <span>Max : {s.max}</span>
                 </div>
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -418,7 +250,7 @@ export default function Stock() {
                 </div>
                 <p className="text-xs text-gray-400 mt-1.5">Seuil alerte : {s.seuil}</p>
 
-                {/* Bouton Commander — visible uniquement si critique */}
+                {/* Bouton Commander â€” visible uniquement si critique */}
                 {critique && (
                   <button onClick={() => ajouterACommander(s)} disabled={enCmd}
                     className={`mt-3 w-full flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 rounded-lg transition-colors ${
@@ -427,7 +259,7 @@ export default function Stock() {
                         : 'bg-orange-500 hover:bg-orange-600 text-white'
                     }`}>
                     <IconCart className="w-3.5 h-3.5" />
-                    {enCmd ? 'Déjà dans la liste' : 'Commander'}
+                    {enCmd ? 'DÃ©jÃ  dans la liste' : 'Commander'}
                   </button>
                 )}
               </div>
@@ -436,11 +268,11 @@ export default function Stock() {
         </div>
       )}
 
-      {/* ════════════════════════════ ONGLET À COMMANDER ════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ONGLET Ã€ COMMANDER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {onglet === 'commander' && (
         <div className="space-y-4">
 
-          {/* Bannière */}
+          {/* BanniÃ¨re */}
           {lignesCommande.length > 0 && (
             <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
               <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -448,9 +280,9 @@ export default function Stock() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-orange-800">
-                  {lignesCommande.length} article{lignesCommande.length > 1 ? 's' : ''} à commander
+                  {lignesCommande.length} article{lignesCommande.length > 1 ? 's' : ''} Ã  commander
                 </p>
-                <p className="text-xs text-orange-600">Ajustez les quantités si nécessaire avant de valider</p>
+                <p className="text-xs text-orange-600">Ajustez les quantitÃ©s si nÃ©cessaire avant de valider</p>
               </div>
             </div>
           )}
@@ -461,7 +293,7 @@ export default function Stock() {
               <div className="flex justify-center">
                 <IconCart className="w-10 h-10 text-gray-300" />
               </div>
-              <p className="text-sm font-medium">Aucun article à commander</p>
+              <p className="text-sm font-medium">Aucun article Ã  commander</p>
               <p className="text-xs">
                 Depuis l'onglet <strong>Stock</strong>, cliquez sur{' '}
                 <span className="text-orange-500 font-medium">Commander</span>{' '}
@@ -479,7 +311,7 @@ export default function Stock() {
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Article</th>
                     <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">Stock actuel</th>
                     <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">Seuil</th>
-                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">Qté à commander</th>
+                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">QtÃ© Ã  commander</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -491,7 +323,7 @@ export default function Stock() {
                         <td className="px-4 py-3">
                           <p className="font-medium text-gray-900">{l.nom_produit}</p>
                           <p className="text-xs text-red-500 font-medium">
-                            Manque {manque} unité{manque > 1 ? 's' : ''} pour atteindre le seuil
+                            Manque {manque} unitÃ©{manque > 1 ? 's' : ''} pour atteindre le seuil
                           </p>
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -547,7 +379,7 @@ export default function Stock() {
         </div>
       )}
 
-      {/* ════════════════════════════ ONGLET HISTORIQUE ══════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ONGLET HISTORIQUE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {onglet === 'historique' && (
         <div className="space-y-3">
           {loadingCommandes ? (
@@ -555,13 +387,13 @@ export default function Stock() {
           ) : commandes.length === 0 ? (
             <div className="text-center py-16 text-gray-400 space-y-2">
               <IconHistory className="w-10 h-10 text-gray-300 mx-auto" />
-              <p className="text-sm font-medium">Aucune commande enregistrée</p>
+              <p className="text-sm font-medium">Aucune commande enregistrÃ©e</p>
             </div>
           ) : commandes.map(c => {
             const estRecu = c.statut === 'recue'
             return (
               <div key={c.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                {/* En-tête commande */}
+                {/* En-tÃªte commande */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
@@ -570,15 +402,15 @@ export default function Stock() {
                         : 'bg-orange-100 text-orange-700'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${estRecu ? 'bg-green-500' : 'bg-orange-500'}`} />
-                      {estRecu ? 'Reçue' : 'En attente'}
+                      {estRecu ? 'ReÃ§ue' : 'En attente'}
                     </span>
                     <span className="text-xs text-gray-500">
-                      Commandé le {fmtDate(c.created_at)}
-                      {estRecu && ` · Reçu le ${fmtDate(c.recu_le)}`}
+                      CommandÃ© le {fmtDate(c.created_at)}
+                      {estRecu && ` Â· ReÃ§u le ${fmtDate(c.recu_le)}`}
                     </span>
                   </div>
 
-                  {/* Bouton Marquer reçu */}
+                  {/* Bouton Marquer reÃ§u */}
                   {!estRecu && (
                     <PermissionGate module="stock" requireWrite>
                       <button onClick={() => setConfirmRecu(c)}
@@ -586,7 +418,7 @@ export default function Stock() {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Marquer reçu
+                        Marquer reÃ§u
                       </button>
                     </PermissionGate>
                   )}
@@ -601,7 +433,7 @@ export default function Stock() {
                         <span>Stock au moment de la commande : <strong className="text-red-500">{l.quantite_actuelle}</strong></span>
                         <span>Seuil : {l.seuil}</span>
                         <span className="bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
-                          +{l.qte_commandee} unités
+                          +{l.qte_commandee} unitÃ©s
                         </span>
                       </div>
                     </div>
@@ -613,7 +445,7 @@ export default function Stock() {
         </div>
       )}
 
-      {/* ── Modal ajout / modification ──────────────────────────────────────── */}
+      {/* â”€â”€ Modal ajout / modification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Modal isOpen={modal} onClose={() => setModal(false)}
         title={editS ? "Modifier l'article" : 'Ajouter un article'} confirmOnClose>
         <div className="space-y-3">
@@ -656,7 +488,7 @@ export default function Stock() {
         </div>
       </Modal>
 
-      {/* ── Dialog suppression article ──────────────────────────────────────── */}
+      {/* â”€â”€ Dialog suppression article â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <ConfirmDialog
         isOpen={!!confirmD}
         onConfirm={async () => { try { await supprimerArticle(confirmD.id); setConfirmD(null) } catch {} }}
@@ -665,13 +497,13 @@ export default function Stock() {
         message={`Supprimer "${confirmD?.nom_produit}" du stock ?`}
       />
 
-      {/* ── Dialog marquer commande reçue ───────────────────────────────────── */}
+      {/* â”€â”€ Dialog marquer commande reÃ§ue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <ConfirmDialog
         isOpen={!!confirmRecu}
         onConfirm={handleMarquerRecu}
         onCancel={() => setConfirmRecu(null)}
-        title="Marquer comme reçue"
-        message={`Confirmer la réception de cette commande ? Les quantités en stock seront mises à jour automatiquement.`}
+        title="Marquer comme reÃ§ue"
+        message={`Confirmer la rÃ©ception de cette commande ? Les quantitÃ©s en stock seront mises Ã  jour automatiquement.`}
       />
     </div>
   )

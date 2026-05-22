@@ -1,14 +1,19 @@
 const STATUS_MAP = {
-  'Actif':    'bg-teal-100 text-teal-700',
-  'Urgent':   'bg-red-100 text-red-700',
-  'Inactif':  'bg-gray-100 text-gray-500',
-  'Nouveau':  'bg-blue-100 text-blue-700',
+  Actif: 'bg-teal-100 text-teal-700',
+  Urgent: 'bg-red-100 text-red-700',
+  Inactif: 'bg-gray-100 text-gray-500',
+  Nouveau: 'bg-blue-100 text-blue-700',
+  Recu: 'bg-teal-100 text-teal-700',
 }
+
 export default function PatientList({ patients = [] }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">Patients récents</h3>
-      <div className="space-y-2">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 h-full min-h-0 flex flex-col">
+      <h3 className="text-sm font-semibold text-gray-900 mb-3">Patients recents</h3>
+      <div className="space-y-2 overflow-y-auto pr-1">
+        {patients.length === 0 && (
+          <div className="text-sm text-gray-400 text-center py-8">Aucun patient recu recemment</div>
+        )}
         {patients.map(p => (
           <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
             <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -16,7 +21,7 @@ export default function PatientList({ patients = [] }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">{p.prenom} {p.nom}</p>
-              <p className="text-xs text-gray-500">{p.telephone}</p>
+              <p className="text-xs text-gray-500 truncate">{p.detail || p.telephone}</p>
             </div>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_MAP[p.statut] ?? 'bg-gray-100 text-gray-500'}`}>
               {p.statut}

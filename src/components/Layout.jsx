@@ -1,88 +1,4 @@
-// import { useState, useEffect } from 'react'
-// import Sidebar from './Sidebar'
-// import ThemeSelector from './ThemeSelector'
-// import { useAuthContext } from '../hooks/AuthContext'
-
-// export default function Layout({ children }) {
-//   const [sidebarOpen, setSidebarOpen] = useState(false)
-//   const { profile } = useAuthContext()
-
-//   useEffect(() => {
-//     const savedTheme = localStorage.getItem('dental-theme')
-//     if (savedTheme && savedTheme !== 'default') {
-//       document.body.classList.add(savedTheme)
-//       document.body.classList.add('has-bg-dental')
-//     }
-//   }, [])
-
-//   // Fermer la sidebar si on passe en desktop
-//   useEffect(() => {
-//     const mq = window.matchMedia('(min-width: 1024px)')
-//     const handler = (e) => { if (e.matches) setSidebarOpen(false) }
-//     mq.addEventListener('change', handler)
-//     return () => mq.removeEventListener('change', handler)
-//   }, [])
-
-//   return (
-//     <div className="flex h-screen overflow-hidden has-bg-dental" id="main-layout">
-
-//       {/* ── Overlay mobile ───────────────────────────────────────────────────── */}
-//       {sidebarOpen && (
-//         <div
-//           className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-//           onClick={() => setSidebarOpen(false)}
-//         />
-//       )}
-
-//       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
-//       <aside
-//         className={`
-//           fixed inset-y-0 left-0 z-30
-//           lg:static lg:z-auto lg:flex-shrink-0
-//           transition-transform duration-300 ease-in-out
-//           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-//         `}
-//       >
-//         <Sidebar onClose={() => setSidebarOpen(false)} />
-//       </aside>
-
-//       {/* ── Zone principale ──────────────────────────────────────────────────── */}
-//       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-//         {/* Topbar mobile */}
-//         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 sticky top-0 z-10 flex-shrink-0">
-//           <button
-//             onClick={() => setSidebarOpen(true)}
-//             className="p-2 -ml-2 rounded-xl text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-//             aria-label="Ouvrir le menu"
-//           >
-//             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-//             </svg>
-//           </button>
-
-//           <span className="font-semibold text-teal-700 font-serif">Cabinet SMILE</span>
-
-//           <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold select-none">
-//             {profile?.prenom?.[0]?.toUpperCase() || 'U'}
-//           </div>
-//         </header>
-
-//         {/* Contenu scrollable */}
-//         <main className="flex-1 overflow-y-auto">
-//           <div className="p-4 md:p-6 lg:p-8">
-//             {children}
-//           </div>
-//         </main>
-
-//         {/* Bouton thème — toujours en bas à droite */}
-//         <ThemeSelector />
-//       </div>
-//     </div>
-//   )
-// }
-
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import ThemeSelector from './ThemeSelector'
 import { useAuthContext } from '../hooks/AuthContext'
@@ -102,7 +18,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex h-screen overflow-hidden" id="main-layout">
 
-      {/* ── Sidebar desktop : dans le flux, fond blanc isolé du thème ────────── */}
+      {/* â”€â”€ Sidebar desktop : dans le flux, fond blanc isolÃ© du thÃ¨me â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <aside
         className="hidden lg:block lg:flex-shrink-0 relative z-10"
         style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
@@ -110,7 +26,7 @@ export default function Layout({ children }) {
         <Sidebar onClose={null} />
       </aside>
 
-      {/* ── Sidebar mobile : overlay complet par-dessus tout ─────────────────── */}
+      {/* â”€â”€ Sidebar mobile : overlay complet par-dessus tout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           {/* Fond sombre */}
@@ -118,7 +34,7 @@ export default function Layout({ children }) {
             className="absolute inset-0 bg-black/60"
             onClick={() => setSidebarOpen(false)}
           />
-          {/* Panneau sidebar — fond blanc isolé du thème */}
+          {/* Panneau sidebar â€” fond blanc isolÃ© du thÃ¨me */}
           <div
             className="absolute inset-y-0 left-0 z-10"
             style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
@@ -128,7 +44,7 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      {/* ── Zone principale : reçoit le thème de fond ────────────────────────── */}
+      {/* â”€â”€ Zone principale : reÃ§oit le thÃ¨me de fond â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden has-bg-dental" id="theme-area">
 
         {/* Topbar mobile */}
@@ -158,14 +74,14 @@ export default function Layout({ children }) {
           </div>
         </header>
 
-        {/* Contenu scrollable — le thème s'affiche ici */}
+        {/* Contenu scrollable â€” le thÃ¨me s'affiche ici */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8">
             {children}
           </div>
         </main>
 
-        {/* Bouton thème */}
+        {/* Bouton thÃ¨me */}
         <ThemeSelector />
       </div>
     </div>

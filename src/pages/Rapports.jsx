@@ -2,6 +2,7 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useFactures } from '../hooks/useFactures'
 import { usePatients } from '../hooks/usePatients'
 import { useRendezVous } from '../hooks/useRendezVous'
+import { FACTURE_STATUS, RDV_STATUS, normalizeFactureStatus, normalizeRdvStatus } from '../lib/statuses'
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
@@ -33,7 +34,7 @@ export default function Rapports() {
     const monthRevenue = factures
       .filter(f => {
         const fDate = new Date(f.date)
-        return fDate.getFullYear() === currentYear && fDate.getMonth() === index
+        return fDate.getFullYear() === currentYear && fDate.getMonth() === index && normalizeFactureStatus(f.statut) !== FACTURE_STATUS.ANNULE
       })
       .reduce((sum, f) => sum + (f.montant || 0), 0)
     
@@ -51,7 +52,7 @@ export default function Rapports() {
     // Patients de retour: had at least one RDV in this month
     const retours = rendezVous.filter(r => {
       const rDate = new Date(r.date)
-      return rDate.getFullYear() === currentYear && rDate.getMonth() === index && r.statut !== 'annule'
+      return rDate.getFullYear() === currentYear && rDate.getMonth() === index && normalizeRdvStatus(r.statut) !== RDV_STATUS.ANNULE
     }).length
 
     return { mois, nouveaux, retours }
@@ -60,7 +61,7 @@ export default function Rapports() {
   // Calculate procedure distribution from rendez-vous
   const actesCount = {}
   rendezVous.forEach(r => {
-    if (r.statut !== 'annule') {
+    if (normalizeRdvStatus(r.statut) !== RDV_STATUS.ANNULE) {
       const type = r.type_acte || 'Autre'
       actesCount[type] = (actesCount[type] || 0) + 1
     }
@@ -84,10 +85,10 @@ export default function Rapports() {
 
   const totalRevenus = dataRevenus.reduce((s, d) => s + d.revenus, 0)
   const totalPatientsSeen = dataPatients.reduce((s, d) => s + d.nouveaux + d.retours, 0)
-  const totalEncaisse = factures.filter(f => f.statut === 'paye').reduce((s, f) => s + (f.montant || 0), 0)
+  const totalEncaisse = factures.filter(f => normalizeFactureStatus(f.statut) === FACTURE_STATUS.PAYE).reduce((s, f) => s + (f.montant || 0), 0)
   const tauxRecouvrement = totalRevenus > 0 ? Math.round((totalEncaisse / totalRevenus) * 100) : 0
-  const rdvHonores = rendezVous.filter(r => r.statut === 'confirme').length
-  const totalRdv = rendezVous.filter(r => r.statut !== 'annule').length
+  const rdvHonores = rendezVous.filter(r => normalizeRdvStatus(r.statut) === RDV_STATUS.RECU).length
+  const totalRdv = rendezVous.filter(r => normalizeRdvStatus(r.statut) !== RDV_STATUS.ANNULE).length
   const tauxRdvHonores = totalRdv > 0 ? Math.round((rdvHonores / totalRdv) * 100) : 0
 
   return (
