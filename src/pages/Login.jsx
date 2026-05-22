@@ -784,7 +784,7 @@ export default function Login() {
                       style={{ animation:"spin 0.78s linear infinite" }}>
                       <path strokeLinecap="round" d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                     </svg>
-                    VÃ©rificationâ€¦
+                    Verification
                   </span>
                 ) : (
                   <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
@@ -897,7 +897,7 @@ export default function Login() {
               color:"rgba(84,110,122,0.4)", letterSpacing:"0.05em",
               animation:"fieldIn 0.6s ease 1.6s both",
             }}>
-              Â© 2026 SMILE  Â· AccÃ¨s rÃ©servÃ© aux personnels
+               2026 SMILE  Acces reserve aux personnels
             </p>
           </div>
         </div>

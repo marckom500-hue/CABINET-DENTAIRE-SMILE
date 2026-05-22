@@ -136,7 +136,7 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <FormField
-          label="PrÃ©nom"
+          label="Prenom"
           value={form.prenom}
           onChange={setName('prenom')}
           required
@@ -162,7 +162,7 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
       </div>
 
       <FormField
-        label="TÃ©lÃ©phone"
+        label="Telephone"
         value={form.telephone}
         onChange={setTelephone}
         placeholder="6XXXXXXXX"
