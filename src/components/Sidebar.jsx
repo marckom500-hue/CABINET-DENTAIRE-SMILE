@@ -66,12 +66,12 @@ export default function Sidebar({ onClose }) {
   return (
     // style inline pour forcer le fond blanc même si un thème CSS l'override
     <div
-      className="w-72 h-full flex flex-col border-r border-gray-200 shadow-xl lg:shadow-none"
-      style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+      className="w-72 h-full flex flex-col shadow-xl lg:shadow-none"
+      style={{ backgroundColor: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-1)', backgroundImage: 'none' }}
     >
 
       {/* ── Logo ──────────────────────────────────────────────────────────── */}
-      <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+      <div className="p-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-1)' }}>
         <div className="flex items-center gap-3">
           <div className="w-16 h-16 rounded-full border-2 border-teal-100 bg-white p-2 shadow-lg shadow-teal-900/10 ring-4 ring-teal-50 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img
@@ -81,7 +81,7 @@ export default function Sidebar({ onClose }) {
             />
           </div>
           <div className="min-w-0">
-            <h1 className="text-base font-bold text-gray-900 font-serif leading-tight">CABINET DENTAIRE SMILE</h1>
+            <h1 className="text-base font-bold font-serif leading-tight" style={{ color: 'var(--text-1)' }}>CABINET DENTAIRE SMILE</h1>
             <p className="text-xs text-teal-600">Dr. Boutchouang &amp; Associés</p>
           </div>
         </div>
@@ -116,11 +116,10 @@ export default function Sidebar({ onClose }) {
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-medium transition-all ${
-                  isActive
-                    ? 'bg-teal-50 text-teal-700 shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  isActive ? 'bg-teal-50 text-teal-700 shadow-sm' : 'hover:bg-teal-50 hover:text-teal-700'
                 }`
               }
+              style={({ isActive }) => isActive ? {} : { color: 'var(--text-2)' }}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={ICONS[item.icon] || ICONS.home} />
@@ -137,12 +136,14 @@ export default function Sidebar({ onClose }) {
       </nav>
 
       {/* ── Footer profil ──────────────────────────────────────────────────── */}
-      <div className="p-4 border-t border-gray-100">
+      <div className="p-4" style={{ borderTop: '1px solid var(--border-1)' }}>
         <div
           onClick={() => { setPreview(profile?.avatar_url || null); setShowProfile(true) }}
-          className="flex items-center gap-3 px-3 py-3 bg-gray-50 hover:bg-teal-50 rounded-2xl cursor-pointer transition-colors group"
+          className="flex items-center gap-3 px-3 py-3 rounded-2xl cursor-pointer transition-all group"
+          style={{ backgroundColor: 'var(--bg-row)', border: '1px solid var(--border-1)' }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(13,148,136,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--bg-row)' }}
         >
-          {/* Avatar */}
           {(profile?.avatar_url)
             ? <img src={profile.avatar_url} alt={displayName}
                 className="w-10 h-10 rounded-2xl object-cover flex-shrink-0 border border-gray-200" />
@@ -151,14 +152,15 @@ export default function Sidebar({ onClose }) {
               </div>
           }
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-900 truncate text-sm group-hover:text-teal-700">{displayName}</p>
+            <p className="font-semibold truncate text-sm" style={{ color: 'var(--text-1)' }}>{displayName}</p>
             <span className={`text-xs px-2.5 py-0.5 rounded-full ${roleColor.bg} ${roleColor.text}`}>
               {ROLES_LABELS[effectiveRole] ?? 'Utilisateur'}
             </span>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); handleLogout() }}
-            className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-xl transition-colors"
+            className="p-2 hover:text-red-500 rounded-xl transition-colors"
+            style={{ color: 'var(--text-3)' }}
             title="Déconnexion"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,17 +177,17 @@ export default function Sidebar({ onClose }) {
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowProfile(false)} />
 
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-lg overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
             {/* Bandeau haut */}
-            <div className="h-20 bg-gradient-to-r from-teal-500 to-teal-600" />
+            <div className="h-24 sm:h-32 bg-gradient-to-r from-teal-500 to-teal-600" />
 
             {/* Avatar centré sur le bandeau */}
-            <div className="flex justify-center -mt-10 mb-3">
+            <div className="flex justify-center -mt-12 sm:-mt-14 mb-3">
               <div className="relative">
                 {(preview || profile?.avatar_url)
                   ? <img src={preview || profile.avatar_url} alt={displayName}
-                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg" />
-                  : <div className="w-20 h-20 rounded-full bg-teal-600 border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl font-bold">
+                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white shadow-lg" />
+                  : <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-teal-600 border-4 border-white shadow-lg flex items-center justify-center text-white text-3xl sm:text-4xl font-bold">
                       {initials}
                     </div>
                 }
@@ -193,7 +195,7 @@ export default function Sidebar({ onClose }) {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="absolute bottom-0 right-0 w-7 h-7 bg-teal-600 hover:bg-teal-700 text-white rounded-full flex items-center justify-center shadow-md transition-colors disabled:opacity-60"
+                  className="absolute bottom-1 right-1 w-8 h-8 sm:w-9 sm:h-9 bg-teal-600 hover:bg-teal-700 text-white rounded-full flex items-center justify-center shadow-md transition-colors disabled:opacity-60"
                   title="Changer la photo"
                 >
                   {uploading
@@ -213,35 +215,35 @@ export default function Sidebar({ onClose }) {
             </div>
 
             {/* Infos */}
-            <div className="px-6 pb-6 space-y-4">
+            <div className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-4 sm:space-y-5">
               <div className="text-center">
-                <p className="text-lg font-bold text-gray-900">{displayName}</p>
-                <p className="text-sm text-gray-500">{profile?.email}</p>
-                <span className={`mt-1 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${roleColor.bg} ${roleColor.text}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${roleColor.dot}`} />
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{displayName}</p>
+                <p className="text-sm sm:text-base mt-0.5 text-gray-500">{profile?.email}</p>
+                <span className={`mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-1 rounded-full ${roleColor.bg} ${roleColor.text}`}>
+                  <span className={`w-2 h-2 rounded-full ${roleColor.dot}`} />
                   {ROLES_LABELS[effectiveRole] ?? 'Utilisateur'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {profile?.specialite && (
-                  <div className="col-span-2 bg-teal-50 rounded-xl p-3">
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Spécialité</p>
-                    <p className="font-medium text-teal-700">{profile.specialite}</p>
+                  <div className="col-span-2 bg-teal-50 rounded-xl p-3 sm:p-4">
+                    <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide mb-1">Spécialité</p>
+                    <p className="font-semibold text-teal-700 sm:text-base">{profile.specialite}</p>
                   </div>
                 )}
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Statut</p>
-                  <span className={`inline-flex items-center gap-1 text-xs font-medium ${
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide mb-1">Statut</p>
+                  <span className={`inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium ${
                     profile?.actif ? 'text-green-600' : 'text-gray-500'
                   }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${profile?.actif ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <span className={`w-2 h-2 rounded-full ${profile?.actif ? 'bg-green-500' : 'bg-gray-400'}`} />
                     {profile?.actif ? 'Actif' : 'Inactif'}
                   </span>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Membre depuis</p>
-                  <p className="font-medium text-gray-700 text-xs">
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide mb-1">Membre depuis</p>
+                  <p className="font-medium text-gray-700 text-xs sm:text-sm">
                     {profile?.created_at
                       ? new Date(profile.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
                       : '—'}
@@ -249,11 +251,11 @@ export default function Sidebar({ onClose }) {
                 </div>
               </div>
 
-              <p className="text-xs text-center text-gray-400">Cliquez sur 📷 pour changer votre photo</p>
+              <p className="text-xs sm:text-sm text-center text-gray-400">Cliquez sur 📷 pour changer votre photo</p>
 
               <button
                 onClick={() => setShowProfile(false)}
-                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-xl transition-colors"
+                className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white text-sm sm:text-base font-medium rounded-xl transition-colors"
               >
                 Fermer
               </button>

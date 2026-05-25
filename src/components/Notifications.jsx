@@ -17,11 +17,11 @@ export default function Notifications({ notifications = [] }) {
   })
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 h-full min-h-0 flex flex-col">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">Alertes</h3>
+    <div className="rounded-xl border p-4 h-full min-h-0 flex flex-col" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
+      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Alertes</h3>
       <div className="space-y-2 overflow-y-auto pr-1 max-h-44 lg:max-h-none">
         {sortedNotifications.length === 0 && (
-          <div className="text-sm text-gray-400 text-center py-8">Aucune alerte recente</div>
+          <div className="text-sm text-center py-8" style={{ color: 'var(--text-3)' }}>Aucune alerte recente</div>
         )}
         {sortedNotifications.map(n => {
           const t = TYPE_MAP[n.type] ?? TYPE_MAP.rdv

@@ -50,7 +50,7 @@ export default function Topbar() {
   const showButtons = !['/rendez-vous', '/patients'].includes(pathname)
 
   const today = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long',
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 
   const [time, setTime] = useState(() =>
@@ -106,10 +106,13 @@ export default function Topbar() {
       {/* ── En-tête ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-serif tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold font-serif tracking-tight" style={{ color: 'var(--text-1)' }}>
             {title}
           </h1>
-          <p className="text-sm text-gray-500 mt-1 capitalize">{today} — {time}</p>
+          <p className="inline-flex items-center gap-2 mt-1">
+            <span className="text-sm font-medium capitalize bg-gray-900 text-white px-3 py-1 rounded-full">{today}</span>
+            <span className="text-sm font-mono font-semibold bg-gray-900 text-white px-3 py-1 rounded-full">{time}</span>
+          </p>
         </div>
 
         {showButtons && (

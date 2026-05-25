@@ -8,7 +8,7 @@ export default function KPICard({ label, value, trend, trendUp, color = 'teal' }
   const c = COLOR_MAP[color] ?? COLOR_MAP.teal
   return (
     <div className={`${c.bg} rounded-xl p-4 md:p-5`}>
-      <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
+      <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-2)' }}>{label}</p>
       <p className={`text-2xl font-bold ${c.text} mb-2`}>{value}</p>
       {trend && (
         <p className={`text-xs font-medium ${trendUp === true ? 'text-green-600' : trendUp === false ? 'text-red-500' : 'text-gray-500'}`}>

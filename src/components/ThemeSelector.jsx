@@ -12,26 +12,35 @@ const THEMES = [
   { id: 'dental-metal',      name: 'Métal Brossé',       description: 'Argenté avec lueur douce',           className: 'bg-dental-metal',      preview: 'bg-gradient-to-br from-slate-200 to-slate-100' },
   { id: 'dental-blueprint',  name: 'Blueprint',          description: 'Papier médical technique',           className: 'bg-dental-blueprint',  preview: 'bg-gray-50' },
   { id: 'dental-cosmos',     name: 'Cosmos Tech',        description: 'Bleu froid innovation',              className: 'bg-dental-cosmos',     preview: 'bg-gradient-to-br from-slate-900 to-slate-800' },
+  { id: 'dental-dark',       name: 'Nuit Absolue',       description: 'Thème sombre total avec lueurs',     className: 'bg-dental-dark',       preview: 'bg-gray-950' },
 ]
 
 // Applique le thème UNIQUEMENT sur la zone de contenu, pas sur la sidebar
 function applyTheme(themeId) {
   const themeArea = document.getElementById('theme-area')
-  const body = document.body
+  const html = document.documentElement
 
-  // Nettoyer tous les thèmes sur les deux cibles
+  // Retirer data-theme sombre si on change
+  html.removeAttribute('data-theme')
+
+  // Nettoyer tous les thèmes
   THEMES.forEach(t => {
     const classes = t.className.split(' ').filter(Boolean)
     classes.forEach(cls => {
       themeArea?.classList.remove(cls)
-      body.classList.remove(cls)
+      document.body.classList.remove(cls)
     })
   })
   themeArea?.classList.remove('has-bg-dental')
-  body.classList.remove('has-bg-dental')
+  document.body.classList.remove('has-bg-dental')
 
-  // Appliquer le nouveau thème seulement sur theme-area
-  if (themeId !== 'default') {
+  if (themeId === 'dental-dark') {
+    html.setAttribute('data-theme', 'dark')
+    themeArea?.classList.add('bg-dental-dark', 'has-bg-dental')
+  } else if (themeId === 'dental-cosmos') {
+    html.setAttribute('data-theme', 'cosmos')
+    themeArea?.classList.add('bg-dental-cosmos', 'has-bg-dental')
+  } else if (themeId !== 'default') {
     const selected = THEMES.find(t => t.id === themeId)
     if (selected) {
       const classes = selected.className.split(' ').filter(Boolean)

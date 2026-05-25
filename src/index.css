@@ -11,6 +11,38 @@
   --color-text-tertiary:        #94a3b8;
   --color-border-tertiary:      #e2e8f0;
   --color-border-secondary:     #cbd5e1;
+  --bg-app:     #f8fafc;
+  --bg-card:    #ffffff;
+  --bg-row:     #f8fafc;
+  --bg-input:   #ffffff;
+  --bg-sidebar: #ffffff;
+  --text-1:     #0f172a;
+  --text-2:     #475569;
+  --text-3:     #94a3b8;
+  --border-1:   #e2e8f0;
+  --border-2:   #cbd5e1;
+}
+
+[data-theme="dark"] {
+  --bg-app:     #0a0a0f;
+  --bg-card:    #16161f;
+  --bg-row:     #252535;
+  --bg-input:   #1e1e2e;
+  --bg-sidebar: #111118;
+  --text-1:     #f1f5f9;
+  --text-2:     #94a3b8;
+  --text-3:     #64748b;
+  --border-1:   #2a2a3e;
+  --border-2:   #334155;
+}
+
+[data-theme="cosmos"] {
+  --bg-sidebar: #0f172a;
+  --bg-row:     #1e3a5f;
+  --border-1:   #1e3a5f;
+  --text-1:     #f1f5f9;
+  --text-2:     #94a3b8;
+  --text-3:     #64748b;
 }
 
 * { box-sizing: border-box; }
@@ -394,6 +426,45 @@ body { font-family: 'DM Sans', sans-serif; }
   pointer-events: none;
   z-index: 0;
   filter: blur(2px);
+}
+
+/* 11. Thème sombre total */
+.bg-dental-dark {
+  background: #0a0a0f;
+  position: relative;
+}
+
+.bg-dental-dark::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(13,148,136,0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 80%, rgba(59,130,246,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  animation: darkPulse 20s ease-in-out infinite;
+}
+
+.bg-dental-dark::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: url('/SMILE.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(4px);
+}
+
+@keyframes darkPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 
 /* Classes utilitaires pour appliquer les fonds */

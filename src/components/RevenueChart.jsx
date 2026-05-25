@@ -25,15 +25,15 @@ export default function RevenueChart({ factures = [], loading = false }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400 h-full">
+      <div className="rounded-xl border p-6 text-center h-full" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-1)', color: 'var(--text-3)' }}>
         Chargement des revenus...
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 h-full min-h-0 flex flex-col">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">Revenus mensuels (FCFA)</h3>
+    <div className="rounded-xl border p-4 h-full min-h-0 flex flex-col" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
+      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Revenus mensuels (FCFA)</h3>
       <div className="flex-1 min-h-[140px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={displayData} margin={{ top:4, right:4, left:0, bottom:0 }}>

@@ -30,10 +30,10 @@ export default function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={requestClose} />
-      <div className="relative bg-white w-full sm:max-w-lg sm:rounded-xl rounded-t-2xl shadow-xl max-h-[90vh] flex flex-col">
+      <div className="relative w-full sm:max-w-lg sm:rounded-xl rounded-t-2xl shadow-xl max-h-[90vh] flex flex-col bg-white">
         <div className="flex items-center justify-between p-4 md:p-5 border-b border-gray-100 flex-shrink-0">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">{title}</h3>
-          <button onClick={requestClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={requestClose} className="p-1.5 rounded-lg transition-colors hover:bg-gray-100 text-gray-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>

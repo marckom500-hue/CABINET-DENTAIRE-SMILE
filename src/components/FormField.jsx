@@ -99,7 +99,7 @@ export default function FormField({
 
   return (
     <div className="mb-3">
-      <label className="block text-xs font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-1)' }}>
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>

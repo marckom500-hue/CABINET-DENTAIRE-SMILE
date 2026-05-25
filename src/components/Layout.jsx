@@ -21,7 +21,7 @@ export default function Layout({ children }) {
       {/* ── Sidebar desktop : dans le flux, fond blanc isolé du thème ────────── */}
       <aside
         className="hidden lg:block lg:flex-shrink-0 relative z-10"
-        style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+        style={{ backgroundColor: 'var(--bg-sidebar)', backgroundImage: 'none' }}
       >
         <Sidebar onClose={null} />
       </aside>
@@ -37,7 +37,7 @@ export default function Layout({ children }) {
           {/* Panneau sidebar — fond blanc isolé du thème */}
           <div
             className="absolute inset-y-0 left-0 z-10"
-            style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+            style={{ backgroundColor: 'var(--bg-sidebar)', backgroundImage: 'none' }}
           >
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
@@ -49,8 +49,8 @@ export default function Layout({ children }) {
 
         {/* Topbar mobile */}
         <header
-          className="lg:hidden flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200"
-          style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+          className="lg:hidden flex-shrink-0 flex items-center justify-between px-4 py-3"
+          style={{ backgroundColor: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-1)', backgroundImage: 'none' }}
         >
           <button
             onClick={() => setSidebarOpen(true)}
