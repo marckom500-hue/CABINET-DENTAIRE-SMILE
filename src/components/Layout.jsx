@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import ThemeSelector from './ThemeSelector'
 import { useAuthContext } from '../hooks/AuthContext'
@@ -18,7 +18,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex h-screen overflow-hidden" id="main-layout">
 
-      {/* â”€â”€ Sidebar desktop : dans le flux, fond blanc isolÃ© du thÃ¨me â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Sidebar desktop : dans le flux, fond blanc isolé du thème ────────── */}
       <aside
         className="hidden lg:block lg:flex-shrink-0 relative z-10"
         style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
@@ -26,7 +26,7 @@ export default function Layout({ children }) {
         <Sidebar onClose={null} />
       </aside>
 
-      {/* â”€â”€ Sidebar mobile : overlay complet par-dessus tout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Sidebar mobile : overlay complet par-dessus tout ─────────────────── */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           {/* Fond sombre */}
@@ -34,7 +34,7 @@ export default function Layout({ children }) {
             className="absolute inset-0 bg-black/60"
             onClick={() => setSidebarOpen(false)}
           />
-          {/* Panneau sidebar â€” fond blanc isolÃ© du thÃ¨me */}
+          {/* Panneau sidebar — fond blanc isolé du thème */}
           <div
             className="absolute inset-y-0 left-0 z-10"
             style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
@@ -44,7 +44,7 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      {/* â”€â”€ Zone principale : reÃ§oit le thÃ¨me de fond â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Zone principale : reçoit le thème de fond ──────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden has-bg-dental" id="theme-area">
 
         {/* Topbar mobile */}
@@ -74,14 +74,14 @@ export default function Layout({ children }) {
           </div>
         </header>
 
-        {/* Contenu scrollable â€” le thÃ¨me s'affiche ici */}
+        {/* Contenu scrollable — le thème s'affiche ici */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8">
             {children}
           </div>
         </main>
 
-        {/* Bouton thÃ¨me */}
+        {/* Bouton thème */}
         <ThemeSelector />
       </div>
     </div>

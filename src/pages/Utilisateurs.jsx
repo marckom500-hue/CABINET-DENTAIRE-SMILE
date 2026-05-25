@@ -554,6 +554,22 @@ function formatLastSignIn(dateStr) {
 
 const EMPTY_FORM = { nom: '', prenom: '', email: '', password: '', role: 'secretaire', actif: true, specialite: '' }
 
+function UserAvatar({ user, size = 'sm' }) {
+  const dim = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-14 h-14 text-lg'
+  if (user.avatar_url) {
+    return (
+      <img src={user.avatar_url} alt={`${user.prenom} ${user.nom}`}
+        className={`${dim} rounded-full object-cover flex-shrink-0 border border-gray-200`} />
+    )
+  }
+  return (
+    <div className={`${dim} rounded-full flex items-center justify-center text-white font-bold shadow-sm flex-shrink-0`}
+      style={{ backgroundColor: getAvatarColor(user.email || user.id) }}>
+      {getInitials(user.nom, user.prenom)}
+    </div>
+  )
+}
+
 export default function Utilisateurs() {
   const [users,        setUsers]        = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -566,6 +582,8 @@ export default function Utilisateurs() {
   const [form,         setForm]         = useState(EMPTY_FORM)
   const [saving,       setSaving]       = useState(false)
   const [error,        setError]        = useState('')
+  const [avatarFile,   setAvatarFile]   = useState(null)
+  const [avatarPreview,setAvatarPreview]= useState(null)
   const { notify } = useNotifications()
 
   // ── Chargement ───────────────────────────────────────────────
@@ -580,11 +598,14 @@ export default function Utilisateurs() {
 
   // ── Ouverture modales ────────────────────────────────────────
   const openCreate = () => {
-    setEditU(null); setShowPassword(false); setForm(EMPTY_FORM); setError(''); setModal(true)
+    setEditU(null); setShowPassword(false); setForm(EMPTY_FORM)
+    setAvatarFile(null); setAvatarPreview(null)
+    setError(''); setModal(true)
   }
   const openEdit = (u) => {
     setEditU(u); setShowPassword(false)
     setForm({ nom: u.nom, prenom: u.prenom, email: u.email, password: '', role: u.role, actif: u.actif, specialite: u.specialite || '' })
+    setAvatarFile(null); setAvatarPreview(u.avatar_url || null)
     setError(''); setModal(true)
   }
   const openProfile = (u) => setViewU(u)
@@ -594,8 +615,18 @@ export default function Utilisateurs() {
     setSaving(true); setError('')
     try {
       if (editU) {
+        // ── Upload avatar si nouveau fichier ──
+        let avatar_url = editU.avatar_url ?? null
+        if (avatarFile) {
+          const ext  = avatarFile.name.split('.').pop()
+          const path = `${editU.id}.${ext}`
+          const { error: upErr } = await supabase.storage.from('avatars').upload(path, avatarFile, { upsert: true })
+          if (upErr) throw upErr
+          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+          avatar_url = `${urlData.publicUrl}?t=${Date.now()}`
+        }
         // ── MODIFICATION directe du profil ──
-        const updateData = { nom: form.nom, prenom: form.prenom, role: form.role, actif: form.actif }
+        const updateData = { nom: form.nom, prenom: form.prenom, role: form.role, actif: form.actif, avatar_url }
         if (form.role === 'medecin' || form.role === 'superadmin') updateData.specialite = form.specialite
         const { error: e } = await supabase.from('users_profiles').update(updateData).eq('id', editU.id)
         if (e) throw e
@@ -726,10 +757,7 @@ export default function Utilisateurs() {
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm flex-shrink-0"
-                          style={{ backgroundColor: getAvatarColor(u.email || u.id) }}>
-                          {getInitials(u.nom, u.prenom)}
-                        </div>
+                        <UserAvatar user={u} size="sm" />
                         <span className="font-medium text-gray-900">{u.prenom} {u.nom}</span>
                       </div>
                     </td>
@@ -804,6 +832,32 @@ export default function Utilisateurs() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{error}</div>
           )}
+
+          {/* Upload photo */}
+          {editU && (
+            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+              <UserAvatar user={{ ...editU, avatar_url: avatarPreview }} size="lg" />
+              <div>
+                <p className="text-xs font-medium text-gray-700 mb-1">Photo de profil</p>
+                <label className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Choisir une photo
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      setAvatarFile(file)
+                      setAvatarPreview(URL.createObjectURL(file))
+                    }}
+                  />
+                </label>
+                {avatarFile && <p className="text-xs text-gray-400 mt-1 truncate max-w-[160px]">{avatarFile.name}</p>}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Prénom *</label>
@@ -912,10 +966,7 @@ export default function Utilisateurs() {
           return (
             <div className="space-y-5">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md flex-shrink-0"
-                  style={{ backgroundColor: getAvatarColor(viewU.email || viewU.id) }}>
-                  {getInitials(viewU.nom, viewU.prenom)}
-                </div>
+                <UserAvatar user={viewU} size="lg" />
                 <div className="min-w-0">
                   <p className="text-lg font-semibold text-gray-900 truncate">{viewU.prenom} {viewU.nom}</p>
                   <p className="text-sm text-gray-500 truncate">{viewU.email}</p>

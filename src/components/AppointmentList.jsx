@@ -13,7 +13,7 @@ export default function AppointmentList({ appointments = [] }) {
           return (
             <div key={a.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50">
               <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-              <span className="text-xs font-medium text-gray-500 w-12 flex-shrink-0">{a.time}</span>
+              <span className="text-xs font-medium text-gray-500 w-24 flex-shrink-0">{a.schedule || a.time}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{a.patient}</p>
                 <p className="text-xs text-gray-500">{a.type}</p>

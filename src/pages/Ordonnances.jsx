@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -12,7 +12,7 @@ function useOrdonnances() {
   const [ordonnances, setOrdonnances] = useState([])
   const [loading, setLoading] = useState(true)
   const { notify } = useNotifications()
-  
+
   const fetch = async () => {
     setLoading(true)
     try {
@@ -29,28 +29,28 @@ function useOrdonnances() {
           )
         `)
         .order('created_at', { ascending: false })
-      
+
       if (ordonnancesError) throw ordonnancesError
-      
+
       if (!ordonnancesData || ordonnancesData.length === 0) {
         setOrdonnances([])
         setLoading(false)
         return
       }
-      
+
       const medecinIds = [...new Set(
         ordonnancesData
           .filter(o => o.id_medecin_traitant)
           .map(o => o.id_medecin_traitant)
       )]
-      
+
       let medecinsMap = {}
       if (medecinIds.length > 0) {
         const { data: medecinsData, error: medecinsError } = await supabase
           .from('users_profiles')
           .select('id, nom, prenom, specialite, telephone, role')
           .in('id', medecinIds)
-        
+
         if (!medecinsError && medecinsData) {
           medecinsMap = medecinsData.reduce((acc, m) => {
             acc[m.id] = m
@@ -58,12 +58,12 @@ function useOrdonnances() {
           }, {})
         }
       }
-      
+
       const ordonnancesAvecMedecin = ordonnancesData.map(o => ({
         ...o,
         medecin_traitant: o.id_medecin_traitant ? medecinsMap[o.id_medecin_traitant] || null : null
       }))
-      
+
       setOrdonnances(ordonnancesAvecMedecin)
     } catch (error) {
       console.error('Erreur chargement:', error)
@@ -72,47 +72,47 @@ function useOrdonnances() {
       setLoading(false)
     }
   }
-  
+
   useEffect(() => { fetch() }, [])
-  
+
   const ajouter = async (o) => {
     const { error } = await supabase.from('ordonnances').insert(o)
     if (error) {
-      notify({ type:'error', message:`Ordonnance non ajoutee : ${error.message}` })
+      notify({ type: 'error', message: `Ordonnance non ajoutée : ${error.message}` })
       throw error
     }
-    notify({ type:'success', message:'Ordonnance ajoutee' })
+    notify({ type: 'success', message: 'Ordonnance ajoutée' })
     await fetch()
   }
-  
+
   const modifier = async (id, o) => {
     const { error } = await supabase.from('ordonnances').update(o).eq('id', id)
     if (error) {
-      notify({ type:'error', message:`Ordonnance non modifiee : ${error.message}` })
+      notify({ type: 'error', message: `Ordonnance non modifiée : ${error.message}` })
       throw error
     }
-    notify({ type:'success', message:'Ordonnance modifiee' })
+    notify({ type: 'success', message: 'Ordonnance modifiée' })
     await fetch()
   }
-  
+
   const supprimer = async (id) => {
     const { error } = await supabase.from('ordonnances').delete().eq('id', id)
     if (error) {
-      notify({ type:'error', message:`Ordonnance non supprimee : ${error.message}` })
+      notify({ type: 'error', message: `Ordonnance non supprimée : ${error.message}` })
       throw error
     }
-    notify({ type:'success', message:'Ordonnance supprimee' })
+    notify({ type: 'success', message: 'Ordonnance supprimée' })
     await fetch()
   }
-  
+
   return { ordonnances, loading, ajouter, modifier, supprimer }
 }
 
-const empty = { 
-  patient_id: '', 
-  medicaments: '', 
-  posologie: '', 
-  duree: '7 jours', 
+const empty = {
+  patient_id: '',
+  medicaments: '',
+  posologie: '',
+  duree: '7 jours',
   notes: '',
   id_medecin_traitant: '',
   signature: ''
@@ -131,10 +131,10 @@ export default function Ordonnances() {
   const [previewId, setPreviewId] = useState(null)
   const [medecins, setMedecins] = useState([])
   const [userConnected, setUserConnected] = useState(null)
-  
+
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: typeof e === 'string' ? e : e.target.value }))
-  
-  // RÃ©cupÃ©rer l'utilisateur connectÃ© (mÃ©decin prescripteur)
+
+  // Récupérer l'utilisateur connecté (médecin prescripteur)
   useEffect(() => {
     const fetchUserConnected = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -149,8 +149,8 @@ export default function Ordonnances() {
     }
     fetchUserConnected()
   }, [])
-  
-  // RÃ©cupÃ©rer la liste des mÃ©decins traitants
+
+  // Récupérer la liste des médecins traitants
   useEffect(() => {
     const fetchMedecins = async () => {
       try {
@@ -162,30 +162,30 @@ export default function Ordonnances() {
           .order('nom')
         setMedecins(data || [])
       } catch (error) {
-        console.error('Erreur chargement mÃ©decins:', error)
+        console.error('Erreur chargement médecins:', error)
       }
     }
     fetchMedecins()
   }, [])
-  
+
   const patientOptions = patients.map(p => ({
     value: p.id,
     label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${p.telephone}` : ''}`.trim(),
   }))
 
   const openCreate = () => { setEditO(null); setForm(empty); setModal(true) }
-  const openEdit = (o) => { 
-    setEditO(o); 
-    setForm({ 
-      patient_id: o.patient_id, 
-      medicaments: o.medicaments, 
-      posologie: o.posologie, 
-      duree: o.duree, 
+  const openEdit = (o) => {
+    setEditO(o)
+    setForm({
+      patient_id: o.patient_id,
+      medicaments: o.medicaments,
+      posologie: o.posologie,
+      duree: o.duree,
       notes: o.notes,
       id_medecin_traitant: o.id_medecin_traitant || '',
       signature: o.signature || ''
-    }); 
-    setModal(true); 
+    })
+    setModal(true)
   }
 
   const handleExportPDF = async (ordonnance, patient) => {
@@ -201,10 +201,10 @@ export default function Ordonnances() {
         medecinTraitant = data
       }
       await downloadOrdonnancePDF(ordonnance, patient, medecinTraitant, userConnected)
-      notify({ type: 'success', message: 'PDF gÃ©nÃ©rÃ© avec succÃ¨s' })
+      notify({ type: 'success', message: 'PDF généré avec succès' })
     } catch (error) {
-      console.error('Export Ã©chouÃ©:', error)
-      notify({ type: 'error', message: 'Erreur lors de la gÃ©nÃ©ration du PDF' })
+      console.error('Export échoué:', error)
+      notify({ type: 'error', message: 'Erreur lors de la génération du PDF' })
     } finally {
       setExportingId(null)
     }
@@ -224,8 +224,8 @@ export default function Ordonnances() {
       }
       await previewOrdonnancePDF(ordonnance, patient, medecinTraitant, userConnected)
     } catch (error) {
-      console.error('AperÃ§u Ã©chouÃ©:', error)
-      notify({ type: 'error', message: 'Erreur lors de l\'aperÃ§u du PDF' })
+      console.error('Aperçu échoué:', error)
+      notify({ type: 'error', message: "Erreur lors de l'aperçu du PDF" })
     } finally {
       setPreviewId(null)
     }
@@ -238,7 +238,7 @@ export default function Ordonnances() {
       else await ajouter(form)
       setModal(false)
     } catch {
-      // Le hook affiche deja la notification d'erreur.
+      // Le hook affiche déjà la notification d'erreur.
     } finally {
       setSaving(false)
     }
@@ -268,10 +268,10 @@ export default function Ordonnances() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Patient</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MÃ©dicaments</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Médicaments</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Posologie</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">DurÃ©e</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MÃ©decin traitant</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Durée</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Médecin traitant</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
               </tr>
@@ -303,19 +303,19 @@ export default function Ordonnances() {
                               <span className="ml-1 text-xs text-purple-500">(Admin)</span>
                             )}
                           </span>
-                        ) : 'â€”'}
-                       </td>
+                        ) : '—'}
+                      </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">
-                        {o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : 'â€”'}
-                       </td>
+                        {o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : '—'}
+                      </td>
                       <td className="px-4 py-3">
                         <PermissionGate module="ordonnances" requireWrite>
                           <div className="flex gap-1">
-                            <button 
-                              onClick={() => handlePreviewPDF(o, patient)} 
+                            <button
+                              onClick={() => handlePreviewPDF(o, patient)}
                               disabled={previewId === o.id}
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                              title="AperÃ§u PDF"
+                              title="Aperçu PDF"
                             >
                               {previewId === o.id ? (
                                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -329,12 +329,12 @@ export default function Ordonnances() {
                                 </svg>
                               )}
                             </button>
-                            
-                            <button 
-                              onClick={() => handleExportPDF(o, patient)} 
+
+                            <button
+                              onClick={() => handleExportPDF(o, patient)}
                               disabled={exportingId === o.id}
                               className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-                              title="TÃ©lÃ©charger PDF"
+                              title="Télécharger PDF"
                             >
                               {exportingId === o.id ? (
                                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -347,13 +347,13 @@ export default function Ordonnances() {
                                 </svg>
                               )}
                             </button>
-                            
+
                             <button onClick={() => openEdit(o)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Modifier">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                             </button>
-                            
+
                             <button onClick={() => setConfirmD(o)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -361,17 +361,17 @@ export default function Ordonnances() {
                             </button>
                           </div>
                         </PermissionGate>
-                       </td>
-                     </tr>
+                      </td>
+                    </tr>
                   )
                 })
               )}
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
 
-      <Modal isOpen={modal} onClose={() => setModal(false)} title={editO ? 'Modifier l\'ordonnance' : 'Nouvelle ordonnance'} confirmOnClose>
+      <Modal isOpen={modal} onClose={() => setModal(false)} title={editO ? "Modifier l'ordonnance" : 'Nouvelle ordonnance'} confirmOnClose>
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Patient</label>
@@ -381,39 +381,39 @@ export default function Ordonnances() {
               {patientOptions.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
             </select>
           </div>
-          
+
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">ðŸ‘¨â€âš•ï¸ MÃ©decin traitant</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">👨⚕️ Médecin traitant</label>
             <select value={form.id_medecin_traitant || ''} onChange={set('id_medecin_traitant')}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
-              <option value="">-- SÃ©lectionner un mÃ©decin traitant --</option>
+              <option value="">-- Sélectionner un médecin traitant --</option>
               {medecins.map(m => (
                 <option key={m.id} value={m.id}>
-                  Dr {m.nom} {m.prenom} 
+                  Dr {m.nom} {m.prenom}
                   {m.role === 'superadmin' ? ' (Super Admin)' : ''}
                   {m.specialite ? ` - ${m.specialite}` : ''}
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-400 mt-1">MÃ©decin traitant du patient (optionnel)</p>
+            <p className="text-xs text-gray-400 mt-1">Médecin traitant du patient (optionnel)</p>
           </div>
-          
+
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">MÃ©dicaments</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Médicaments</label>
             <textarea value={form.medicaments} onChange={set('medicaments')} rows={3}
-              placeholder="Ex: Amoxicilline 500mg, IbuprofÃ¨ne 400mg..."
+              placeholder="Ex: Amoxicilline 500mg, Ibuprofène 400mg..."
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
           </div>
-          
+
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Posologie</label>
             <textarea value={form.posologie} onChange={set('posologie')} rows={2}
-              placeholder="Ex: 1 comprimÃ© 3x/jour pendant les repas"
+              placeholder="Ex: 1 comprimé 3x/jour pendant les repas"
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
           </div>
-          
+
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">DurÃ©e du traitement</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Durée du traitement</label>
             <select value={form.duree} onChange={set('duree')}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
               {['3 jours','5 jours','7 jours','10 jours','14 jours','21 jours','1 mois'].map(d => (
@@ -421,17 +421,17 @@ export default function Ordonnances() {
               ))}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
             <textarea value={form.notes} onChange={set('notes')} rows={2}
-              placeholder="Instructions complÃ©mentaires..."
+              placeholder="Instructions complémentaires..."
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
           </div>
-          
+
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-2">
-              âœï¸ Signature du mÃ©decin
+              ✏️ Signature du médecin
             </label>
             <SignaturePad
               onSave={(signature) => setForm({ ...form, signature: signature })}
@@ -439,14 +439,14 @@ export default function Ordonnances() {
               initialSignature={form.signature}
             />
             <p className="text-xs text-gray-400 mt-1">
-              Dessinez votre signature avec la souris ou le pavÃ© tactile
+              Dessinez votre signature avec la souris ou le pavé tactile
             </p>
           </div>
-          
+
           <div className="flex gap-3 pt-2">
             <button onClick={() => setModal(false)} className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Annuler</button>
             <button onClick={handleSubmit} disabled={saving} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors disabled:opacity-50">
-              {saving ? 'Enregistrement...' : (editO ? 'Modifier' : 'CrÃ©er')}
+              {saving ? 'Enregistrement...' : (editO ? 'Modifier' : 'Créer')}
             </button>
           </div>
         </div>
@@ -454,7 +454,7 @@ export default function Ordonnances() {
 
       <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimer(confirmD.id); setConfirmD(null) } catch {} }}
         onCancel={() => setConfirmD(null)} title="Supprimer l'ordonnance"
-        message="Supprimer dÃ©finitivement cette ordonnance ?" />
+        message="Supprimer définitivement cette ordonnance ?" />
     </div>
   )
 }

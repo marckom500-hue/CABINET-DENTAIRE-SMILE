@@ -1,6 +1,8 @@
-﻿import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useState, useRef } from 'react'
 import { useAuthContext } from '../hooks/AuthContext'
 import { getNavItems, ROLES_LABELS, ROLES_COLORS } from '../lib/roles'
+import { supabase } from '../lib/supabase'
 
 const ICONS = {
   home:     "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
@@ -16,8 +18,12 @@ const ICONS = {
 }
 
 export default function Sidebar({ onClose }) {
-  const { role, profile, loading, logout } = useAuthContext()
+  const { role, profile, loading, logout, refreshProfile } = useAuthContext()
   const navigate = useNavigate()
+  const [showProfile, setShowProfile] = useState(false)
+  const [uploading, setUploading]     = useState(false)
+  const [preview, setPreview]         = useState(null)
+  const fileInputRef = useRef(null)
 
   const effectiveRole = loading ? null : (role ?? 'secretaire')
   const navItems  = getNavItems(effectiveRole)
@@ -35,14 +41,36 @@ export default function Sidebar({ onClose }) {
     navigate('/login')
   }
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile?.id) return
+    setPreview(URL.createObjectURL(file))
+    setUploading(true)
+    try {
+      const ext  = file.name.split('.').pop()
+      const path = `${profile.id}.${ext}`
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+      if (upErr) throw upErr
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      const avatar_url = `${urlData.publicUrl}?t=${Date.now()}`
+      await supabase.from('users_profiles').update({ avatar_url }).eq('id', profile.id)
+      await refreshProfile()
+    } catch (err) {
+      console.error('Upload avatar:', err)
+      setPreview(null)
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
-    // style inline pour forcer le fond blanc mÃªme si un thÃ¨me CSS l'override
+    // style inline pour forcer le fond blanc même si un thème CSS l'override
     <div
       className="w-72 h-full flex flex-col border-r border-gray-200 shadow-xl lg:shadow-none"
       style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
     >
 
-      {/* â”€â”€ Logo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Logo ──────────────────────────────────────────────────────────── */}
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-16 h-16 rounded-full border-2 border-teal-100 bg-white p-2 shadow-lg shadow-teal-900/10 ring-4 ring-teal-50 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -54,7 +82,7 @@ export default function Sidebar({ onClose }) {
           </div>
           <div className="min-w-0">
             <h1 className="text-base font-bold text-gray-900 font-serif leading-tight">CABINET DENTAIRE SMILE</h1>
-            <p className="text-xs text-teal-600">Dr. Boutchouang & Associes</p>
+            <p className="text-xs text-teal-600">Dr. Boutchouang &amp; Associés</p>
           </div>
         </div>
 
@@ -71,7 +99,7 @@ export default function Sidebar({ onClose }) {
         )}
       </div>
 
-      {/* â”€â”€ Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Navigation ──────────────────────────────────────────────────────── */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {loading ? (
           <div className="space-y-2">
@@ -108,22 +136,30 @@ export default function Sidebar({ onClose }) {
         )}
       </nav>
 
-      {/* â”€â”€ Footer profil â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Footer profil ──────────────────────────────────────────────────── */}
       <div className="p-4 border-t border-gray-100">
-        <div className="flex items-center gap-3 px-3 py-3 bg-gray-50 rounded-2xl">
-          <div className="w-10 h-10 bg-teal-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-            {initials}
-          </div>
+        <div
+          onClick={() => { setPreview(profile?.avatar_url || null); setShowProfile(true) }}
+          className="flex items-center gap-3 px-3 py-3 bg-gray-50 hover:bg-teal-50 rounded-2xl cursor-pointer transition-colors group"
+        >
+          {/* Avatar */}
+          {(profile?.avatar_url)
+            ? <img src={profile.avatar_url} alt={displayName}
+                className="w-10 h-10 rounded-2xl object-cover flex-shrink-0 border border-gray-200" />
+            : <div className="w-10 h-10 bg-teal-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                {initials}
+              </div>
+          }
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-900 truncate text-sm">{displayName}</p>
+            <p className="font-medium text-gray-900 truncate text-sm group-hover:text-teal-700">{displayName}</p>
             <span className={`text-xs px-2.5 py-0.5 rounded-full ${roleColor.bg} ${roleColor.text}`}>
               {ROLES_LABELS[effectiveRole] ?? 'Utilisateur'}
             </span>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={(e) => { e.stopPropagation(); handleLogout() }}
             className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-xl transition-colors"
-            title="DÃ©connexion"
+            title="Déconnexion"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -132,6 +168,99 @@ export default function Sidebar({ onClose }) {
           </button>
         </div>
       </div>
+
+      {/* ── Modale profil ─────────────────────────────────────────────────── */}
+      {showProfile && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowProfile(false)} />
+
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+            {/* Bandeau haut */}
+            <div className="h-20 bg-gradient-to-r from-teal-500 to-teal-600" />
+
+            {/* Avatar centré sur le bandeau */}
+            <div className="flex justify-center -mt-10 mb-3">
+              <div className="relative">
+                {(preview || profile?.avatar_url)
+                  ? <img src={preview || profile.avatar_url} alt={displayName}
+                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg" />
+                  : <div className="w-20 h-20 rounded-full bg-teal-600 border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl font-bold">
+                      {initials}
+                    </div>
+                }
+                {/* Bouton caméra */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute bottom-0 right-0 w-7 h-7 bg-teal-600 hover:bg-teal-700 text-white rounded-full flex items-center justify-center shadow-md transition-colors disabled:opacity-60"
+                  title="Changer la photo"
+                >
+                  {uploading
+                    ? <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                    : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                  }
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              </div>
+            </div>
+
+            {/* Infos */}
+            <div className="px-6 pb-6 space-y-4">
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-900">{displayName}</p>
+                <p className="text-sm text-gray-500">{profile?.email}</p>
+                <span className={`mt-1 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${roleColor.bg} ${roleColor.text}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${roleColor.dot}`} />
+                  {ROLES_LABELS[effectiveRole] ?? 'Utilisateur'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {profile?.specialite && (
+                  <div className="col-span-2 bg-teal-50 rounded-xl p-3">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Spécialité</p>
+                    <p className="font-medium text-teal-700">{profile.specialite}</p>
+                  </div>
+                )}
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Statut</p>
+                  <span className={`inline-flex items-center gap-1 text-xs font-medium ${
+                    profile?.actif ? 'text-green-600' : 'text-gray-500'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${profile?.actif ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    {profile?.actif ? 'Actif' : 'Inactif'}
+                  </span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Membre depuis</p>
+                  <p className="font-medium text-gray-700 text-xs">
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                      : '—'}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-center text-gray-400">Cliquez sur 📷 pour changer votre photo</p>
+
+              <button
+                onClick={() => setShowProfile(false)}
+                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )

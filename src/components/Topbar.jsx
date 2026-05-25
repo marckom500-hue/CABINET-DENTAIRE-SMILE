@@ -1,5 +1,5 @@
-﻿import { useLocation, useNavigate } from 'react-router-dom'
-import { useState, useCallback } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useCallback, useEffect } from 'react'
 import Modal from './Modal'
 import FormulairePatient from './FormulairePatient'
 import FormulaireRdv from './FormulaireRdv'
@@ -34,15 +34,15 @@ export default function Topbar() {
   const { ajouterPatient } = usePatients()
   const { ajouterRdv } = useRendezVous()
 
-  // â”€â”€ Ã‰tat des modales â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── État des modales ──────────────────────────────────────────────────
   const [modalPatient, setModalPatient] = useState(false)
   const [modalRdv, setModalRdv]         = useState(false)
 
-  // â”€â”€ Ã‰tat des formulaires (pour dÃ©tecter dirty) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── État des formulaires (pour détecter dirty) ────────────────────────
   const [formPatient, setFormPatient] = useState(EMPTY_PATIENT)
   const [formRdv, setFormRdv]         = useState(EMPTY_RDV)
 
-  // â”€â”€ Confirmation d'abandon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Confirmation d'abandon ────────────────────────────────────────────
   const [confirmPatient, setConfirmPatient] = useState(false)
   const [confirmRdv, setConfirmRdv]         = useState(false)
 
@@ -53,15 +53,25 @@ export default function Topbar() {
     weekday: 'long', day: 'numeric', month: 'long',
   })
 
-  // â”€â”€ Helpers dirty â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const [time, setTime] = useState(() =>
+    new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  )
+  useEffect(() => {
+    const id = setInterval(() =>
+      setTime(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+    , 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  // ── Helpers dirty ─────────────────────────────────────────────────────
   const isDirty = (form, empty) =>
     Object.keys(empty).some((k) => (form[k] ?? '') !== (empty[k] ?? ''))
 
-  // â”€â”€ Ouverture des modales (rÃ©initialise le form) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Ouverture des modales (réinitialise le form) ──────────────────────
   const openPatient = () => { setFormPatient(EMPTY_PATIENT); setModalPatient(true) }
   const openRdv     = () => { setFormRdv(EMPTY_RDV);         setModalRdv(true) }
 
-  // â”€â”€ Tentative de fermeture (avec ou sans confirmation) â”€â”€â”€â”€â”€â”€
+  // ── Tentative de fermeture (avec ou sans confirmation) ────────────────
   const requestClosePatient = useCallback(() => {
     if (isDirty(formPatient, EMPTY_PATIENT)) {
       setConfirmPatient(true)
@@ -78,7 +88,7 @@ export default function Topbar() {
     }
   }, [formRdv])
 
-  // â”€â”€ Fermeture confirmÃ©e â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Fermeture confirmée ───────────────────────────────────────────────
   const forceClosePatient = () => {
     setConfirmPatient(false)
     setModalPatient(false)
@@ -93,13 +103,13 @@ export default function Topbar() {
 
   return (
     <>
-      {/* â”€â”€ En-tÃªte â”€â”€ */}
+      {/* ── En-tête ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-serif tracking-tight">
             {title}
           </h1>
-          <p className="text-sm text-gray-500 mt-1 capitalize">{today}</p>
+          <p className="text-sm text-gray-500 mt-1 capitalize">{today} — {time}</p>
         </div>
 
         {showButtons && (
@@ -127,14 +137,13 @@ export default function Topbar() {
         )}
       </div>
 
-      {/* â”€â”€ Modale RDV â”€â”€ */}
+      {/* ── Modale RDV ── */}
       <Modal
         isOpen={modalRdv}
-        onClose={requestCloseRdv}   /* clic sur la croix ou hors modale â†’ confirmation si dirty */
+        onClose={requestCloseRdv}
         title="Nouveau rendez-vous"
       >
         <FormulaireRdv
-          /* On remonte les changements du formulaire pour dÃ©tecter dirty */
           onFormChange={setFormRdv}
           onSubmit={async (d) => {
             await ajouterRdv(d)
@@ -146,7 +155,7 @@ export default function Topbar() {
         />
       </Modal>
 
-      {/* â”€â”€ Modale Patient â”€â”€ */}
+      {/* ── Modale Patient ── */}
       <Modal
         isOpen={modalPatient}
         onClose={requestClosePatient}
@@ -164,24 +173,24 @@ export default function Topbar() {
         />
       </Modal>
 
-      {/* â”€â”€ ConfirmDialog abandon Patient â”€â”€ */}
+      {/* ── ConfirmDialog abandon Patient ── */}
       <ConfirmDialog
         isOpen={confirmPatient}
         tone="warning"
         title="Abandonner le formulaire ?"
-        message="Les informations saisies ne seront pas enregistrÃ©es. Voulez-vous vraiment fermer ce formulaire ?"
+        message="Les informations saisies ne seront pas enregistrées. Voulez-vous vraiment fermer ce formulaire ?"
         confirmLabel="Abandonner"
         cancelLabel="Continuer la saisie"
         onConfirm={forceClosePatient}
         onCancel={() => setConfirmPatient(false)}
       />
 
-      {/* â”€â”€ ConfirmDialog abandon RDV â”€â”€ */}
+      {/* ── ConfirmDialog abandon RDV ── */}
       <ConfirmDialog
         isOpen={confirmRdv}
         tone="warning"
         title="Abandonner le formulaire ?"
-        message="Les informations saisies ne seront pas enregistrÃ©es. Voulez-vous vraiment fermer ce formulaire ?"
+        message="Les informations saisies ne seront pas enregistrées. Voulez-vous vraiment fermer ce formulaire ?"
         confirmLabel="Abandonner"
         cancelLabel="Continuer la saisie"
         onConfirm={forceCloseRdv}

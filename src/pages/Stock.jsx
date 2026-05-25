@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useStock } from '../hooks/useStock'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -26,7 +26,7 @@ function IconHistory({ className = 'w-4 h-4' }) {
 }
 
 function fmtDate(iso) {
-  if (!iso) return 'â€”'
+  if (!iso) return '—'
   return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' })
 }
 
@@ -49,8 +49,8 @@ export default function Stock() {
   const [lignesCommande, setLignesCommande] = useState([])
   const [validating,     setValidating]     = useState(false)
 
-  // Confirmation "marquer reÃ§u"
-  const [confirmRecu, setConfirmRecu] = useState(null)  // commande object
+  // Confirmation "marquer reçu"
+  const [confirmRecu, setConfirmRecu] = useState(null)
 
   const set = k => v => setForm(f => ({ ...f, [k]: v }))
   const openCreate = () => { setEditS(null); setForm(empty); setModal(true) }
@@ -63,7 +63,7 @@ export default function Stock() {
       else       await ajouterArticle(form)
       setModal(false)
     } catch {
-      // hook gÃ¨re la notif
+      // hook gère la notif
     } finally {
       setSaving(false)
     }
@@ -72,13 +72,13 @@ export default function Stock() {
   const critiques = stock.filter(s => s.quantite <= s.seuil)
   const enAttente = commandes.filter(c => c.statut === 'en_attente')
 
-  // IDs dÃ©jÃ  dans la liste de commande
+  // IDs déjà dans la liste de commande
   const dejaDansCommande = useMemo(
     () => new Set(lignesCommande.map(l => l.articleId)),
     [lignesCommande]
   )
 
-  // Ajouter un article critique dans "Ã€ commander"
+  // Ajouter un article critique dans "À commander"
   const ajouterACommander = (article) => {
     setLignesCommande(prev => {
       if (prev.find(l => l.articleId === article.id)) return prev
@@ -104,7 +104,7 @@ export default function Stock() {
     setLignesCommande(prev => prev.filter(l => l.articleId !== articleId))
   }
 
-  // Valider la commande â†’ Supabase
+  // Valider la commande → Supabase
   const handleValider = async () => {
     if (lignesCommande.length === 0) return
     setValidating(true)
@@ -113,35 +113,34 @@ export default function Stock() {
       setLignesCommande([])
       setOnglet('historique')
     } catch {
-      // hook gÃ¨re la notif
+      // hook gère la notif
     } finally {
       setValidating(false)
     }
   }
 
-  // Marquer commande reÃ§ue â†’ met Ã  jour le stock
+  // Marquer commande reçue → met à jour le stock
   const handleMarquerRecu = async () => {
     if (!confirmRecu) return
     try {
       await marquerRecu(confirmRecu.id, confirmRecu.commande_lignes)
       setConfirmRecu(null)
     } catch {
-      // hook gÃ¨re la notif
+      // hook gère la notif
     }
   }
 
-  // â”€â”€â”€ Rendu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="p-4 md:p-6 space-y-5">
 
-      {/* En-tÃªte */}
+      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-serif">Stock</h2>
           <p className="text-sm text-gray-500">
             {stock.length} article{stock.length > 1 ? 's' : ''}
             {critiques.length > 0 && (
-              <span className="ml-2 text-red-500 font-medium">Â· {critiques.length} en alerte</span>
+              <span className="ml-2 text-red-500 font-medium">· {critiques.length} en alerte</span>
             )}
           </p>
         </div>
@@ -169,7 +168,7 @@ export default function Stock() {
           Stock
         </button>
 
-        {/* Ã€ commander */}
+        {/* À commander */}
         <button onClick={() => setOnglet('commander')}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
             onglet === 'commander'
@@ -177,7 +176,7 @@ export default function Stock() {
               : 'text-gray-500 hover:text-gray-700'
           }`}>
           <IconCart className="w-4 h-4" />
-          Ã€ commander
+          À commander
           {lignesCommande.length > 0 && (
             <span className="bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {lignesCommande.length}
@@ -202,7 +201,7 @@ export default function Stock() {
         </button>
       </div>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ONGLET STOCK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════════════════════ ONGLET STOCK ══════════════════════════════════ */}
       {onglet === 'stock' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
@@ -218,7 +217,7 @@ export default function Stock() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{s.nom_produit}</p>
-                    {critique && <span className="text-xs text-red-500 font-medium">âš  Stock critique</span>}
+                    {critique && <span className="text-xs text-red-500 font-medium">⚠ Stock critique</span>}
                   </div>
                   <div className="flex gap-1 ml-2">
                     <PermissionGate module="stock" requireWrite>
@@ -241,7 +240,7 @@ export default function Stock() {
                 </div>
 
                 <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                  <span>QuantitÃ© : <strong className={critique ? 'text-red-500' : 'text-gray-800'}>{s.quantite}</strong></span>
+                  <span>Quantité : <strong className={critique ? 'text-red-500' : 'text-gray-800'}>{s.quantite}</strong></span>
                   <span>Max : {s.max}</span>
                 </div>
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -250,7 +249,7 @@ export default function Stock() {
                 </div>
                 <p className="text-xs text-gray-400 mt-1.5">Seuil alerte : {s.seuil}</p>
 
-                {/* Bouton Commander â€” visible uniquement si critique */}
+                {/* Bouton Commander — visible uniquement si critique */}
                 {critique && (
                   <button onClick={() => ajouterACommander(s)} disabled={enCmd}
                     className={`mt-3 w-full flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 rounded-lg transition-colors ${
@@ -259,7 +258,7 @@ export default function Stock() {
                         : 'bg-orange-500 hover:bg-orange-600 text-white'
                     }`}>
                     <IconCart className="w-3.5 h-3.5" />
-                    {enCmd ? 'DÃ©jÃ  dans la liste' : 'Commander'}
+                    {enCmd ? 'Déjà dans la liste' : 'Commander'}
                   </button>
                 )}
               </div>
@@ -268,11 +267,11 @@ export default function Stock() {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ONGLET Ã€ COMMANDER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════════════════ ONGLET À COMMANDER ══════════════════════════════ */}
       {onglet === 'commander' && (
         <div className="space-y-4">
 
-          {/* BanniÃ¨re */}
+          {/* Bannière */}
           {lignesCommande.length > 0 && (
             <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
               <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -280,9 +279,9 @@ export default function Stock() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-orange-800">
-                  {lignesCommande.length} article{lignesCommande.length > 1 ? 's' : ''} Ã  commander
+                  {lignesCommande.length} article{lignesCommande.length > 1 ? 's' : ''} à commander
                 </p>
-                <p className="text-xs text-orange-600">Ajustez les quantitÃ©s si nÃ©cessaire avant de valider</p>
+                <p className="text-xs text-orange-600">Ajustez les quantités si nécessaire avant de valider</p>
               </div>
             </div>
           )}
@@ -293,7 +292,7 @@ export default function Stock() {
               <div className="flex justify-center">
                 <IconCart className="w-10 h-10 text-gray-300" />
               </div>
-              <p className="text-sm font-medium">Aucun article Ã  commander</p>
+              <p className="text-sm font-medium">Aucun article à commander</p>
               <p className="text-xs">
                 Depuis l'onglet <strong>Stock</strong>, cliquez sur{' '}
                 <span className="text-orange-500 font-medium">Commander</span>{' '}
@@ -311,7 +310,7 @@ export default function Stock() {
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Article</th>
                     <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">Stock actuel</th>
                     <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">Seuil</th>
-                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">QtÃ© Ã  commander</th>
+                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">Qté à commander</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -323,7 +322,7 @@ export default function Stock() {
                         <td className="px-4 py-3">
                           <p className="font-medium text-gray-900">{l.nom_produit}</p>
                           <p className="text-xs text-red-500 font-medium">
-                            Manque {manque} unitÃ©{manque > 1 ? 's' : ''} pour atteindre le seuil
+                            Manque {manque} unité{manque > 1 ? 's' : ''} pour atteindre le seuil
                           </p>
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -379,7 +378,7 @@ export default function Stock() {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ONGLET HISTORIQUE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════════════════ ONGLET HISTORIQUE ══════════════════════════════ */}
       {onglet === 'historique' && (
         <div className="space-y-3">
           {loadingCommandes ? (
@@ -387,13 +386,13 @@ export default function Stock() {
           ) : commandes.length === 0 ? (
             <div className="text-center py-16 text-gray-400 space-y-2">
               <IconHistory className="w-10 h-10 text-gray-300 mx-auto" />
-              <p className="text-sm font-medium">Aucune commande enregistrÃ©e</p>
+              <p className="text-sm font-medium">Aucune commande enregistrée</p>
             </div>
           ) : commandes.map(c => {
             const estRecu = c.statut === 'recue'
             return (
               <div key={c.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                {/* En-tÃªte commande */}
+                {/* En-tête commande */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
@@ -402,15 +401,15 @@ export default function Stock() {
                         : 'bg-orange-100 text-orange-700'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${estRecu ? 'bg-green-500' : 'bg-orange-500'}`} />
-                      {estRecu ? 'ReÃ§ue' : 'En attente'}
+                      {estRecu ? 'Reçue' : 'En attente'}
                     </span>
                     <span className="text-xs text-gray-500">
-                      CommandÃ© le {fmtDate(c.created_at)}
-                      {estRecu && ` Â· ReÃ§u le ${fmtDate(c.recu_le)}`}
+                      Commandé le {fmtDate(c.created_at)}
+                      {estRecu && ` · Reçu le ${fmtDate(c.recu_le)}`}
                     </span>
                   </div>
 
-                  {/* Bouton Marquer reÃ§u */}
+                  {/* Bouton Marquer reçu */}
                   {!estRecu && (
                     <PermissionGate module="stock" requireWrite>
                       <button onClick={() => setConfirmRecu(c)}
@@ -418,7 +417,7 @@ export default function Stock() {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Marquer reÃ§u
+                        Marquer reçu
                       </button>
                     </PermissionGate>
                   )}
@@ -433,7 +432,7 @@ export default function Stock() {
                         <span>Stock au moment de la commande : <strong className="text-red-500">{l.quantite_actuelle}</strong></span>
                         <span>Seuil : {l.seuil}</span>
                         <span className="bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
-                          +{l.qte_commandee} unitÃ©s
+                          +{l.qte_commandee} unités
                         </span>
                       </div>
                     </div>
@@ -445,7 +444,7 @@ export default function Stock() {
         </div>
       )}
 
-      {/* â”€â”€ Modal ajout / modification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Modal ajout / modification ── */}
       <Modal isOpen={modal} onClose={() => setModal(false)}
         title={editS ? "Modifier l'article" : 'Ajouter un article'} confirmOnClose>
         <div className="space-y-3">
@@ -488,7 +487,7 @@ export default function Stock() {
         </div>
       </Modal>
 
-      {/* â”€â”€ Dialog suppression article â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Dialog suppression article ── */}
       <ConfirmDialog
         isOpen={!!confirmD}
         onConfirm={async () => { try { await supprimerArticle(confirmD.id); setConfirmD(null) } catch {} }}
@@ -497,13 +496,13 @@ export default function Stock() {
         message={`Supprimer "${confirmD?.nom_produit}" du stock ?`}
       />
 
-      {/* â”€â”€ Dialog marquer commande reÃ§ue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Dialog marquer commande reçue ── */}
       <ConfirmDialog
         isOpen={!!confirmRecu}
         onConfirm={handleMarquerRecu}
         onCancel={() => setConfirmRecu(null)}
-        title="Marquer comme reÃ§ue"
-        message={`Confirmer la rÃ©ception de cette commande ? Les quantitÃ©s en stock seront mises Ã  jour automatiquement.`}
+        title="Marquer comme reçue"
+        message="Confirmer la réception de cette commande ? Les quantités en stock seront mises à jour automatiquement."
       />
     </div>
   )

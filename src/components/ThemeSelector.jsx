@@ -1,26 +1,25 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 const THEMES = [
-  { id: 'default',           name: 'DÃ©faut',             description: 'Gris clair standard',               className: 'bg-gray-50',          preview: 'bg-gray-300' },
-  { id: 'dental-abstract',   name: 'Abstrait Dental',    description: 'Motifs dentaires gÃ©omÃ©triques',      className: 'bg-dental-abstract',   preview: 'bg-gray-100' },
-  { id: 'dental-serenity',   name: 'SÃ©rÃ©nitÃ©',           description: 'DÃ©gradÃ© bleu-vert apaisant',         className: 'bg-dental-serenity',   preview: 'bg-gradient-to-br from-sky-50 to-emerald-50' },
+  { id: 'default',           name: 'Défaut',             description: 'Gris clair standard',               className: 'bg-gray-50',          preview: 'bg-gray-300' },
+  { id: 'dental-abstract',   name: 'Abstrait Dental',    description: 'Motifs dentaires géométriques',      className: 'bg-dental-abstract',   preview: 'bg-gray-100' },
+  { id: 'dental-serenity',   name: 'Sérénité',           description: 'Dégradé bleu-vert apaisant',         className: 'bg-dental-serenity',   preview: 'bg-gradient-to-br from-sky-50 to-emerald-50' },
   { id: 'dental-marble',     name: 'Marbre Blanc',       description: 'Texture marbre avec reflets',        className: 'bg-dental-marble',     preview: 'bg-white' },
-  { id: 'dental-hexagon',    name: 'Hexagone MÃ©dical',   description: 'RÃ©seau hexagonal discret',           className: 'bg-dental-hexagon',    preview: 'bg-gray-50' },
-  { id: 'dental-office',     name: 'Cabinet Minimal',    description: 'Paysage de cabinet floutÃ©',          className: 'bg-dental-office',     preview: 'bg-gradient-to-b from-slate-100 to-slate-50' },
-  { id: 'dental-pastel',     name: 'Pastel Particules',  description: 'DÃ©gradÃ© pastel avec particules',     className: 'bg-dental-pastel',     preview: 'bg-gradient-to-br from-white via-emerald-50 to-sky-50' },
+  { id: 'dental-hexagon',    name: 'Hexagone Médical',   description: 'Réseau hexagonal discret',           className: 'bg-dental-hexagon',    preview: 'bg-gray-50' },
+  { id: 'dental-office',     name: 'Cabinet Minimal',    description: 'Paysage de cabinet flouté',          className: 'bg-dental-office',     preview: 'bg-gradient-to-b from-slate-100 to-slate-50' },
+  { id: 'dental-pastel',     name: 'Pastel Particules',  description: 'Dégradé pastel avec particules',     className: 'bg-dental-pastel',     preview: 'bg-gradient-to-br from-white via-emerald-50 to-sky-50' },
   { id: 'dental-dna',        name: 'ADN Dentaire',       description: 'Graphisme ADN et sourire',           className: 'bg-dental-dna',        preview: 'bg-gray-50' },
-  { id: 'dental-metal',      name: 'MÃ©tal BrossÃ©',       description: 'ArgentÃ© avec lueur douce',           className: 'bg-dental-metal',      preview: 'bg-gradient-to-br from-slate-200 to-slate-100' },
-  { id: 'dental-blueprint',  name: 'Blueprint',          description: 'Papier mÃ©dical technique',           className: 'bg-dental-blueprint',  preview: 'bg-gray-50' },
+  { id: 'dental-metal',      name: 'Métal Brossé',       description: 'Argenté avec lueur douce',           className: 'bg-dental-metal',      preview: 'bg-gradient-to-br from-slate-200 to-slate-100' },
+  { id: 'dental-blueprint',  name: 'Blueprint',          description: 'Papier médical technique',           className: 'bg-dental-blueprint',  preview: 'bg-gray-50' },
   { id: 'dental-cosmos',     name: 'Cosmos Tech',        description: 'Bleu froid innovation',              className: 'bg-dental-cosmos',     preview: 'bg-gradient-to-br from-slate-900 to-slate-800' },
 ]
 
-// Applique le thÃ¨me UNIQUEMENT sur la zone de contenu, pas sur la sidebar
+// Applique le thème UNIQUEMENT sur la zone de contenu, pas sur la sidebar
 function applyTheme(themeId) {
-  // Cibles : seulement la zone de contenu principal
   const themeArea = document.getElementById('theme-area')
   const body = document.body
 
-  // Nettoyer tous les thÃ¨mes sur les deux cibles
+  // Nettoyer tous les thèmes sur les deux cibles
   THEMES.forEach(t => {
     const classes = t.className.split(' ').filter(Boolean)
     classes.forEach(cls => {
@@ -31,7 +30,7 @@ function applyTheme(themeId) {
   themeArea?.classList.remove('has-bg-dental')
   body.classList.remove('has-bg-dental')
 
-  // Appliquer le nouveau thÃ¨me seulement sur theme-area
+  // Appliquer le nouveau thème seulement sur theme-area
   if (themeId !== 'default') {
     const selected = THEMES.find(t => t.id === themeId)
     if (selected) {
@@ -48,12 +47,12 @@ export default function ThemeSelector() {
     return localStorage.getItem('dental-theme') || 'default'
   })
 
-  // Appliquer le thÃ¨me au montage
+  // Appliquer le thème au montage
   useEffect(() => {
     applyTheme(currentTheme)
   }, [])
 
-  // Appliquer Ã  chaque changement
+  // Appliquer à chaque changement
   useEffect(() => {
     localStorage.setItem('dental-theme', currentTheme)
     applyTheme(currentTheme)
@@ -61,11 +60,11 @@ export default function ThemeSelector() {
 
   return (
     <div className="relative">
-      {/* Bouton fixe en bas Ã  droite */}
+      {/* Bouton fixe en bas à droite */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 p-3 bg-teal-600 text-white rounded-full shadow-lg hover:bg-teal-700 transition-all hover:scale-110"
-        title="Changer le thÃ¨me"
+        title="Changer le thème"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -83,12 +82,12 @@ export default function ThemeSelector() {
 
           {/* Panneau */}
           <div className="fixed bottom-20 right-6 z-50 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-            {/* En-tÃªte */}
+            {/* En-tête */}
             <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-green-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-gray-900">ThÃ¨me de l'application</h3>
-                  <p className="text-xs text-gray-500 mt-1">Choisissez l'arriÃ¨re-plan de votre choix</p>
+                  <h3 className="font-bold text-gray-900">Thème de l'application</h3>
+                  <p className="text-xs text-gray-500 mt-1">Choisissez l'arrière-plan de votre choix</p>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -101,7 +100,7 @@ export default function ThemeSelector() {
               </div>
             </div>
 
-            {/* Liste des thÃ¨mes */}
+            {/* Liste des thèmes */}
             <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
               {THEMES.map((theme) => (
                 <button
@@ -131,7 +130,7 @@ export default function ThemeSelector() {
 
             {/* Pied */}
             <div className="p-3 border-t border-gray-100 bg-gray-50">
-              <p className="text-xs text-gray-500 text-center">Le thÃ¨me est sauvegardÃ© automatiquement</p>
+              <p className="text-xs text-gray-500 text-center">Le thème est sauvegardé automatiquement</p>
             </div>
           </div>
         </>
@@ -139,5 +138,3 @@ export default function ThemeSelector() {
     </div>
   )
 }
-
-

@@ -25,7 +25,9 @@ function getRdvDateTime(rdv) {
 function formatVisitDate(rdv) {
   const date = getRdvDateTime(rdv)
   if (Number.isNaN(date.getTime())) return rdv.type_acte || 'RDV'
-  return `${date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${rdv.type_acte || 'RDV'}`
+  const datePart = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+  const timePart = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  return `${datePart} - ${timePart} - ${rdv.type_acte || 'RDV'}`
 }
 
 function toAmount(value) {
@@ -110,6 +112,7 @@ export default function Dashboard() {
   const appointmentsForList = todayAppointments.map(r => ({
     id: r.id,
     time: r.heure,
+    schedule: formatVisitDate(r),
     patient: r.patients ? `${r.patients.prenom} ${r.patients.nom}` : 'Patient inconnu',
     type: r.type_acte,
     status: r.statut,

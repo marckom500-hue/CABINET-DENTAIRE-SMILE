@@ -35,32 +35,32 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
   
   const dateNaissance = patient?.date_naissance 
     ? new Date(patient.date_naissance).toLocaleDateString('fr-FR')
-    : "Non renseignÃ©e";
-  const telephone = patient?.telephone || "Non renseignÃ©";
+    : "Non renseignée";
+  const telephone = patient?.telephone || "Non renseignée";
   
-  // Information du mÃ©decin traitant (celui qui suit le patient)
+  // Information du médecin traitant (celui qui suit le patient)
   const medecinTraitantNom = medecinTraitant 
     ? `Dr ${medecinTraitant.nom} ${medecinTraitant.prenom}`
-    : "Non renseignÃ©";
+    : "Non renseignée";
   const medecinTraitantSpecialite = medecinTraitant?.specialite || "";
   const medecinTraitantTel = medecinTraitant?.telephone || "";
   
-  // Information du mÃ©decin prescripteur (celui qui signe)
+  // Information du médecin prescripteur (celui qui signe)
   const medecinPrescripteurNom = medecinPrescripteur 
     ? `Dr ${medecinPrescripteur.nom} ${medecinPrescripteur.prenom}`
     : cabinetInfos.nom;
-  
-  const medicaments = ordonnance.medicaments || "Aucun mÃ©dicament prescrit";
-  const posologie = ordonnance.posologie || "Aucune posologie indiquÃ©e";
+  const medicaments = ordonnance.medicaments || "Aucun médicament prescrit";
+  const posologie = ordonnance.posologie || "Aucune posologie indiquée";
   const duree = ordonnance.duree || "7 jours";
   const notes = ordonnance.notes || "";
   const signature = ordonnance.signature || "";
+
   
   let logoBase64 = null;
   try {
     logoBase64 = await imageToBase64(cabinetInfos.logoPath);
   } catch (e) {
-    console.warn("Logo non chargÃ©");
+    console.warn("Logo non chargé");
   }
   
   const div = document.createElement('div');
@@ -78,18 +78,18 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
         </div>
       </div>
       <div style="font-size: 11px; color: #666;">${cabinetInfos.adresse}</div>
-      <div style="font-size: 10px; color: #888;">ðŸ“ž ${cabinetInfos.telephone} | âœ‰ï¸ ${cabinetInfos.email}</div>
+      <div style="font-size: 10px; color: #888;">☎︎ ${cabinetInfos.telephone} | ✉︎ ${cabinetInfos.email}</div>
     </div>
     
     <!-- MÃ‰DECIN TRAITANT -->
     <div style="background: #e8f4f0; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2c7a4d;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <span style="font-size: 10px; color: #2c7a4d; font-weight: bold;">MÃ‰DECIN TRAITANT</span>
+          <span style="font-size: 10px; color: #2c7a4d; font-weight: bold;">MÉDECIN TRAITANT</span>
           <div style="font-size: 13px; font-weight: bold; color: #333;">${medecinTraitantNom}</div>
           ${medecinTraitantSpecialite ? `<div style="font-size: 10px; color: #666;">${medecinTraitantSpecialite}</div>` : ''}
         </div>
-        ${medecinTraitantTel ? `<div style="font-size: 10px; color: #666;">ðŸ“ž ${medecinTraitantTel}</div>` : ''}
+        ${medecinTraitantTel ? `<div style="font-size: 10px; color: #666;">☎︎ ${medecinTraitantTel}</div>` : ''}
       </div>
     </div>
     
@@ -106,10 +106,11 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
           <div style="font-size: 12px; color: #333;">${dateNaissance}</div>
         </div>
         <div>
-          <div style="font-size: 10px; color: #666;">TÃ©lÃ©phone</div>
+          <div style="font-size: 10px; color: #666;">Téléphone</div>
           <div style="font-size: 12px; color: #333;">${telephone}</div>
         </div>
       </div>
+
       <div style="margin-top: 8px; padding-top: 5px; border-top: 1px dashed #cde5f0;">
         <span style="font-size: 10px; color: #666;">Date ordonnance :</span>
         <span style="font-size: 11px; font-weight: bold; color: #333;"> ${date}</span>
@@ -119,20 +120,24 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
     <div style="text-align: center; font-size: 26px; font-weight: bold; color: #0f5b7a; margin: 20px 0;">ORDONNANCE</div>
     
     <div style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-      <div style="background: #0f5b7a; color: white; padding: 10px 15px; font-weight: bold;">ðŸ’Š MÃ‰DICAMENTS PRESCRITS</div>
+      <div style="background: #0f5b7a; color: white; padding: 10px 15px; font-weight: bold;">💊 MÉDICAMENTS PRESCRITS</div>
       <div style="padding: 15px; font-size: 13px; line-height: 1.6; white-space: pre-wrap;">${medicaments}</div>
     </div>
+
     
     <div style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-      <div style="background: #0f5b7a; color: white; padding: 10px 15px; font-weight: bold;">â° POSOLOGIE</div>
+      <div style="background: #0f5b7a; color: white; padding: 10px 15px; font-weight: bold;">⚙️ POSOLOGIE</div>
       <div style="padding: 15px; font-size: 13px; line-height: 1.6; white-space: pre-wrap;">${posologie}</div>
     </div>
+
     
     <div style="background: #fff3cd; border-left: 4px solid #e74c3c; padding: 10px 15px; margin: 15px 0; font-weight: bold;">
-      ðŸ“… DURÃ‰E DU TRAITEMENT : ${duree}
+      🕒 DURÉE DU TRAITEMENT : ${duree}
     </div>
+
     
-    ${notes ? `<div style="background: #f9f9f9; padding: 10px 15px; border-radius: 8px; margin: 15px 0; font-size: 11px; color: #666; font-style: italic;">ðŸ“ NOTE : ${notes}</div>` : ''}
+    ${notes ? `<div style="background: #f9f9f9; padding: 10px 15px; border-radius: 8px; margin: 15px 0; font-size: 11px; color: #666; font-style: italic;">📝 NOTE : ${notes}</div>` : ''}
+
     
     <!-- ZONE SIGNATURE AVEC LE NOM DU MÃ‰DECIN TRAITANT ET SA SIGNATURE DESSINÃ‰E -->
     <div style="margin-top: 40px; text-align: right; border-top: 1px dashed #ccc; padding-top: 30px;">
@@ -144,8 +149,9 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
           <img src="${signature}" style="height: 60px; margin: 5px auto; display: block; border: 1px solid #e0e0e0; border-radius: 4px;" alt="Signature">
         ` : '<div style="height: 60px; border-bottom: 1px solid #999; margin: 5px 0;"></div>'}
         <div style="font-size: 9px; color: #999; margin-top: 8px;">
-          Signature & Cachet du mÃ©decin
+          Signature & Cachet du médecin
         </div>
+
       </div>
     </div>
     

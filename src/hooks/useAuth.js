@@ -148,5 +148,9 @@ export function useAuth() {
     setUser(null); setProfile(null); setLoading(false); lastUserIdRef.current = null
   }
 
-  return { user, profile, role: profile?.role ?? null, loading, login, logout }
+  const refreshProfile = async () => {
+    if (user?.id) await fetchProfile(user.id)
+  }
+
+  return { user, profile, role: profile?.role ?? null, loading, login, logout, refreshProfile }
 }

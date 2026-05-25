@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import FormField from './FormField'
 import DateNaissancePicker from './DateNaissancePicker'
 
@@ -31,7 +31,7 @@ function normalizePatient(patient) {
 }
 
 /**
- * Valide le nom ou prÃ©nom :
+ * Valide le nom ou prénom :
  * - uniquement des lettres (avec accents, tirets, apostrophes, espaces)
  * - au moins 3 lettres
  */
@@ -39,7 +39,7 @@ function validateName(value) {
   if (!value) return { valid: false, message: 'Ce champ est requis' }
   // Uniquement lettres (avec accents), tirets, apostrophes, espaces
   if (/[^\p{L}\s'-]/u.test(value)) {
-    return { valid: false, message: 'Uniquement des lettres (pas de chiffres ni caractÃ¨res spÃ©ciaux)' }
+    return { valid: false, message: 'Uniquement des lettres (pas de chiffres ni caractères spéciaux)' }
   }
   // Compter uniquement les lettres
   const lettersOnly = value.replace(/[^\p{L}]/gu, '')
@@ -52,11 +52,11 @@ function validateName(value) {
 /**
  * Valide l'email :
  * - format local@domaine.ext
- * - domaine doit Ãªtre dans la liste des domaines valides connus
+ * - domaine doit être dans la liste des domaines valides connus
  */
 function validateEmail(value) {
   if (!value) return { valid: true, message: '' } // email optionnel
-  // VÃ©rification format de base
+  // Vérification format de base
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(value)) {
     return { valid: false, message: 'Format invalide. Ex : prenom@gmail.com' }
@@ -68,20 +68,20 @@ function validateEmail(value) {
   if (!VALID_DOMAINS.includes(domain)) {
     return {
       valid: false,
-      message: `Domaine non reconnu. Utilisez un domaine valide (gmail.com, yahoo.fr, outlook.comâ€¦)`,
+      message: `Domaine non reconnu. Utilisez un domaine valide (gmail.com, yahoo.fr, outlook.com…)`,
     }
   }
   return { valid: true, message: 'Email valide' }
 }
 
 export default function FormulairePatient({ patient, onSubmit, onCancel, onFormChange }) {
-  // Remonte l'Ã©tat du formulaire au parent (Topbar) pour dÃ©tecter dirty
-  // useEffect est dÃ©clarÃ© aprÃ¨s useState ci-dessous
+  // Remonte l'état du formulaire au parent (Topbar) pour détecter dirty
+  // useEffect est déclaré après useState ci-dessous
   const [form, setForm] = useState(normalizePatient(patient))
   const [saving, setSaving] = useState(false)
   const [touched, setTouched] = useState({})
 
-  // Notifie le parent Ã  chaque changement (pour dirty detection dans Topbar)
+  // Notifie le parent à chaque changement (pour dirty detection dans Topbar)
   useEffect(() => { onFormChange?.(form) }, [form]) // eslint-disable-line
 
   const set = (k) => (v) => {
@@ -96,9 +96,9 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
     setTouched(t => ({ ...t, telephone: true }))
   }
 
-  // Nom / PrÃ©nom : bloquer la saisie de chiffres et caractÃ¨res spÃ©ciaux dÃ¨s la frappe
+  // Nom / Prénom : bloquer la saisie de chiffres et caractères spéciaux dès la frappe
   const setName = (k) => (value) => {
-    // Autorise lettres, accents, espaces, tirets, apostrophes â€” bloque le reste
+    // Autorise lettres, accents, espaces, tirets, apostrophes — bloque le reste
     const filtered = value.replace(/[^\p{L}\s'-]/gu, '')
     setForm(f => ({ ...f, [k]: filtered }))
     setTouched(t => ({ ...t, [k]: true }))
@@ -126,7 +126,7 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
     try {
       await onSubmit(form)
     } catch {
-      // Le hook affiche dÃ©jÃ  la notification d'erreur.
+      // Le hook affiche déjà la notification d'erreur.
     } finally {
       setSaving(false)
     }
@@ -136,7 +136,7 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <FormField
-          label="Prenom"
+          label="Prénom"
           value={form.prenom}
           onChange={setName('prenom')}
           required
@@ -144,7 +144,7 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
           validationMessage={
             touched.prenom
               ? prenomValidation.message
-              : 'Au moins 3 lettres, uniquement des caractÃ¨res alphabÃ©tiques'
+              : 'Au moins 3 lettres, uniquement des caractères alphabétiques'
           }
         />
         <FormField
@@ -156,13 +156,13 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
           validationMessage={
             touched.nom
               ? nomValidation.message
-              : 'Au moins 3 lettres, uniquement des caractÃ¨res alphabÃ©tiques'
+              : 'Au moins 3 lettres, uniquement des caractères alphabétiques'
           }
         />
       </div>
 
       <FormField
-        label="Telephone"
+        label="Téléphone"
         value={form.telephone}
         onChange={setTelephone}
         placeholder="6XXXXXXXX"
@@ -173,12 +173,12 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
         validationState={touched.telephone ? (phoneIsValid ? 'success' : 'error') : undefined}
         validationMessage={
           touched.telephone
-            ? (phoneIsValid ? 'NumÃ©ro valide' : 'NumÃ©ro invalide : 9 chiffres requis, doit commencer par 6')
-            : '9 chiffres requis, le numÃ©ro doit commencer par 6'
+            ? (phoneIsValid ? 'Numéro valide' : 'Numéro invalide : 9 chiffres requis, doit commencer par 6')
+            : '9 chiffres requis, le numéro doit commencer par 6'
         }
       />
 
-      {/* Email : type="text" pour contrÃ´le manuel, validation domaine stricte */}
+      {/* Email : type="text" pour contrôle manuel, validation domaine stricte */}
       <FormField
         label="Email"
         type="text"
@@ -190,7 +190,7 @@ export default function FormulairePatient({ patient, onSubmit, onCancel, onFormC
         validationMessage={
           touched.email && form.email
             ? emailValidation.message
-            : 'Format requis : prenom@gmail.com, prenom@yahoo.frâ€¦'
+            : 'Format requis : prenom@gmail.com, prenom@yahoo.fr…'
         }
       />
 

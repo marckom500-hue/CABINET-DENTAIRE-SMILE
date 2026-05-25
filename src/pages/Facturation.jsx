@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useFactures } from '../hooks/useFactures'
 import { usePatients } from '../hooks/usePatients'
 import Modal from '../components/Modal'
@@ -47,7 +47,7 @@ export default function Facturation() {
 
   const getPatientName = (patientId) => {
     const p = patients.find(x => x.id === patientId)
-    return p ? `${p.prenom} ${p.nom}` : 'â€”'
+    return p ? `${p.prenom} ${p.nom}` : '—'
   }
 
   const dateTouched = Boolean(form.date)
@@ -66,7 +66,7 @@ export default function Facturation() {
       else       await ajouterFacture(payload)
       setModal(false)
     } catch {
-      // Le hook affiche dÃ©jÃ  la notification d'erreur
+      // Le hook affiche déjà la notification d'erreur
     } finally {
       setSaving(false)
     }
@@ -75,7 +75,7 @@ export default function Facturation() {
   return (
     <div className="p-4 md:p-6 space-y-5">
 
-      {/* En-tÃªte */}
+      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-serif">Facturation</h2>
@@ -95,11 +95,11 @@ export default function Facturation() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-teal-50 rounded-xl p-4">
-          <p className="text-xs text-gray-500 mb-1">Total facturÃ©</p>
+          <p className="text-xs text-gray-500 mb-1">Total facturé</p>
           <p className="text-2xl font-bold text-teal-700">{total.toLocaleString('fr-FR')} FCFA</p>
         </div>
         <div className="bg-green-50 rounded-xl p-4">
-          <p className="text-xs text-gray-500 mb-1">EncaissÃ©</p>
+          <p className="text-xs text-gray-500 mb-1">Encaissé</p>
           <p className="text-2xl font-bold text-green-700">{encaisse.toLocaleString('fr-FR')} FCFA</p>
         </div>
         <div className="bg-amber-50 rounded-xl p-4">
@@ -112,9 +112,9 @@ export default function Facturation() {
       <div className="flex gap-2 flex-wrap">
         {[
           { key: 'tous',    label: 'Toutes'      },
-          { key: FACTURE_STATUS.PAYE, label: 'Payees' },
+          { key: FACTURE_STATUS.PAYE,    label: 'Payées'     },
           { key: FACTURE_STATUS.ATTENTE, label: 'En attente' },
-          { key: FACTURE_STATUS.ANNULE, label: 'Annulees' },
+          { key: FACTURE_STATUS.ANNULE,  label: 'Annulées'   },
         ].map(f => (
           <button key={f.key} onClick={() => setFiltre(f.key)}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
@@ -160,7 +160,7 @@ export default function Facturation() {
                     <td className="px-4 py-3">
                       <PermissionGate module="facturation" requireWrite>
                         <div className="flex gap-1">
-                          {/* Ã‰diter */}
+                          {/* Éditer */}
                           <button onClick={() => openEdit(f)}
                             className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                             title="Modifier">
@@ -171,7 +171,7 @@ export default function Facturation() {
                           {/* PDF */}
                           <button onClick={() => setPreviewF(f)}
                             className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
-                            title="AperÃ§u / TÃ©lÃ©charger PDF">
+                            title="Aperçu / Télécharger PDF">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -195,7 +195,7 @@ export default function Facturation() {
         </div>
       </div>
 
-      {/* Modal crÃ©ation/Ã©dition */}
+      {/* Modal création/édition */}
       <Modal isOpen={modal} onClose={() => setModal(false)} title={editF ? 'Modifier la facture' : 'Nouvelle facture'} confirmOnClose>
         <div className="space-y-3">
           <div>
@@ -206,7 +206,7 @@ export default function Facturation() {
               {patientOptions.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
             </select>
             <p className="text-xs text-gray-400 mt-1">
-              {loadingPatients ? 'Chargement des patients...' : 'SÃ©lectionnez un patient dÃ©jÃ  enregistrÃ©'}
+              {loadingPatients ? 'Chargement des patients...' : 'Sélectionnez un patient déjà enregistré'}
             </p>
           </div>
           <div>
@@ -232,8 +232,8 @@ export default function Facturation() {
               }`} />
             <p className={`text-xs mt-1 ${dateTouched ? (dateIsValid ? 'text-teal-600' : 'text-red-600') : 'text-gray-400'}`}>
               {dateTouched
-                ? (dateIsValid ? 'Date valide' : "Date invalide : elle ne peut pas Ãªtre supÃ©rieure Ã  aujourd'hui")
-                : "Les dates futures sont bloquÃ©es dans le calendrier"}
+                ? (dateIsValid ? 'Date valide' : "Date invalide : elle ne peut pas être supérieure à aujourd'hui")
+                : "Les dates futures sont bloquées dans le calendrier"}
             </p>
           </div>
           <div>
@@ -241,8 +241,8 @@ export default function Facturation() {
             <select value={form.statut} onChange={e => set('statut')(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
               <option value={FACTURE_STATUS.ATTENTE}>En attente</option>
-              <option value={FACTURE_STATUS.PAYE}>Payee</option>
-              <option value={FACTURE_STATUS.ANNULE}>Annulee</option>
+              <option value={FACTURE_STATUS.PAYE}>Payée</option>
+              <option value={FACTURE_STATUS.ANNULE}>Annulée</option>
             </select>
           </div>
           <div className="flex gap-3 pt-2">
@@ -263,7 +263,7 @@ export default function Facturation() {
         onConfirm={async () => { try { await supprimerFacture(confirmD.id); setConfirmD(null) } catch {} }}
         onCancel={() => setConfirmD(null)}
         title="Supprimer la facture"
-        message="Supprimer dÃ©finitivement cette facture ?" />
+        message="Supprimer définitivement cette facture ?" />
 
       {/* Modal PDF */}
       <PreviewPDFModal
