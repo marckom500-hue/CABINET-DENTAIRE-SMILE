@@ -23,6 +23,12 @@ export default function Sidebar({ onClose }) {
   const [showProfile, setShowProfile] = useState(false)
   const [uploading, setUploading]     = useState(false)
   const [preview, setPreview]         = useState(null)
+  const [editingAccess, setEditingAccess] = useState(false)
+  const [accessForm, setAccessForm] = useState({ email: '', password: '' })
+  const [accessSaving, setAccessSaving] = useState(false)
+  const [accessError, setAccessError] = useState('')
+  const [accessSuccess, setAccessSuccess] = useState('')
+  const [showAccessPassword, setShowAccessPassword] = useState(false)
   const fileInputRef = useRef(null)
 
   const effectiveRole = loading ? null : (role ?? 'secretaire')
@@ -39,6 +45,77 @@ export default function Sidebar({ onClose }) {
   const handleLogout = async () => {
     await logout()
     navigate('/login')
+  }
+
+  const openProfileModal = () => {
+    setPreview(profile?.avatar_url || null)
+    setEditingAccess(false)
+    setAccessForm({ email: profile?.email || '', password: '' })
+    setAccessError('')
+    setAccessSuccess('')
+    setShowAccessPassword(false)
+    setShowProfile(true)
+  }
+
+  const closeProfileModal = () => {
+    setShowProfile(false)
+    setEditingAccess(false)
+    setAccessError('')
+    setAccessSuccess('')
+    setShowAccessPassword(false)
+    setAccessForm({ email: profile?.email || '', password: '' })
+  }
+
+  const startAccessEdit = () => {
+    setAccessForm({ email: profile?.email || '', password: '' })
+    setAccessError('')
+    setAccessSuccess('')
+    setShowAccessPassword(false)
+    setEditingAccess(true)
+  }
+
+  const handleAccessSave = async () => {
+    if (!profile?.id) return
+
+    const email = accessForm.email.trim()
+    const password = accessForm.password
+    const emailChanged = email !== (profile.email || '')
+    const passwordChanged = password.length > 0
+
+    setAccessSaving(true)
+    setAccessError('')
+    setAccessSuccess('')
+
+    try {
+      if (!email) throw new Error("L'email est requis")
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("L'email est invalide")
+      if (!emailChanged && !passwordChanged) throw new Error('Aucune modification a enregistrer')
+      if (passwordChanged && password.length < 6) throw new Error('Le mot de passe doit contenir au moins 6 caracteres')
+
+      const authUpdate = {}
+      if (emailChanged) authUpdate.email = email
+      if (passwordChanged) authUpdate.password = password
+
+      const { error: authError } = await supabase.auth.updateUser(authUpdate)
+      if (authError) throw authError
+
+      if (emailChanged) {
+        const { error: profileError } = await supabase
+          .from('users_profiles')
+          .update({ email })
+          .eq('id', profile.id)
+        if (profileError) throw profileError
+      }
+
+      await refreshProfile()
+      setAccessForm({ email, password: '' })
+      setEditingAccess(false)
+      setAccessSuccess('Acces mis a jour avec succes')
+    } catch (err) {
+      setAccessError(err?.message || 'Impossible de modifier les acces')
+    } finally {
+      setAccessSaving(false)
+    }
   }
 
   const handleAvatarChange = async (e) => {
@@ -138,7 +215,7 @@ export default function Sidebar({ onClose }) {
       {/* ── Footer profil ──────────────────────────────────────────────────── */}
       <div className="p-4" style={{ borderTop: '1px solid var(--border-1)' }}>
         <div
-          onClick={() => { setPreview(profile?.avatar_url || null); setShowProfile(true) }}
+          onClick={openProfileModal}
           className="flex items-center gap-3 px-3 py-3 rounded-2xl cursor-pointer transition-all group"
           style={{ backgroundColor: 'var(--bg-row)', border: '1px solid var(--border-1)' }}
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(13,148,136,0.15)' }}
@@ -175,7 +252,7 @@ export default function Sidebar({ onClose }) {
       {showProfile && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
           {/* Overlay */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowProfile(false)} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeProfileModal} />
 
           <div className="relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-lg overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
             {/* Bandeau haut */}
@@ -225,6 +302,99 @@ export default function Sidebar({ onClose }) {
                 </span>
               </div>
 
+              <div className="border border-gray-100 rounded-xl p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide">Acces de connexion</p>
+                    {!editingAccess && <p className="text-sm text-gray-600 mt-1">{profile?.email}</p>}
+                  </div>
+                  {!editingAccess && (
+                    <button
+                      onClick={startAccessEdit}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                    >
+                      Modifier
+                    </button>
+                  )}
+                </div>
+
+                {accessError && (
+                  <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {accessError}
+                  </div>
+                )}
+                {accessSuccess && (
+                  <div className="mb-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                    {accessSuccess}
+                  </div>
+                )}
+
+                {editingAccess && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={accessForm.email}
+                        onChange={e => setAccessForm(f => ({ ...f, email: e.target.value }))}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
+                      <div className="relative">
+                        <input
+                          type={showAccessPassword ? 'text' : 'password'}
+                          value={accessForm.password}
+                          onChange={e => setAccessForm(f => ({ ...f, password: e.target.value }))}
+                          placeholder="Laisser vide pour ne pas changer"
+                          className="w-full px-3 py-2 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowAccessPassword(v => !v)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-teal-600 rounded"
+                          title={showAccessPassword ? 'Masquer' : 'Afficher'}
+                        >
+                          {showAccessPassword ? (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.956 9.956 0 0112 4c5 0 9.27 3.11 11 7.5a11.79 11.79 0 01-3.06 4.4M6.1 6.1A11.79 11.79 0 001 11.5C2.73 15.89 7 19 12 19c1.17 0 2.29-.17 3.34-.49" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Minimum 6 caracteres si vous le modifiez</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingAccess(false)
+                          setAccessError('')
+                          setAccessForm({ email: profile?.email || '', password: '' })
+                        }}
+                        className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAccessSave}
+                        disabled={accessSaving}
+                        className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-60"
+                      >
+                        {accessSaving ? 'Enregistrement...' : 'Enregistrer'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {profile?.specialite && (
                   <div className="col-span-2 bg-teal-50 rounded-xl p-3 sm:p-4">
@@ -254,7 +424,7 @@ export default function Sidebar({ onClose }) {
               <p className="text-xs sm:text-sm text-center text-gray-400">Cliquez sur 📷 pour changer votre photo</p>
 
               <button
-                onClick={() => setShowProfile(false)}
+                onClick={closeProfileModal}
                 className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white text-sm sm:text-base font-medium rounded-xl transition-colors"
               >
                 Fermer
