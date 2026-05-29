@@ -1,5 +1,6 @@
 ﻿import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { formatPhone, formatPhoneList } from "./phone";
 
 const cabinetInfos = {
   nom: "Cabinet Dentaire Smile",
@@ -36,14 +37,15 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
   const dateNaissance = patient?.date_naissance 
     ? new Date(patient.date_naissance).toLocaleDateString('fr-FR')
     : "Non renseignée";
-  const telephone = patient?.telephone || "Non renseignée";
+  const telephone = formatPhone(patient?.telephone, "Non renseignée");
   
   // Information du médecin traitant (celui qui suit le patient)
   const medecinTraitantNom = medecinTraitant 
     ? `Dr ${medecinTraitant.nom} ${medecinTraitant.prenom}`
     : "Non renseignée";
   const medecinTraitantSpecialite = medecinTraitant?.specialite || "";
-  const medecinTraitantTel = medecinTraitant?.telephone || "";
+  const medecinTraitantTel = medecinTraitant?.telephone ? formatPhone(medecinTraitant.telephone, "") : "";
+  const cabinetTelephone = formatPhoneList(cabinetInfos.telephone);
   
   // Information du médecin prescripteur (celui qui signe)
   const medecinPrescripteurNom = medecinPrescripteur 
@@ -78,7 +80,7 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
         </div>
       </div>
       <div style="font-size: 11px; color: #666;">${cabinetInfos.adresse}</div>
-      <div style="font-size: 10px; color: #888;">☎︎ ${cabinetInfos.telephone} | ✉︎ ${cabinetInfos.email}</div>
+      <div style="font-size: 10px; color: #888;">☎︎ ${cabinetTelephone} | ✉︎ ${cabinetInfos.email}</div>
     </div>
     
     <!-- MÃ‰DECIN TRAITANT -->
@@ -157,7 +159,7 @@ async function getOrdonnanceHTML(ordonnance, patient, medecinTraitant, medecinPr
     
     <div style="margin-top: 30px; text-align: center; font-size: 7px; color: #aaa; border-top: 1px solid #eee; padding-top: 15px;">
       ${cabinetInfos.nom} - ${cabinetInfos.adresse}<br>
-      ${cabinetInfos.telephone} - ${cabinetInfos.email}
+      ${cabinetTelephone} - ${cabinetInfos.email}
     </div>
   `;
   

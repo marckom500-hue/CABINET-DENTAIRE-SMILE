@@ -1,3 +1,5 @@
+import { formatPhone } from '../utils/phone'
+
 const STATUS_MAP = {
   Actif: 'bg-teal-100 text-teal-700',
   Urgent: 'bg-red-100 text-red-700',
@@ -24,7 +26,7 @@ export default function PatientList({ patients = [] }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-gray-900">{p.prenom} {p.nom}</p>
-              <p className="text-xs truncate text-gray-600">{p.detail || p.telephone}</p>
+              <p className="text-xs truncate text-gray-600">{p.detail || formatPhone(p.telephone)}</p>
             </div>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_MAP[p.statut] ?? 'bg-gray-100 text-gray-500'}`}>
               {p.statut}

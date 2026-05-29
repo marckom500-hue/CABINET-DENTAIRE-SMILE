@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRappels } from '../hooks/useRappels'
 import { PermissionGate } from '../components/RoleGuard'
 import RappelsFailedSMS from '../components/RappelsFailedSMS'
+import { formatPhone } from '../utils/phone'
 
 const STATUS_MAP = {
   envoye:  { label:'Envoyé',   cls:'bg-teal-100 text-teal-700'   },
@@ -168,7 +169,7 @@ export default function Rappels() {
                       <td className="px-4 py-3 font-medium text-gray-900">
                         {patient ? `${patient.prenom} ${patient.nom}` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{patient?.telephone ?? '—'}</td>
+                      <td className="px-4 py-3 text-gray-600">{formatPhone(patient?.telephone)}</td>
                       <td className="px-4 py-3 text-gray-600">
                         {rdv ? `${rdv.date} à ${rdv.heure}` : '—'}<br />
                         <span className="text-xs text-gray-400">{rdv?.type_acte}</span>
@@ -225,7 +226,7 @@ export default function Rappels() {
                       {rdv.patients?.prenom} {rdv.patients?.nom}
                     </p>
                     <p className="text-xs text-gray-500">{rdv.date} à {rdv.heure} — {rdv.type_acte}</p>
-                    <p className="text-xs text-gray-400">{rdv.patients?.telephone}</p>
+                    <p className="text-xs text-gray-400">{formatPhone(rdv.patients?.telephone)}</p>
                   </div>
                   <PermissionGate module="rappels" requireWrite>
                     <button

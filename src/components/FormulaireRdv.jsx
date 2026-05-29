@@ -127,6 +127,7 @@ import FormField from './FormField'
 import { usePatients } from '../hooks/usePatients'
 import { ACTES_OPTIONS } from '../lib/actes'
 import { RDV_STATUS, RDV_STATUS_META, normalizeRdvStatus } from '../lib/statuses'
+import { formatPhone } from '../utils/phone'
 
 const STATUTS = [
   { value: RDV_STATUS.CONFIRME, label: RDV_STATUS_META[RDV_STATUS.CONFIRME].label },
@@ -179,7 +180,7 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
 
   const patientOptions = patients.map(p => ({
     value: String(p.id),
-    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${p.telephone}` : ''}`.trim(),
+    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${formatPhone(p.telephone)}` : ''}`.trim(),
   }))
 
   const dateTouched = Boolean(form.date)

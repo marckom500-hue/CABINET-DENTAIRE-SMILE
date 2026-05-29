@@ -6,6 +6,7 @@ import { PermissionGate } from '../components/RoleGuard'
 import { usePatients } from '../hooks/usePatients'
 import { useNotifications } from '../hooks/NotificationsContext'
 import { downloadOrdonnancePDF, previewOrdonnancePDF } from '../utils/pdfGenerator'
+import { formatPhone } from '../utils/phone'
 import SignaturePad from '../components/SignaturePad'
 
 function useOrdonnances() {
@@ -170,7 +171,7 @@ export default function Ordonnances() {
 
   const patientOptions = patients.map(p => ({
     value: p.id,
-    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${p.telephone}` : ''}`.trim(),
+    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${formatPhone(p.telephone)}` : ''}`.trim(),
   }))
 
   const openCreate = () => { setEditO(null); setForm(empty); setModal(true) }

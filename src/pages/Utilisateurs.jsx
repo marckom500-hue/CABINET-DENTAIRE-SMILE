@@ -518,6 +518,8 @@ import { ROLES_LABELS, ROLES_COLORS } from '../lib/roles'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useNotifications } from '../hooks/NotificationsContext'
+import { useAuthContext } from '../hooks/AuthContext'
+import { formatPhone } from '../utils/phone'
 
 const ROLE_OPTIONS = Object.entries(ROLES_LABELS).map(([v, l]) => ({ value: v, label: l }))
 
@@ -552,7 +554,12 @@ function formatLastSignIn(dateStr) {
   }
 }
 
-const EMPTY_FORM = { nom: '', prenom: '', email: '', password: '', role: 'secretaire', actif: true, specialite: '' }
+const EMPTY_FORM = { nom: '', prenom: '', telephone: '', email: '', password: '', role: 'secretaire', actif: true, specialite: '' }
+const PHONE_REGEX = /^6\d{8}$/
+
+function cleanPhone(value) {
+  return value.replace(/\D/g, '').slice(0, 9)
+}
 
 function UserAvatar({ user, size = 'sm' }) {
   const dim = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-14 h-14 text-lg'
@@ -585,6 +592,7 @@ export default function Utilisateurs() {
   const [avatarFile,   setAvatarFile]   = useState(null)
   const [avatarPreview,setAvatarPreview]= useState(null)
   const { notify } = useNotifications()
+  const { profile, refreshProfile } = useAuthContext()
 
   // ── Chargement ───────────────────────────────────────────────
   const fetchUsers = async () => {
@@ -604,7 +612,7 @@ export default function Utilisateurs() {
   }
   const openEdit = (u) => {
     setEditU(u); setShowPassword(false)
-    setForm({ nom: u.nom, prenom: u.prenom, email: u.email, password: '', role: u.role, actif: u.actif, specialite: u.specialite || '' })
+    setForm({ nom: u.nom, prenom: u.prenom, telephone: u.telephone || '', email: u.email, password: '', role: u.role, actif: u.actif, specialite: u.specialite || '' })
     setAvatarFile(null); setAvatarPreview(u.avatar_url || null)
     setError(''); setModal(true)
   }
@@ -626,7 +634,18 @@ export default function Utilisateurs() {
           avatar_url = `${urlData.publicUrl}?t=${Date.now()}`
         }
         // ── MODIFICATION directe du profil ──
-        const updateData = { nom: form.nom, prenom: form.prenom, role: form.role, actif: form.actif, avatar_url }
+        if (!form.prenom.trim()) throw new Error('Le prénom est requis')
+        if (!form.nom.trim())    throw new Error('Le nom est requis')
+        if (!PHONE_REGEX.test(form.telephone)) throw new Error('Numéro invalide : 9 chiffres requis, doit commencer par 6')
+
+        const updateData = {
+          nom: form.nom.trim(),
+          prenom: form.prenom.trim(),
+          telephone: form.telephone,
+          role: form.role,
+          actif: form.actif,
+          avatar_url
+        }
         if (form.role === 'medecin' || form.role === 'superadmin') updateData.specialite = form.specialite
         const { error: e } = await supabase.from('users_profiles').update(updateData).eq('id', editU.id)
         if (e) throw e
@@ -635,6 +654,7 @@ export default function Utilisateurs() {
         // ── CRÉATION via Edge Function (jamais via service_role côté front) ──
         if (!form.prenom.trim()) throw new Error('Le prénom est requis')
         if (!form.nom.trim())    throw new Error('Le nom est requis')
+        if (!PHONE_REGEX.test(form.telephone)) throw new Error('Numéro invalide : 9 chiffres requis, doit commencer par 6')
         if (!form.email.trim())  throw new Error("L'email est requis")
         if (!form.password)      throw new Error('Le mot de passe est requis')
         if (form.password.length < 6) throw new Error('Le mot de passe doit contenir au moins 6 caractères')
@@ -653,6 +673,7 @@ export default function Utilisateurs() {
             role:       form.role,
             nom:        form.nom.trim(),
             prenom:     form.prenom.trim(),
+            telephone:  form.telephone,
             actif:      true,
             specialite: (form.role === 'medecin' || form.role === 'superadmin') ? form.specialite : '',
           },
@@ -674,6 +695,7 @@ export default function Utilisateurs() {
 
       notify({ type: 'success', message: editU ? 'Utilisateur modifié' : 'Utilisateur créé avec succès' })
       await fetchUsers()
+      if (editU?.id && editU.id === profile?.id) await refreshProfile()
       setModal(false)
 
     } catch (err) {
@@ -703,8 +725,9 @@ export default function Utilisateurs() {
   }
 
   const showMedicalFields = form.role === 'medecin' || form.role === 'superadmin'
+  const phoneIsValid = PHONE_REGEX.test(form.telephone)
   const filtered = users.filter(u =>
-    `${u.nom} ${u.prenom} ${u.email}`.toLowerCase().includes(search.toLowerCase())
+    `${u.nom} ${u.prenom} ${u.email} ${u.telephone || ''}`.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -740,16 +763,16 @@ export default function Utilisateurs() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                {['Utilisateur','Email','Rôle','Spécialité','Statut','Dernière connexion','Actions'].map(h => (
+                {['Utilisateur','Email','Téléphone','Rôle','Spécialité','Statut','Dernière connexion','Actions'].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Chargement...</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-gray-400">Chargement...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Aucun utilisateur</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-gray-400">Aucun utilisateur</td></tr>
               ) : filtered.map(u => {
                 const rc       = ROLES_COLORS[u.role] ?? ROLES_COLORS.assistant
                 const lastConn = formatLastSignIn(u.last_sign_in)
@@ -762,6 +785,7 @@ export default function Utilisateurs() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-500">{u.email}</td>
+                    <td className="px-4 py-3 text-gray-500">{formatPhone(u.telephone)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${rc.bg} ${rc.text}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${rc.dot}`} />
@@ -871,6 +895,25 @@ export default function Utilisateurs() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Téléphone *</label>
+            <input
+              value={form.telephone}
+              onChange={e => setForm(f => ({...f, telephone: cleanPhone(e.target.value)}))}
+              placeholder="6XXXXXXXX"
+              inputMode="numeric"
+              maxLength={9}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                form.telephone && !phoneIsValid ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+              }`}
+            />
+            <p className={`text-xs mt-1 ${form.telephone && !phoneIsValid ? 'text-red-500' : 'text-gray-400'}`}>
+              {form.telephone && !phoneIsValid
+                ? 'Numéro invalide : 9 chiffres requis, doit commencer par 6'
+                : 'Format requis : 6XXXXXXXX'}
+            </p>
+          </div>
+
           {!editU && (
             <>
               <div>
@@ -970,9 +1013,14 @@ export default function Utilisateurs() {
                 <div className="min-w-0">
                   <p className="text-lg font-semibold text-gray-900 truncate">{viewU.prenom} {viewU.nom}</p>
                   <p className="text-sm text-gray-500 truncate">{viewU.email}</p>
+                  <p className="text-sm text-gray-500 truncate">{formatPhone(viewU.telephone, 'Téléphone non renseigné')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
+                <div className="border border-gray-100 rounded-lg p-3">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Téléphone</p>
+                  <p className="mt-2 text-sm text-gray-700">{formatPhone(viewU.telephone, 'Non renseigné')}</p>
+                </div>
                 <div className="border border-gray-100 rounded-lg p-3">
                   <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Rôle</p>
                   <span className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${rc.bg} ${rc.text}`}>

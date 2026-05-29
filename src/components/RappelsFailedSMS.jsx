@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatPhone } from '../utils/phone'
 
 export default function RappelsFailedSMS() {
   const [failedReminders, setFailedReminders] = useState([])
@@ -167,6 +168,9 @@ export default function RappelsFailedSMS() {
                     <p className="text-sm text-gray-600">
                       Type: {reminder.rendez_vous?.type_acte}
                     </p>
+                    <p className="text-sm text-gray-600">
+                      Téléphone: {formatPhone(reminder.rendez_vous?.patients?.telephone)}
+                    </p>
                     {reminder.erreur && (
                       <p className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded border border-red-200">
                         {reminder.erreur}
@@ -207,6 +211,9 @@ export default function RappelsFailedSMS() {
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       RDV: {item.rendez_vous?.date} à {item.rendez_vous?.heure}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Téléphone: {formatPhone(item.telephone)}
                     </p>
                     <p className="text-xs text-amber-600 mt-2 bg-amber-50 p-2 rounded border border-amber-200">
                       {item.raison_echec}

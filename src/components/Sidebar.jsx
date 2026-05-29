@@ -3,6 +3,8 @@ import { useState, useRef } from 'react'
 import { useAuthContext } from '../hooks/AuthContext'
 import { getNavItems, ROLES_LABELS, ROLES_COLORS } from '../lib/roles'
 import { supabase } from '../lib/supabase'
+import ConfirmDialog from './ConfirmDialog'
+import { formatPhone } from '../utils/phone'
 
 const ICONS = {
   home:     "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
@@ -17,12 +19,24 @@ const ICONS = {
   rappels:  "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
 }
 
+const PHONE_REGEX = /^6\d{8}$/
+
+function cleanPhone(value) {
+  return value.replace(/\D/g, '').slice(0, 9)
+}
+
 export default function Sidebar({ onClose }) {
   const { role, profile, loading, logout, refreshProfile } = useAuthContext()
   const navigate = useNavigate()
   const [showProfile, setShowProfile] = useState(false)
   const [uploading, setUploading]     = useState(false)
   const [preview, setPreview]         = useState(null)
+  const [editingIdentity, setEditingIdentity] = useState(false)
+  const [identityForm, setIdentityForm] = useState({ nom: '', prenom: '', telephone: '' })
+  const [identitySaving, setIdentitySaving] = useState(false)
+  const [identityError, setIdentityError] = useState('')
+  const [identitySuccess, setIdentitySuccess] = useState('')
+  const [confirmProfileClose, setConfirmProfileClose] = useState(false)
   const [editingAccess, setEditingAccess] = useState(false)
   const [accessForm, setAccessForm] = useState({ email: '', password: '' })
   const [accessSaving, setAccessSaving] = useState(false)
@@ -42,6 +56,17 @@ export default function Sidebar({ onClose }) {
     ? `${prenom[0]}${nom[0]}`.toUpperCase()
     : displayName.slice(0, 2).toUpperCase() || '??'
 
+  const hasUnsavedIdentityChanges = editingIdentity && (
+    identityForm.prenom.trim() !== (profile?.prenom || '').trim() ||
+    identityForm.nom.trim() !== (profile?.nom || '').trim() ||
+    identityForm.telephone !== (profile?.telephone || '')
+  )
+  const hasUnsavedAccessChanges = editingAccess && (
+    accessForm.email.trim() !== (profile?.email || '') ||
+    accessForm.password.length > 0
+  )
+  const hasUnsavedProfileChanges = hasUnsavedIdentityChanges || hasUnsavedAccessChanges
+
   const handleLogout = async () => {
     await logout()
     navigate('/login')
@@ -49,6 +74,14 @@ export default function Sidebar({ onClose }) {
 
   const openProfileModal = () => {
     setPreview(profile?.avatar_url || null)
+    setEditingIdentity(false)
+    setIdentityForm({
+      nom: profile?.nom || '',
+      prenom: profile?.prenom || '',
+      telephone: profile?.telephone || ''
+    })
+    setIdentityError('')
+    setIdentitySuccess('')
     setEditingAccess(false)
     setAccessForm({ email: profile?.email || '', password: '' })
     setAccessError('')
@@ -59,11 +92,67 @@ export default function Sidebar({ onClose }) {
 
   const closeProfileModal = () => {
     setShowProfile(false)
+    setConfirmProfileClose(false)
+    setEditingIdentity(false)
+    setIdentityError('')
+    setIdentitySuccess('')
     setEditingAccess(false)
     setAccessError('')
     setAccessSuccess('')
     setShowAccessPassword(false)
     setAccessForm({ email: profile?.email || '', password: '' })
+  }
+
+  const requestProfileClose = () => {
+    if (hasUnsavedProfileChanges) {
+      setConfirmProfileClose(true)
+      return
+    }
+    closeProfileModal()
+  }
+
+  const startIdentityEdit = () => {
+    setIdentityForm({
+      nom: profile?.nom || '',
+      prenom: profile?.prenom || '',
+      telephone: profile?.telephone || ''
+    })
+    setIdentityError('')
+    setIdentitySuccess('')
+    setEditingIdentity(true)
+  }
+
+  const handleIdentitySave = async () => {
+    if (!profile?.id) return
+
+    const prenomValue = identityForm.prenom.trim()
+    const nomValue = identityForm.nom.trim()
+    const telephoneValue = identityForm.telephone
+
+    setIdentitySaving(true)
+    setIdentityError('')
+    setIdentitySuccess('')
+
+    try {
+      if (!prenomValue) throw new Error('Le prénom est requis')
+      if (!nomValue) throw new Error('Le nom est requis')
+      if (!PHONE_REGEX.test(telephoneValue)) throw new Error('Numéro invalide : 9 chiffres requis, doit commencer par 6')
+
+      const { error } = await supabase
+        .from('users_profiles')
+        .update({ prenom: prenomValue, nom: nomValue, telephone: telephoneValue })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      await refreshProfile()
+      setEditingIdentity(false)
+      setIdentitySuccess('Informations mises a jour avec succes')
+    } catch (err) {
+      setIdentityError(err?.message || 'Impossible de modifier le profil')
+    } finally {
+      setIdentitySaving(false)
+    }
   }
 
   const startAccessEdit = () => {
@@ -252,7 +341,7 @@ export default function Sidebar({ onClose }) {
       {showProfile && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
           {/* Overlay */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeProfileModal} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={requestProfileClose} />
 
           <div className="relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-lg overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
             {/* Bandeau haut */}
@@ -296,10 +385,111 @@ export default function Sidebar({ onClose }) {
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{displayName}</p>
                 <p className="text-sm sm:text-base mt-0.5 text-gray-500">{profile?.email}</p>
+                <p className="text-sm sm:text-base mt-0.5 text-gray-500">{formatPhone(profile?.telephone, 'Téléphone non renseigné')}</p>
                 <span className={`mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-1 rounded-full ${roleColor.bg} ${roleColor.text}`}>
                   <span className={`w-2 h-2 rounded-full ${roleColor.dot}`} />
                   {ROLES_LABELS[effectiveRole] ?? 'Utilisateur'}
                 </span>
+              </div>
+
+              <div className="border border-gray-100 rounded-xl p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide">Informations personnelles</p>
+                    {!editingIdentity && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {displayName} {profile?.telephone ? `- ${formatPhone(profile.telephone)}` : ''}
+                      </p>
+                    )}
+                  </div>
+                  {!editingIdentity && (
+                    <button
+                      onClick={startIdentityEdit}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                    >
+                      Modifier
+                    </button>
+                  )}
+                </div>
+
+                {identityError && (
+                  <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {identityError}
+                  </div>
+                )}
+                {identitySuccess && (
+                  <div className="mb-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                    {identitySuccess}
+                  </div>
+                )}
+
+                {editingIdentity && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Prénom</label>
+                        <input
+                          value={identityForm.prenom}
+                          onChange={e => setIdentityForm(f => ({ ...f, prenom: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Nom</label>
+                        <input
+                          value={identityForm.nom}
+                          onChange={e => setIdentityForm(f => ({ ...f, nom: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Téléphone</label>
+                      <input
+                        value={identityForm.telephone}
+                        onChange={e => setIdentityForm(f => ({ ...f, telephone: cleanPhone(e.target.value) }))}
+                        placeholder="6XXXXXXXX"
+                        inputMode="numeric"
+                        maxLength={9}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                          identityForm.telephone && !PHONE_REGEX.test(identityForm.telephone)
+                            ? 'border-red-300 focus:ring-red-500'
+                            : 'border-gray-200'
+                        }`}
+                      />
+                      <p className={`text-xs mt-1 ${identityForm.telephone && !PHONE_REGEX.test(identityForm.telephone) ? 'text-red-500' : 'text-gray-400'}`}>
+                        {identityForm.telephone && !PHONE_REGEX.test(identityForm.telephone)
+                          ? 'Numéro invalide : 9 chiffres requis, doit commencer par 6'
+                          : 'Format requis : 6XXXXXXXX'}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingIdentity(false)
+                          setIdentityError('')
+                          setIdentityForm({
+                            nom: profile?.nom || '',
+                            prenom: profile?.prenom || '',
+                            telephone: profile?.telephone || ''
+                          })
+                        }}
+                        className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleIdentitySave}
+                        disabled={identitySaving}
+                        className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-60"
+                      >
+                        {identitySaving ? 'Enregistrement...' : 'Enregistrer'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="border border-gray-100 rounded-xl p-3 sm:p-4">
@@ -424,13 +614,24 @@ export default function Sidebar({ onClose }) {
               <p className="text-xs sm:text-sm text-center text-gray-400">Cliquez sur 📷 pour changer votre photo</p>
 
               <button
-                onClick={closeProfileModal}
+                onClick={requestProfileClose}
                 className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white text-sm sm:text-base font-medium rounded-xl transition-colors"
               >
                 Fermer
               </button>
             </div>
           </div>
+
+          <ConfirmDialog
+            isOpen={confirmProfileClose}
+            onConfirm={closeProfileModal}
+            onCancel={() => setConfirmProfileClose(false)}
+            title="Abandonner les modifications ?"
+            message="Des changements non enregistrés sont en cours. Voulez-vous vraiment fermer ce profil ?"
+            confirmLabel="Oui, abandonner"
+            cancelLabel="Non"
+            tone="warning"
+          />
         </div>
       )}
 

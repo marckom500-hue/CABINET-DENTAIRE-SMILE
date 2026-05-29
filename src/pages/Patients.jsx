@@ -5,6 +5,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import FormulairePatient from '../components/FormulairePatient'
 import MedicalRecord from '../components/MedicalRecord'
 import { PermissionGate } from '../components/RoleGuard'
+import { formatPhone } from '../utils/phone'
 
 const STATUS_COLORS = { Actif:'bg-teal-100 text-teal-700', Urgent:'bg-red-100 text-red-700', Inactif:'bg-gray-100 text-gray-500', Nouveau:'bg-blue-100 text-blue-700' }
 
@@ -85,7 +86,7 @@ export default function Patients() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{p.telephone}</td>
+                  <td className="px-4 py-3 text-gray-600">{formatPhone(p.telephone)}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{p.date_naissance ? new Date(p.date_naissance).toLocaleDateString('fr-FR') : '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_COLORS[p.statut] ?? 'bg-gray-100 text-gray-500'}`}>

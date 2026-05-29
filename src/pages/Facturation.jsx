@@ -7,6 +7,7 @@ import { PermissionGate } from '../components/RoleGuard'
 import { ACTES_OPTIONS } from '../lib/actes'
 import PreviewPDFModal from '../components/PreviewPDFModal'
 import { FACTURE_STATUS, FACTURE_STATUS_META, normalizeFactureStatus } from '../lib/statuses'
+import { formatPhone } from '../utils/phone'
 
 const empty = { patient_id:'', acte:'', montant:'', date: new Date().toISOString().split('T')[0], statut: FACTURE_STATUS.ATTENTE }
 const today = new Date().toISOString().split('T')[0]
@@ -42,7 +43,7 @@ export default function Facturation() {
 
   const patientOptions = patients.map(p => ({
     value: p.id,
-    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${p.telephone}` : ''}`.trim(),
+    label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${formatPhone(p.telephone)}` : ''}`.trim(),
   }))
 
   const getPatientName = (patientId) => {

@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const PHONE_REGEX = /^6\d{8}$/
 
 serve(async (req) => {
   // CORS
@@ -18,14 +19,27 @@ serve(async (req) => {
 
   try {
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
-    const { email, password, nom, prenom, role, specialite } = await req.json()
+    const { email, password, nom, prenom, telephone, role, specialite } = await req.json()
+
+    if (!PHONE_REGEX.test(telephone || '')) {
+      return new Response(
+        JSON.stringify({ error: 'Numéro invalide : 9 chiffres requis, doit commencer par 6' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        }
+      )
+    }
 
     // 1. Créer l'utilisateur dans auth.users (API Admin = PAS DE LIMITE)
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { nom, prenom, role, specialite }
+      user_metadata: { nom, prenom, telephone, role, specialite }
     })
 
     if (createError) throw createError
@@ -38,6 +52,7 @@ serve(async (req) => {
         email,
         nom,
         prenom,
+        telephone,
         role,
         actif: true,
         specialite: specialite || null

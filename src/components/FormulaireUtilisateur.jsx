@@ -10,6 +10,11 @@ const empty = {
   actif: true,
   specialite: ''
 }
+const PHONE_REGEX = /^6\d{8}$/
+
+function cleanPhone(value) {
+  return value.replace(/\D/g, '').slice(0, 9)
+}
 
 function normalizeUtilisateur(utilisateur) {
   if (!utilisateur) return empty
@@ -35,7 +40,8 @@ export default function FormulaireUtilisateur({ utilisateur, onSubmit, onCancel 
 
   const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email || '')
   const emailTouched = Boolean(form.email)
-  const canSubmit = Boolean(form.prenom && form.nom && (!form.email || emailIsValid))
+  const phoneIsValid = PHONE_REGEX.test(form.telephone || '')
+  const canSubmit = Boolean(form.prenom && form.nom && phoneIsValid && (!form.email || emailIsValid))
 
   const handleSubmit = async () => {
     if (!canSubmit) return
@@ -82,9 +88,17 @@ export default function FormulaireUtilisateur({ utilisateur, onSubmit, onCancel 
       <FormField
         label="Téléphone"
         value={form.telephone}
-        onChange={set('telephone')}
+        onChange={(value) => set('telephone')(cleanPhone(value))}
         placeholder="6XXXXXXXX"
         inputMode="numeric"
+        maxLength={9}
+        pattern="6[0-9]{8}"
+        validationState={form.telephone ? (phoneIsValid ? 'success' : 'error') : undefined}
+        validationMessage={
+          form.telephone
+            ? (phoneIsValid ? 'Numéro valide' : 'Numéro invalide : 9 chiffres requis, doit commencer par 6')
+            : 'Format requis : 6XXXXXXXX'
+        }
       />
 
       <FormField
