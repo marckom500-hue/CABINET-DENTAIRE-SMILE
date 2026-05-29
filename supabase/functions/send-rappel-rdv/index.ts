@@ -226,6 +226,41 @@ async function sendSms(phone: string, message: string) {
   return sendAfricasTalkingSms(phone, message)
 }
 
+async function sendSmsWithRetry(phone: string, message: string, maxRetries = 3): Promise<any> {
+  const maxAttempts = maxRetries + 1
+  let lastError: any = null
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const result = await sendSms(phone, message)
+      if (result.success) {
+        return { ...result, attempts: attempt + 1 }
+      }
+      lastError = result
+
+      // Retry seulement pour les erreurs temporaires (502, 503, 504, timeout)
+      const isTemporaryError = result.status === 502 || result.status === 503 || result.status === 504 || result.response?.includes("timeout")
+      if (!isTemporaryError || attempt === maxAttempts - 1) {
+        return { ...result, attempts: attempt + 1 }
+      }
+
+      // Backoff exponentiel: 2s, 4s, 8s
+      const delayMs = Math.pow(2, attempt + 1) * 1000
+      console.log(`[SMS RETRY] Tentative ${attempt + 1}/${maxAttempts - 1}, attente ${delayMs}ms...`)
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+    } catch (error) {
+      lastError = error
+      if (attempt < maxAttempts - 1) {
+        const delayMs = Math.pow(2, attempt + 1) * 1000
+        console.log(`[SMS RETRY] Erreur: ${error}, attente ${delayMs}ms...`)
+        await new Promise(resolve => setTimeout(resolve, delayMs))
+      }
+    }
+  }
+
+  return lastError
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders })
@@ -265,8 +300,8 @@ serve(async (req) => {
 
       const message = buildMessage(template, rdv, patient)
       const phone = normalizeCameroonPhone(patient.telephone.toString())
-      const smsResult = await sendSms(phone, message)
-      const statut = smsResult.success ? "envoye" : "echec"
+      const smsResult = await sendSmsWithRetry(phone, message, 3)
+      const statut = smsResult.success ? "envoye" : "echec_permanent"
       const smsError = smsResult.success
         ? null
         : `Echec fournisseur SMS${smsResult.status ? ` HTTP ${smsResult.status}` : ""}: ${smsResult.response}`
@@ -276,6 +311,7 @@ serve(async (req) => {
         statut,
         message,
         erreur: smsError ? smsError.substring(0, 500) : null,
+        tentatives: smsResult.attempts || 1,
       })
 
       return {
@@ -289,6 +325,7 @@ serve(async (req) => {
         gateway_status: smsResult.status,
         gateway_response: smsResult.response,
         gateway_url: smsResult.url,
+        attempts: smsResult.attempts,
       }
     }
 
@@ -360,8 +397,8 @@ serve(async (req) => {
 
     const message = buildMessage(template, rdv, patient)
     const phone = normalizeCameroonPhone(patient.telephone.toString())
-    const smsResult = await sendSms(phone, message)
-    const statut = smsResult.success ? "envoye" : "echec"
+    const smsResult = await sendSmsWithRetry(phone, message, 3)
+    const statut = smsResult.success ? "envoye" : "echec_permanent"
     const smsError = smsResult.success
       ? null
       : `Echec fournisseur SMS${smsResult.status ? ` HTTP ${smsResult.status}` : ""}: ${smsResult.response}`
@@ -371,6 +408,7 @@ serve(async (req) => {
       statut,
       message,
       erreur: smsError ? smsError.substring(0, 500) : null,
+      tentatives: smsResult.attempts || 1,
     })
 
     return jsonResponse({
@@ -383,6 +421,7 @@ serve(async (req) => {
       gateway_status: smsResult.status,
       gateway_response: smsResult.response,
       gateway_url: smsResult.url,
+      attempts: smsResult.attempts,
     })
   } catch (error: any) {
     console.error("Erreur send-rappel-rdv:", error)

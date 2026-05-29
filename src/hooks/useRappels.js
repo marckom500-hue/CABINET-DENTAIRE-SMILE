@@ -101,15 +101,17 @@ export function useRappels() {
   }
 
   const rdvSansRappel = async () => {
-    const demain = new Date()
-    demain.setDate(demain.getDate() + 1)
-    const demainStr = demain.toISOString().split('T')[0]
+    const aujourd = new Date()
+    aujourd.setHours(0, 0, 0, 0)
+    const aujourdStr = aujourd.toISOString().split('T')[0]
 
     const { data } = await supabase
       .from('rendez_vous')
       .select('*, patients(nom, prenom, telephone)')
-      .eq('date', demainStr)
+      .gte('date', aujourdStr)
       .not('statut', 'eq', 'annule')
+      .order('date', { ascending: true })
+      .order('heure', { ascending: true })
     return data ?? []
   }
 

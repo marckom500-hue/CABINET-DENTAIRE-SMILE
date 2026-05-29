@@ -9,7 +9,7 @@ const STATUS_MAP = {
 export default function PatientList({ patients = [] }) {
   return (
     <div className="rounded-xl border p-4 h-full min-h-0 flex flex-col" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
-      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Patients recents</h3>
+      <h3 className="text-sm font-semibold mb-3 text-gray-900">Patients recents</h3>
       <div className="space-y-2 overflow-y-auto pr-1">
         {patients.length === 0 && (
           <div className="text-sm text-center py-8" style={{ color: 'var(--text-3)' }}>Aucun patient recu recemment</div>
@@ -23,8 +23,8 @@ export default function PatientList({ patients = [] }) {
               {p.prenom?.[0]}{p.nom?.[0]}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)' }}>{p.prenom} {p.nom}</p>
-              <p className="text-xs truncate" style={{ color: 'var(--text-3)' }}>{p.detail || p.telephone}</p>
+              <p className="text-sm font-medium truncate text-gray-900">{p.prenom} {p.nom}</p>
+              <p className="text-xs truncate text-gray-600">{p.detail || p.telephone}</p>
             </div>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_MAP[p.statut] ?? 'bg-gray-100 text-gray-500'}`}>
               {p.statut}

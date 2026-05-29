@@ -4,6 +4,7 @@ import Modal from './Modal'
 import FormulairePatient from './FormulairePatient'
 import FormulaireRdv from './FormulaireRdv'
 import ConfirmDialog from './ConfirmDialog'
+import ReminderNotificationBell from './ReminderNotificationBell'
 import { usePatients } from '../hooks/usePatients'
 import { useRendezVous } from '../hooks/useRendezVous'
 
@@ -115,32 +116,33 @@ export default function Topbar() {
           </p>
         </div>
 
-        {showButtons && (
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={openRdv}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Nouveau RDV</span>
-            </button>
+        <div className="flex items-center gap-3">
+          <ReminderNotificationBell />
+          {showButtons && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={openRdv}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Nouveau RDV</span>
+              </button>
 
-            <button
-              onClick={openPatient}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              <span>Nouveau Patient</span>
-            </button>
-          </div>
-        )}
+              <button
+                onClick={openPatient}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span>Nouveau Patient</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* ── Modale RDV ── */}
       <Modal
         isOpen={modalRdv}
         onClose={requestCloseRdv}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRappels } from '../hooks/useRappels'
 import { PermissionGate } from '../components/RoleGuard'
+import RappelsFailedSMS from '../components/RappelsFailedSMS'
 
 const STATUS_MAP = {
   envoye:  { label:'Envoyé',   cls:'bg-teal-100 text-teal-700'   },
@@ -51,6 +52,23 @@ export default function Rappels() {
     else showToast(`Erreur : ${res.error}`, 'error')
   }
 
+  const handleEnvoyerTous = async () => {
+    if (rdvDemain.length === 0) {
+      showToast('Aucun RDV à traiter', 'error')
+      return
+    }
+    setSaving(true)
+    let successCount = 0
+    let errorCount = 0
+    for (const rdv of rdvDemain) {
+      const res = await envoyerRappel(rdv.id)
+      if (res.success) successCount++
+      else errorCount++
+    }
+    setSaving(false)
+    showToast(`${successCount} envoyé(s), ${errorCount} erreur(s)`, errorCount > 0 ? 'error' : 'success')
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Toast */}
@@ -97,6 +115,7 @@ export default function Rappels() {
           {[
             { key:'historique', label:'Historique' },
             { key:'manuel',     label:'Envoi manuel' },
+            { key:'erreurs',    label:'Erreurs & Renvois' },
             { key:'config',     label:'Configuration' },
           ].map(t => (
             <button key={t.key} onClick={() => setOnglet(t.key)}
@@ -110,6 +129,11 @@ export default function Rappels() {
           ))}
         </div>
       </div>
+
+      {/* Contenu onglet Erreurs & Renvois */}
+      {onglet === 'erreurs' && (
+        <RappelsFailedSMS />
+      )}
 
       {/* Contenu onglet Historique */}
       {onglet === 'historique' && (
@@ -171,14 +195,29 @@ export default function Rappels() {
       {onglet === 'manuel' && (
         <div className="space-y-4">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
-            <strong>RDV de demain sans rappel envoyé.</strong> Cliquez sur "Envoyer" pour déclencher manuellement un SMS.
+            <strong>RDV du jour et futurs sans rappel envoyé.</strong> Cliquez sur "Envoyer" pour déclencher manuellement un SMS.
           </div>
           {rdvDemain.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400 text-sm">
-              Aucun RDV prévu demain sans rappel
+              Aucun RDV sans rappel
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+            <>
+              <div className="flex justify-end">
+                <PermissionGate module="rappels" requireWrite>
+                  <button
+                    onClick={handleEnvoyerTous}
+                    disabled={saving}
+                    className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    {saving ? 'Envoi en cours...' : `Envoyer tous (${rdvDemain.length})`}
+                  </button>
+                </PermissionGate>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
               {rdvDemain.map(rdv => (
                 <div key={rdv.id} className="flex items-center gap-4 p-4">
                   <div className="flex-1 min-w-0">
@@ -202,7 +241,8 @@ export default function Rappels() {
                   </PermissionGate>
                 </div>
               ))}
-            </div>
+              </div>
+            </>
           )}
         </div>
       )}

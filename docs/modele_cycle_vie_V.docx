@@ -1,0 +1,24 @@
+II.1.6.  Modèle de cycle de vie 
+
+Pour chaque produit (ou application) conçu et développé on choisit une démarche pour le suivre tout au long du projet que l'on appelle cycle de vie du produit. Le cycle de vie est un cadre structurel qui décrit les phases et les processus par lesquels un logiciel passe depuis sa conception initiale jusqu'à sa fin de vie. Pour la réalisation de notre projet SMILE (Système de gestion de cabinet dentaire), nous avons opté pour le modèle de cycle de vie en V.
+
+Le modèle en V, également appelé V-Model, est une extension du modèle en cascade qui met l'accent sur la validation et la vérification à chaque étape du développement. Contrairement au modèle Agile qui privilégie l'itération et la flexibilité, le modèle en V suit une approche séquentielle rigoureuse où chaque phase de développement correspond à une phase de test spécifique. Ce modèle est particulièrement adapté aux projets critiques comme les systèmes médicaux, où la qualité, la traçabilité et la fiabilité sont primordiales.
+
+Le choix du modèle en V pour le projet SMILE se justifie par plusieurs facteurs : la criticité du domaine médical (gestion des données patients, rendez-vous, ordonnances, facturation), les exigences de traçabilité (pouvoir tracer chaque fonctionnalité depuis les besoins jusqu'aux tests), la sécurité des données sensibles (informations patients, actes médicaux), la stabilité des besoins (fonctionnalités bien définies d'un cabinet dentaire), et la conformité aux standards médicaux qui nécessitent une documentation complète.
+
+On distingue neuf phases dans le déroulement du cycle en V, organisées en deux branches :
+
+La branche descendante (conception et développement) comprend :
+- L'analyse des besoins
+- Les spécifications fonctionnelles
+- La conception globale (architecture)
+- La conception détaillée
+- L'implémentation (codage)
+
+La branche montante (tests et validation) comprend :
+- Les tests unitaires
+- Les tests d'intégration
+- Les tests de validation
+- Les tests d'acceptation
+
+Chaque phase de la branche descendante correspond à une phase de test spécifique dans la branche montante, assurant ainsi une validation complète et une traçabilité totale des exigences jusqu'aux tests.

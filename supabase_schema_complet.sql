@@ -156,12 +156,14 @@ CREATE POLICY "stock_write" ON public.stock FOR ALL    USING (public.get_my_role
 -- 7. TABLE RAPPELS_SMS (historique)
 -- ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.rappels_sms (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  rdv_id     UUID REFERENCES public.rendez_vous(id) ON DELETE SET NULL,
-  statut     TEXT DEFAULT 'pending' CHECK (statut IN ('envoye','echec','pending')),
-  message    TEXT,
-  erreur     TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  rdv_id              UUID REFERENCES public.rendez_vous(id) ON DELETE SET NULL,
+  statut              TEXT DEFAULT 'pending' CHECK (statut IN ('envoye','echec','echec_permanent','echec_temporaire','pending')),
+  message             TEXT,
+  erreur              TEXT,
+  tentatives          INTEGER DEFAULT 1,
+  derniere_tentative  TIMESTAMPTZ DEFAULT now(),
+  created_at          TIMESTAMPTZ DEFAULT now()
 );
 
 ALTER TABLE public.rappels_sms ENABLE ROW LEVEL SECURITY;
@@ -182,7 +184,7 @@ CREATE TABLE IF NOT EXISTS public.rappels_config (
 );
 
 -- Insère la config par défaut si elle n'existe pas
-INSERT INTO public.rappels_config DEFAULT VALUES
+INSERT INTO public.rappels_config (delai_heures) VALUES (2)
 ON CONFLICT DO NOTHING;
 
 ALTER TABLE public.rappels_config ENABLE ROW LEVEL SECURITY;
@@ -191,15 +193,15 @@ CREATE POLICY "config_write" ON public.rappels_config FOR ALL    USING (public.g
 
 
 -- ─────────────────────────────────────────────
--- 9. CRON JOB — Rappels automatiques quotidiens
+-- 9. CRON JOB — Rappels automatiques toutes les heures
 -- Activer l'extension pg_cron dans Supabase → Extensions
 -- ─────────────────────────────────────────────
--- Exécute la Edge Function chaque jour à 8h00 (heure Supabase = UTC)
--- Pour le Cameroun (UTC+1), 8h locale = 7h UTC
+-- Exécute la Edge Function toutes les heures pour envoyer les rappels
+-- 2 heures avant chaque RDV
 
 SELECT cron.schedule(
-  'rappels-rdv-quotidiens',
-  '0 7 * * *',
+  'rappels-rdv-toutes-heures',
+  '0 * * * *',
   $$
   SELECT net.http_post(
     url    := current_setting('app.supabase_url') || '/functions/v1/send-rappel-rdv',

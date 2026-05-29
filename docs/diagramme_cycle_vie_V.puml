@@ -1,0 +1,54 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam rectangle {
+  BorderColor #2E86C1
+  BackgroundColor #D6EAF8
+  FontSize 12
+  FontStyle bold
+}
+skinparam defaultTextAlignment center
+
+title Modèle de Cycle de Vie en V - Projet SMILE
+
+' Définition des positions manuelles pour former un V
+rectangle "Analyse\ndes besoins" as B1 <<(L, #AED6F1)>>
+rectangle "Spécifications\nfonctionnelles" as B2 <<(L, #AED6F1)>>
+rectangle "Conception\nglobale" as B3 <<(L, #AED6F1)>>
+rectangle "Conception\ndétaillée" as B4 <<(L, #AED6F1)>>
+rectangle "Implémentation\n(Codage)" as B5 <<(L, #AED6F1)>>
+
+rectangle "Tests\nd'acceptation" as T4 <<(L, #A9DFBF)>>
+rectangle "Tests de\nvalidation" as T3 <<(L, #A9DFBF)>>
+rectangle "Tests\nd'intégration" as T2 <<(L, #A9DFBF)>>
+rectangle "Tests\nunitaires" as T1 <<(L, #A9DFBF)>>
+
+' Branche descendante (gauche vers bas)
+B1 -down-> B2
+B2 -down-> B3
+B3 -down-> B4
+B4 -down-> B5
+
+' Branche montante (bas vers droite)
+B5 -right-> T1
+T1 -up-> T2
+T2 -up-> T3
+T3 -up-> T4
+
+' Lignes pointillées de correspondance
+B1 -[#red,dashed]-> T4 : "Validation"
+B2 -[#red,dashed]-> T3 : "Validation"
+B3 -[#red,dashed]-> T2 : "Intégration"
+B4 -[#red,dashed]-> T1 : "Tests unitaires"
+
+note right of B1
+  **Branche descendante**
+  Conception et Développement
+end note
+
+note right of T4
+  **Branche montante**
+  Tests et Validation
+end note
+
+@enduml

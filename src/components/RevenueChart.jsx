@@ -33,7 +33,7 @@ export default function RevenueChart({ factures = [], loading = false }) {
 
   return (
     <div className="rounded-xl border p-4 h-full min-h-0 flex flex-col" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
-      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Revenus mensuels (FCFA)</h3>
+      <h3 className="text-sm font-semibold mb-3 text-gray-900">Revenus mensuels (FCFA)</h3>
       <div className="flex-1 min-h-[140px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={displayData} margin={{ top:4, right:4, left:0, bottom:0 }}>

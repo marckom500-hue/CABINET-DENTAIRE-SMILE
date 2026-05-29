@@ -18,7 +18,7 @@ export default function Notifications({ notifications = [] }) {
 
   return (
     <div className="rounded-xl border p-4 h-full min-h-0 flex flex-col" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
-      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Alertes</h3>
+      <h3 className="text-sm font-semibold mb-3 text-gray-900">Alertes</h3>
       <div className="space-y-2 overflow-y-auto pr-1 max-h-44 lg:max-h-none">
         {sortedNotifications.length === 0 && (
           <div className="text-sm text-center py-8" style={{ color: 'var(--text-3)' }}>Aucune alerte recente</div>

@@ -12,6 +12,7 @@ import { usePatients } from '../hooks/usePatients'
 import { useFactures } from '../hooks/useFactures'
 import { useStock } from '../hooks/useStock'
 import { useDevis } from '../hooks/useDevis'
+import { useMissedReminders } from '../hooks/useMissedReminders'
 import { useAuthContext } from '../hooks/AuthContext'
 import { useNotifications } from '../hooks/NotificationsContext'
 import { DEVIS_STATUS, DEVIS_STATUS_META, FACTURE_STATUS, FACTURE_STATUS_META, RDV_STATUS, RDV_STATUS_META, normalizeDevisStatus, normalizeFactureStatus, normalizeRdvStatus } from '../lib/statuses'
@@ -100,6 +101,19 @@ export default function Dashboard() {
   const { factures, loading: facturesLoading, encaisse } = useFactures()
   const { stock, loading: stockLoading } = useStock()
   const { devis, loading: devisLoading } = useDevis()
+  const { missedReminders } = useMissedReminders()
+
+  // Combiner les notifications avec les rappels manqués
+  const allNotifications = [
+    ...notifications,
+    ...missedReminders.map(r => ({
+      id: `missed-${r.id}`,
+      type: 'error',
+      message: `Rappel SMS échoué pour ${r.rendez_vous?.patients?.prenom} ${r.rendez_vous?.patients?.nom} (${r.rendez_vous?.date} ${r.rendez_vous?.heure})`,
+      time: new Date(r.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      created_at: r.created_at,
+    })),
+  ]
 
   const today = new Date().toISOString().split('T')[0]
   const todayAppointments = rendezVous.filter(r => {
@@ -305,7 +319,7 @@ export default function Dashboard() {
             <AppointmentList appointments={appointmentsForList} />
           )}
         </div>
-        <Notifications notifications={notifications} />
+        <Notifications notifications={allNotifications} />
         <RevenueChart factures={factures} loading={facturesLoading} />
         <DonutChart data={actesData} />
         <PatientList patients={recentPatients} />
