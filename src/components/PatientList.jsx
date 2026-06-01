@@ -25,7 +25,7 @@ export default function PatientList({ patients = [] }) {
               {p.prenom?.[0]}{p.nom?.[0]}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-gray-900">{p.prenom} {p.nom}</p>
+              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)' }}>{p.prenom} {p.nom}</p>
               <p className="text-xs truncate text-gray-600">{p.detail || formatPhone(p.telephone)}</p>
             </div>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_MAP[p.statut] ?? 'bg-gray-100 text-gray-500'}`}>

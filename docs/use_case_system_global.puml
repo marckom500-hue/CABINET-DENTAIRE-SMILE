@@ -1,0 +1,108 @@
+@startuml DentaCare_Usecase_Final
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam padding 8
+skinparam title {
+  FontSize 25
+  FontColor #003366
+ FontStyle bold
+}
+skinparam actor {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #000000
+  FontSize 24
+  FontStyle bold
+}
+skinparam usecase {
+  BackgroundColor #B3E5FC
+  BorderColor #0277BD
+  FontColor #000000
+  FontSize 30
+}
+skinparam rectangle {
+  BorderColor #0277BD
+  BorderThickness 2
+  BackgroundColor #F0F8FF
+}
+
+title Diagramme de cas d'utilisation système
+
+' ========== ACTEURS PLACÉS VERTICALEMENT (À GAUCHE) ==========
+left to right direction
+
+actor "Médecin" as ActorMed
+actor "Secrétaire" as ActorSec
+actor "Comptable" as ActorComp
+actor "Assistant" as ActorAsst
+actor "Superadmin" as ActorAdmin
+
+' ========== SYSTÈME ==========
+rectangle " " as System {
+
+  usecase "S'authentifier" as UCAuth
+
+  usecase "Gérer patients" as UC1
+  usecase "Consulter dossier médical" as UC2
+  usecase "Planifier RDV" as UC3
+  usecase "Rédiger ordonnance (PDF)" as UC4
+  usecase "Créer devis" as UC5
+  usecase "Convertir devis en facture" as UC6
+  usecase "Gérer facturation" as UC7
+  usecase "Enregistrer paiement" as UC8
+  usecase "Gérer stock & alertes" as UC9
+  usecase "Consulter tableau de bord" as UC10
+  usecase "Gérer utilisateurs & rôles" as UC11
+  usecase "Recevoir rappel SMS" as UC12
+}
+
+' ========== FLÈCHES ACTEUR MÉDECIN ==========
+ActorMed --> UC1
+ActorMed --> UC2
+ActorMed --> UC3
+ActorMed --> UC4
+ActorMed --> UC10
+
+' ========== FLÈCHES ACTEUR SECRÉTAIRE ==========
+ActorSec --> UC1
+ActorSec --> UC3
+ActorSec --> UC5
+ActorSec --> UCAuth
+
+' ========== FLÈCHES ACTEUR COMPTABLE ==========
+ActorComp --> UC7
+ActorComp --> UC8
+ActorComp --> UC10
+
+' ========== FLÈCHES ACTEUR ASSISTANT ==========
+ActorAsst --> UC9
+ActorAsst --> UC3
+ActorAsst --> UCAuth
+
+' ========== FLÈCHES ACTEUR SUPERADMIN ==========
+ActorAdmin --> UCAuth
+ActorAdmin --> UC11
+
+' ========== RELATIONS INCLUDE VERS AUTHENTIFICATION ==========
+UC1 ..> UCAuth : <<include>>
+UC2 ..> UCAuth : <<include>>
+UC3 ..> UCAuth : <<include>>
+UC4 ..> UCAuth : <<include>>
+UC5 ..> UCAuth : <<include>>
+UC6 ..> UCAuth : <<include>>
+UC7 ..> UCAuth : <<include>>
+UC8 ..> UCAuth : <<include>>
+UC9 ..> UCAuth : <<include>>
+UC10 ..> UCAuth : <<include>>
+UC11 ..> UCAuth : <<include>>
+
+' ========== NOTE SMS ==========
+note right of UC12 
+  Action automatique (Edge Function + CRON)
+  Notification SMS 24h et 2h avant RDV
+end note
+
+@enduml
+
+
+
