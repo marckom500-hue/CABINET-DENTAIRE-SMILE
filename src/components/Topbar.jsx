@@ -5,6 +5,7 @@ import FormulairePatient from './FormulairePatient'
 import FormulaireRdv from './FormulaireRdv'
 import ConfirmDialog from './ConfirmDialog'
 import ReminderNotificationBell from './ReminderNotificationBell'
+import NotificationCenter from './NotificationCenter'
 import { usePatients } from '../hooks/usePatients'
 import { useRendezVous } from '../hooks/useRendezVous'
 import { useAuthContext } from '../hooks/AuthContext'
@@ -130,6 +131,7 @@ export default function Topbar() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div />
           <div className="flex items-center gap-3">
+            <NotificationCenter />
             <ReminderNotificationBell />
             {showButtons && (
               <div className="flex flex-wrap gap-2">

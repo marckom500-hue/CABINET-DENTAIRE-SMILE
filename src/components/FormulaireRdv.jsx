@@ -50,6 +50,7 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
   const { patients, loading: loadingPatients, refresh: refreshPatients } = usePatients()
   const [medecins, setMedecins] = useState([])
   const [loadingMedecins, setLoadingMedecins] = useState(true)
+  const [medecinError, setMedecinError] = useState(null)
   const [form, setForm]   = useState(normalizeRdv(rdv))
   const [saving, setSaving] = useState(false)
   const [showQuickForm, setShowQuickForm] = useState(false)
@@ -61,13 +62,29 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
   useEffect(() => {
     const fetchMedecins = async () => {
       setLoadingMedecins(true)
-      const { data } = await supabase
-        .from('users_profiles')
-        .select('id, nom, prenom')
-        .in('role', ['medecin', 'superadmin'])
-        .eq('actif', true)
-      setMedecins(data ?? [])
-      setLoadingMedecins(false)
+      setMedecinError(null)
+      try {
+        const { data, error } = await supabase
+          .from('users_profiles')
+          .select('id, nom, prenom, role, actif')
+          .in('role', ['medecin', 'superadmin'])
+          .eq('actif', true)
+        
+        if (error) {
+          console.error('Erreur chargement médecins:', error)
+          setMedecinError(error.message)
+          setMedecins([])
+        } else {
+          console.log('Médecins chargés:', data)
+          setMedecins(data ?? [])
+        }
+      } catch (err) {
+        console.error('Exception chargement médecins:', err)
+        setMedecinError(err.message)
+        setMedecins([])
+      } finally {
+        setLoadingMedecins(false)
+      }
     }
     fetchMedecins()
   }, [])
@@ -198,10 +215,20 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
         value={form.medecin_id}
         onChange={set('medecin_id')}
         options={medecinOptions}
-        placeholder={loadingMedecins ? 'Chargement des médecins...' : 'Sélectionnez un médecin'}
+        placeholder={loadingMedecins ? 'Chargement des médecins...' : (medecinError ? 'Erreur de chargement' : 'Sélectionnez un médecin')}
         required
-        disabled={loadingMedecins}
+        disabled={loadingMedecins || medecinError}
       />
+      {medecinError && (
+        <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2">
+          ⚠️ Erreur : {medecinError}
+        </div>
+      )}
+      {!loadingMedecins && !medecinError && medecins.length === 0 && (
+        <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+          ⚠️ Aucun médecin disponible. Vérifiez que vous avez des médecins actifs en base.
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <FormField
