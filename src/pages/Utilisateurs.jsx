@@ -585,6 +585,8 @@ export default function Utilisateurs() {
   const [editU,        setEditU]        = useState(null)
   const [viewU,        setViewU]        = useState(null)
   const [confirmD,     setConfirmD]     = useState(null)
+  const [confirmToggle, setConfirmToggle] = useState(null)
+  const [confirmReset,  setConfirmReset]  = useState(null)
   const [showPassword, setShowPassword] = useState(false)
   const [form,         setForm]         = useState(EMPTY_FORM)
   const [saving,       setSaving]       = useState(false)
@@ -713,6 +715,7 @@ export default function Utilisateurs() {
     const { error } = await supabase.from('users_profiles').update({ actif: !u.actif }).eq('id', u.id)
     if (error) { notify({ type: 'error', message: error.message }); return }
     notify({ type: 'success', message: `Utilisateur ${!u.actif ? 'activé' : 'désactivé'}` })
+    setConfirmToggle(null)
     fetchUsers()
   }
 
@@ -723,6 +726,72 @@ export default function Utilisateurs() {
     notify({ type: 'success', message: 'Utilisateur supprimé' })
     setConfirmD(null); fetchUsers()
   }
+
+  // ── Réinitialisation mot de passe ────────────────────────────
+  // const handleResetPassword = async (u) => {
+  //   try {
+  //     const { data: sessionData } = await supabase.auth.getSession()
+  //     if (!sessionData?.session?.access_token) {
+  //       throw new Error('Session expirée. Veuillez vous reconnecter.')
+  //     }
+
+  //     const { data: rawData, error: fnError } = await supabase.functions.invoke('reset-password', {
+  //       body: { user_id: u.id, email: u.email },
+  //       headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+  //     })
+
+  //     if (fnError) throw new Error(fnError.message ?? 'Erreur lors de la réinitialisation')
+
+  //     const response = typeof rawData === 'string' ? JSON.parse(rawData) : rawData
+  //     if (response?.error) throw new Error(response.error)
+
+  //     // Copier le lien dans le presse-papiers
+  //     if (response?.recovery_link) {
+  //       await navigator.clipboard.writeText(response.recovery_link)
+  //       notify({ type: 'success', message: `Lien copié ! Envoyez-le à ${u.email}` })
+  //     } else {
+  //       notify({ type: 'success', message: `Lien généré pour ${u.email}` })
+  //     }
+  //     setConfirmReset(null)
+  //   } catch (err) {
+  //     notify({ type: 'error', message: err?.message ?? 'Erreur' })
+  //     console.error('handleResetPassword:', err)
+  //   }
+  // }
+
+  const handleResetPassword = async (u) => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData?.session?.access_token) {
+      throw new Error('Session expirée. Veuillez vous reconnecter.')
+    }
+
+    const { data: rawData, error: fnError } = await supabase.functions.invoke('reset-password', {
+      body: { user_id: u.id, email: u.email },
+      headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+    })
+
+    if (fnError) throw new Error(fnError.message ?? 'Erreur lors de la réinitialisation')
+
+    const response = typeof rawData === 'string' ? JSON.parse(rawData) : rawData
+    if (response?.error) throw new Error(response.error)
+
+    // Copier le mot de passe temporaire dans le presse-papiers
+    if (response?.temp_password) {
+      await navigator.clipboard.writeText(response.temp_password)
+      notify({
+        type: 'success',
+        message: `Mot de passe temporaire copié : ${response.temp_password}`,
+        duration: 8000, // visible 8 secondes
+      })
+    }
+
+    setConfirmReset(null)
+  } catch (err) {
+    notify({ type: 'error', message: err?.message ?? 'Erreur' })
+    console.error('handleResetPassword:', err)
+  }
+}
 
   const showMedicalFields = form.role === 'medecin' || form.role === 'superadmin'
   const phoneIsValid = PHONE_REGEX.test(form.telephone)
@@ -796,9 +865,9 @@ export default function Utilisateurs() {
                       {(u.role === 'medecin' || u.role === 'superadmin') ? (u.specialite || '—') : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => handleToggleActif(u)}
+                      <button onClick={() => !u.actif ? handleToggleActif(u) : setConfirmToggle(u)}
                         className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full transition-colors ${
-                          u.actif ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          u.actif ? 'bg-green-100 text-green-700 hover:bg-green-200 cursor-pointer' : 'bg-gray-100 text-gray-500 hover:bg-gray-200 cursor-pointer'
                         }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${u.actif ? 'bg-green-500' : 'bg-gray-400'}`} />
                         {u.actif ? 'Actif' : 'Inactif'}
@@ -832,6 +901,11 @@ export default function Utilisateurs() {
                         <button onClick={() => openEdit(u)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Modifier">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button onClick={() => setConfirmReset(u)} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Réinitialiser le mot de passe">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                           </svg>
                         </button>
                         <button onClick={() => setConfirmD(u)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
@@ -1066,6 +1140,18 @@ export default function Utilisateurs() {
       <ConfirmDialog isOpen={!!confirmD} onConfirm={handleDelete} onCancel={() => setConfirmD(null)}
         title="Supprimer l'utilisateur"
         message={`Supprimer définitivement le compte de ${confirmD?.prenom} ${confirmD?.nom} ?`} />
+
+      <ConfirmDialog isOpen={!!confirmToggle} onConfirm={() => handleToggleActif(confirmToggle)} onCancel={() => setConfirmToggle(null)}
+        title="Désactiver l'utilisateur"
+        message={`Êtes-vous sûr de vouloir désactiver ${confirmToggle?.prenom} ${confirmToggle?.nom} ? Il ne pourra plus se connecter.`}
+        confirmLabel="Désactiver"
+        tone="warning" />
+
+      <ConfirmDialog isOpen={!!confirmReset} onConfirm={() => handleResetPassword(confirmReset)} onCancel={() => setConfirmReset(null)}
+        title="Réinitialiser le mot de passe"
+        message={`Envoyer un lien de réinitialisation à ${confirmReset?.email} ?`}
+        confirmLabel="Envoyer"
+        tone="info" />
     </div>
   )
 }

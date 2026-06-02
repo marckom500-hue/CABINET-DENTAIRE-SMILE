@@ -124,19 +124,20 @@ export default function RendezVous() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  {['Date', 'Heure', 'Patient', 'Acte', 'Duree', 'Statut', 'Actions'].map(h => (
+                  {['Date', 'Heure', 'Patient', 'Médecin', 'Acte', 'Duree', 'Statut', 'Actions'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  <tr><td colSpan={7} className="text-center py-12 text-gray-400">Chargement...</td></tr>
+                  <tr><td colSpan={8} className="text-center py-12 text-gray-400">Chargement...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-12 text-gray-400">Aucun rendez-vous trouve</td></tr>
+                  <tr><td colSpan={8} className="text-center py-12 text-gray-400">Aucun rendez-vous trouve</td></tr>
                 ) : filtered.map(r => {
                   const s = RDV_STATUS_META[normalizeRdvStatus(r.statut)] ?? RDV_STATUS_META[RDV_STATUS.ATTENTE]
                   const patient = r.patients
+                  const medecin = r.users_profiles
                   return (
                     <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900">
@@ -145,6 +146,9 @@ export default function RendezVous() {
                       <td className="px-4 py-3 text-gray-600">{r.heure}</td>
                       <td className="px-4 py-3 text-gray-900">
                         {patient ? `${patient.prenom} ${patient.nom}` : `ID: ${r.patient_id}`}
+                      </td>
+                      <td className="px-4 py-3 text-gray-900">
+                        {medecin ? `Dr. ${medecin.prenom} ${medecin.nom}` : 'Non assigné'}
                       </td>
                       <td className="px-4 py-3 text-gray-600">{r.type_acte}</td>
                       <td className="px-4 py-3 text-gray-500">{r.duree} min</td>

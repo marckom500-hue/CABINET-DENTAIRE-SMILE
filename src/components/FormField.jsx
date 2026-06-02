@@ -15,7 +15,9 @@ export default function FormField({
   options = [],
   rows = 3,
   disabled = false,
-  className = ''
+  className = '',
+  hideLabel = false,
+  min
 }) {
   const [touched, setTouched] = useState(false)
 
@@ -90,6 +92,7 @@ export default function FormField({
             inputMode={inputMode}
             maxLength={maxLength}
             pattern={pattern}
+            min={min}
             disabled={disabled}
             className={inputClass}
           />
@@ -99,10 +102,12 @@ export default function FormField({
 
   return (
     <div className="mb-3">
-      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-1)' }}>
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
+      {!hideLabel && (
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-1)' }}>
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+      )}
       
       {renderInput()}
       

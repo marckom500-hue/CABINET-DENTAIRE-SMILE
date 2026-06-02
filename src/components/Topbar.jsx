@@ -7,6 +7,7 @@ import ConfirmDialog from './ConfirmDialog'
 import ReminderNotificationBell from './ReminderNotificationBell'
 import { usePatients } from '../hooks/usePatients'
 import { useRendezVous } from '../hooks/useRendezVous'
+import { useAuthContext } from '../hooks/AuthContext'
 
 const PAGE_TITLES = {
   '/': 'Tableau de bord',
@@ -34,6 +35,7 @@ export default function Topbar() {
   const navigate = useNavigate()
   const { ajouterPatient } = usePatients()
   const { ajouterRdv } = useRendezVous()
+  const { profile, role } = useAuthContext()
 
   // ── État des modales ──────────────────────────────────────────────────
   const [modalPatient, setModalPatient] = useState(false)
@@ -105,42 +107,54 @@ export default function Topbar() {
   return (
     <>
       {/* ── En-tête ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold font-serif tracking-tight" style={{ color: 'var(--text-1)' }}>
-            {title}
-          </h1>
-          <p className="inline-flex items-center gap-2 mt-1">
-            <span className="text-sm font-medium capitalize bg-gray-900 text-white px-3 py-1 rounded-full">{today}</span>
-            <span className="text-sm font-mono font-semibold bg-gray-900 text-white px-3 py-1 rounded-full">{time}</span>
-          </p>
+      <div className="flex flex-col gap-4 pb-6">
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-lg sm:text-xl md:text-2xl font-medium opacity-90">Bienvenue</p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif mt-2">
+                {(role === 'medecin' || role === 'superadmin') && 'Dr. '}
+                {profile?.prenom ? `${profile.prenom} ${profile?.nom || ''}`.trim() : 'Utilisateur'}
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl font-medium opacity-90">
+                {title}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm sm:text-base font-medium opacity-90 capitalize">{today}</p>
+              <p className="text-2xl sm:text-3xl font-mono font-bold mt-1">{time}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <ReminderNotificationBell />
-          {showButtons && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={openRdv}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Nouveau RDV</span>
-              </button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div />
+          <div className="flex items-center gap-3">
+            <ReminderNotificationBell />
+            {showButtons && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={openRdv}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Nouveau RDV</span>
+                </button>
 
-              <button
-                onClick={openPatient}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>Nouveau Patient</span>
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={openPatient}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-3 rounded-2xl transition-all active:scale-95"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  <span>Nouveau Patient</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <Modal

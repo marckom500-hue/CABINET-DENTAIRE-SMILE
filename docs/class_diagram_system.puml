@@ -1,0 +1,204 @@
+@startuml SMILE_Class_Diagram
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam classBackgroundColor #f0f8ff
+skinparam classBorderColor #0d9488
+skinparam arrowColor #0d9488
+skinparam classAttributeIconSize 0
+
+
+' ============================================================
+' ENTITÉS PRINCIPALES
+' ============================================================
+
+class User {
+  - id: UUID
+  - email: string
+  - password_hash: string
+  - created_at: timestamp
+  - updated_at: timestamp
+  - last_sign_in: timestamp
+  - is_anonymous: boolean
+}
+
+class UserProfile {
+  - id: UUID (FK User)
+  - nom: string
+  - prenom: string
+  - telephone: string
+  - email: string
+  - role: enum (superadmin|medecin|secretaire|comptable|assistant)
+  - actif: boolean
+  - specialite: string (nullable)
+  - avatar_url: string (nullable)
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class Patient {
+  - id: UUID
+  - nom: string
+  - prenom: string
+  - telephone: string
+  - email: string
+  - date_naissance: date
+  - adresse: string
+  - groupe_sanguin: string
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class RendezVous {
+  - id: UUID
+  - patient_id: UUID (FK Patient)
+  - medecin_id: UUID (FK UserProfile)
+  - date: date
+  - heure: time
+  - motif: string
+  - notes: string (nullable)
+  - type_acte: string
+  - statut: enum (planifie|recu|annule|urgent)
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class Ordonnance {
+  - id: UUID
+  - patient_id: UUID (FK Patient)
+  - medecin_id: UUID (FK UserProfile)
+  - date_emission: date
+  - medicaments: text
+  - posologie: text
+  - duree_traitement: string
+  - notes: string (nullable)
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class Facture {
+  - id: UUID
+  - patient_id: UUID (FK Patient)
+  - date: date
+  - montant: decimal
+  - acte: string
+  - statut: enum (attente|paye|annule)
+  - notes: string (nullable)
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class Devis {
+  - id: UUID
+  - patient_id: UUID (FK Patient)
+  - numero: string
+  - date_creation: date
+  - montant_total: decimal
+  - statut: enum (brouillon|envoye|accepte|refuse)
+  - description: text
+  - validite_jours: integer
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class Stock {
+  - id: UUID
+  - nom: string
+  - description: string
+  - quantite: integer
+  - quantite_min: integer
+  - prix_unitaire: decimal
+  - categorie: string
+  - date_expiration: date (nullable)
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class RappelSMS {
+  - id: UUID
+  - rdv_id: UUID (FK RendezVous)
+  - statut: enum (envoye|echec_permanent|echec_temporaire)
+  - message: text
+  - erreur: string (nullable)
+  - tentatives: integer
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class RappelsConfig {
+  - id: UUID
+  - actif: boolean
+  - envoi_auto: boolean
+  - delai_heures: integer
+  - message_template: text
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+class Notification {
+  - id: UUID
+  - user_id: UUID (FK UserProfile)
+  - type: enum (success|error|warning|info)
+  - message: string
+  - read: boolean
+  - created_at: timestamp
+}
+
+' ============================================================
+' RELATIONS
+' ============================================================
+
+User "1" -- "1" UserProfile : crée
+UserProfile "1" -- "*" RendezVous : prescrit
+UserProfile "1" -- "*" Ordonnance : rédige
+Patient "1" -- "*" RendezVous : a
+Patient "1" -- "*" Ordonnance : reçoit
+Patient "1" -- "*" Facture : génère
+Patient "1" -- "*" Devis : reçoit
+RendezVous "1" -- "*" RappelSMS : génère
+RappelSMS "*" -- "1" RappelsConfig : utilise
+UserProfile "1" -- "*" Notification : reçoit
+
+' ============================================================
+' NOTES
+' ============================================================
+
+note right of User
+  Authentification Supabase
+  Gestion des sessions
+  JWT tokens
+end note
+
+note right of UserProfile
+  Profil utilisateur
+  Rôles et permissions
+  Spécialité médicale
+  Avatar utilisateur
+end note
+
+note right of Patient
+  Informations patient
+  Historique médical
+  Coordonnées
+end note
+
+note right of RendezVous
+  Gestion des RDV
+  Filtrage par médecin
+  Statuts multiples
+  Lié à un acte dentaire
+end note
+
+note right of Facture
+  Facturation patient
+  Suivi des paiements
+  Montants variables
+end note
+
+note right of RappelSMS
+  Rappels automatiques
+  Intégration SMS
+  Gestion des erreurs
+  Retry logic
+end note
+
+@enduml

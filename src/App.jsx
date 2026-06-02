@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import RendezVous from './pages/RendezVous'
+import MedecinRdv from './pages/MedecinRdv'
 import Patients from './pages/Patients'
 import Ordonnances from './pages/Ordonnances'
 import Facturation from './pages/Facturation'
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/"             element={<Dashboard />} />
         <Route path="/rendez-vous"  element={<RoleGuard module="rendez_vous"><RendezVous /></RoleGuard>} />
+        <Route path="/mes-rdv"      element={<RoleGuard module="rendez_vous"><MedecinRdv /></RoleGuard>} />
         <Route path="/patients"     element={<RoleGuard module="patients"><Patients /></RoleGuard>} />
         <Route path="/ordonnances"  element={<RoleGuard module="ordonnances"><Ordonnances /></RoleGuard>} />
         <Route path="/facturation"  element={<RoleGuard module="facturation"><Facturation /></RoleGuard>} />

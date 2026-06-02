@@ -277,7 +277,7 @@ export default function Dashboard() {
 
   if (profile?.role === 'comptable') {
     return (
-      <div className="space-y-3 md:space-y-4 pb-20 lg:pb-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
+      <div className="space-y-3 md:space-y-4 pb-20 lg:pb-0 lg:h-[calc(100vh-4rem)] lg:overflow-y-auto">
         <Topbar />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -300,7 +300,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-3 md:space-y-4 pb-20 lg:pb-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
+    <div className="space-y-3 md:space-y-4 pb-20 lg:pb-0 lg:h-[calc(100vh-4rem)] lg:overflow-y-auto">
       <Topbar />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

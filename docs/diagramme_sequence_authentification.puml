@@ -1,0 +1,45 @@
+@startuml Authentication_Sequence
+title Authentification Utilisateur
+
+participant "Utilisateur" as user
+participant "Page Login" as login
+participant "AuthContext" as auth
+participant "Supabase" as supabase
+participant "Base de données" as db
+
+user -> login: Accède à la page
+activate login
+login -> login: Affiche formulaire
+login --> user: Formulaire prêt
+
+user -> login: Saisit identifiants
+user -> login: Clique "Se connecter"
+
+login -> auth: login(email, password)
+activate auth
+
+auth -> supabase: Envoie credentials
+activate supabase
+
+supabase -> db: SELECT users_profiles
+activate db
+db --> supabase: Retourne profil
+deactivate db
+
+alt Succès
+  supabase --> auth: Session + user
+  auth --> login: {success: true}
+  login -> login: Sauvegarde localStorage
+  login -> login: Redirige Dashboard
+  login --> user: Connexion réussie
+else Erreur
+  supabase --> auth: Erreur
+  auth --> login: {error: "..."}
+  login --> user: Affiche erreur
+end
+
+deactivate supabase
+deactivate auth
+deactivate login
+
+@enduml

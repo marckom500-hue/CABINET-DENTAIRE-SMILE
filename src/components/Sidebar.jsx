@@ -181,19 +181,33 @@ export default function Sidebar({ onClose }) {
       if (!emailChanged && !passwordChanged) throw new Error('Aucune modification a enregistrer')
       if (passwordChanged && password.length < 6) throw new Error('Le mot de passe doit contenir au moins 6 caracteres')
 
-      const authUpdate = {}
-      if (emailChanged) authUpdate.email = email
-      if (passwordChanged) authUpdate.password = password
-
-      const { error: authError } = await supabase.auth.updateUser(authUpdate)
-      if (authError) throw authError
-
-      if (emailChanged) {
+      // Modifier l'email SANS modifier le mot de passe
+      if (emailChanged && !passwordChanged) {
         const { error: profileError } = await supabase
           .from('users_profiles')
           .update({ email })
           .eq('id', profile.id)
         if (profileError) throw profileError
+
+        // Mettre a jour l'email dans auth aussi
+        const { error: authError } = await supabase.auth.updateUser({ email })
+        if (authError) throw authError
+      } else {
+        // Modifier email ET mot de passe
+        const authUpdate = {}
+        if (emailChanged) authUpdate.email = email
+        if (passwordChanged) authUpdate.password = password
+
+        const { error: authError } = await supabase.auth.updateUser(authUpdate)
+        if (authError) throw authError
+
+        if (emailChanged) {
+          const { error: profileError } = await supabase
+            .from('users_profiles')
+            .update({ email })
+            .eq('id', profile.id)
+          if (profileError) throw profileError
+        }
       }
 
       await refreshProfile()
@@ -520,14 +534,14 @@ export default function Sidebar({ onClose }) {
                 )}
 
                 {editingAccess && (
-                  <div className="space-y-3">
+                  <div className="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
                       <input
                         type="email"
                         value={accessForm.email}
                         onChange={e => setAccessForm(f => ({ ...f, email: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
                       />
                     </div>
                     <div>
@@ -538,7 +552,7 @@ export default function Sidebar({ onClose }) {
                           value={accessForm.password}
                           onChange={e => setAccessForm(f => ({ ...f, password: e.target.value }))}
                           placeholder="Laisser vide pour ne pas changer"
-                          className="w-full px-3 py-2 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                          className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
                         />
                         <button
                           type="button"

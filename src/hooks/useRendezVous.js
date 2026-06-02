@@ -11,7 +11,7 @@ export function useRendezVous() {
     setLoading(true)
     const { data } = await supabase
       .from('rendez_vous')
-      .select('*, patients(nom, prenom, telephone)')
+      .select('*, patients(nom, prenom, telephone), users_profiles(nom, prenom)')
       .order('date', { ascending: true })
     setRendezVous(data ?? [])
     setLoading(false)

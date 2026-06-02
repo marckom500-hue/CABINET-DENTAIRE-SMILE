@@ -20,6 +20,7 @@ export const ROLES_COLORS = {
 export const PERMISSIONS = {
   dashboard:     { superadmin:'complet',   medecin:'complet',  secretaire:'partiel',  comptable:'partiel',   assistant:'limite'  },
   rendez_vous:   { superadmin:'crud',      medecin:'crud',     secretaire:'crud',     comptable:false,       assistant:'lecture' },
+  mes_rdv:       { superadmin:'crud',      medecin:'crud',     secretaire:false,      comptable:false,       assistant:false     },
   patients:      { superadmin:'crud',      medecin:'crud',     secretaire:'crud',     comptable:false,       assistant:'lecture' },
   ordonnances:   { superadmin:'crud',      medecin:'crud',     secretaire:false,      comptable:false,       assistant:false     },
   facturation:   { superadmin:'crud',      medecin:'lecture',  secretaire:'crud',     comptable:'crud',      assistant:false     },
@@ -45,6 +46,7 @@ export function getNavItems(role) {
   const all = [
     { path:'/',             label:'Tableau de bord', module:'dashboard',     icon:'home'     },
     { path:'/rendez-vous',  label:'Rendez-vous',     module:'rendez_vous',   icon:'calendar' },
+    { path:'/mes-rdv',      label:'Mes RDV',         module:'mes_rdv',       icon:'calendar' },
     { path:'/patients',     label:'Patients',         module:'patients',      icon:'users'    },
     { path:'/ordonnances',  label:'Ordonnances',      module:'ordonnances',   icon:'document' },
     { path:'/facturation',  label:'Facturation',      module:'facturation',   icon:'invoice'  },

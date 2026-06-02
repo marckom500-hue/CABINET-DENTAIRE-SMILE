@@ -15,15 +15,15 @@ skinparam actor {
   FontStyle bold
 }
 skinparam usecase {
-  BackgroundColor #B3E5FC
-  BorderColor #0277BD
+  BackgroundColor #00a9ff
+  BorderColor #000000
   FontColor #000000
   FontSize 30
 }
 skinparam rectangle {
   BorderColor #0277BD
-  BorderThickness 2
-  BackgroundColor #F0F8FF
+  BorderThickness 5
+  BackgroundColor #00a9ff
 }
 
 title Diagramme de cas d'utilisation système
@@ -36,6 +36,7 @@ actor "Secrétaire" as ActorSec
 actor "Comptable" as ActorComp
 actor "Assistant" as ActorAsst
 actor "Superadmin" as ActorAdmin
+actor "Patient" as ActorPatient
 
 ' ========== SYSTÈME ==========
 rectangle " " as System {
@@ -45,6 +46,7 @@ rectangle " " as System {
   usecase "Gérer patients" as UC1
   usecase "Consulter dossier médical" as UC2
   usecase "Planifier RDV" as UC3
+  usecase "Consulter ses RDV" as UC3b
   usecase "Rédiger ordonnance (PDF)" as UC4
   usecase "Créer devis" as UC5
   usecase "Convertir devis en facture" as UC6
@@ -57,9 +59,9 @@ rectangle " " as System {
 }
 
 ' ========== FLÈCHES ACTEUR MÉDECIN ==========
-ActorMed --> UC1
 ActorMed --> UC2
 ActorMed --> UC3
+ActorMed --> UC3b
 ActorMed --> UC4
 ActorMed --> UC10
 
@@ -67,6 +69,7 @@ ActorMed --> UC10
 ActorSec --> UC1
 ActorSec --> UC3
 ActorSec --> UC5
+ActorSec --> UC6
 ActorSec --> UCAuth
 
 ' ========== FLÈCHES ACTEUR COMPTABLE ==========
@@ -83,10 +86,14 @@ ActorAsst --> UCAuth
 ActorAdmin --> UCAuth
 ActorAdmin --> UC11
 
+' ========== FLÈCHES ACTEUR PATIENT ==========
+ActorPatient --> UC12 : reçoit
+
 ' ========== RELATIONS INCLUDE VERS AUTHENTIFICATION ==========
 UC1 ..> UCAuth : <<include>>
 UC2 ..> UCAuth : <<include>>
 UC3 ..> UCAuth : <<include>>
+UC3b ..> UCAuth : <<include>>
 UC4 ..> UCAuth : <<include>>
 UC5 ..> UCAuth : <<include>>
 UC6 ..> UCAuth : <<include>>
@@ -96,13 +103,19 @@ UC9 ..> UCAuth : <<include>>
 UC10 ..> UCAuth : <<include>>
 UC11 ..> UCAuth : <<include>>
 
+' ========== RELATION RAPPEL SMS ==========
+UC3 ..> UC12 : <<extend>>
+
 ' ========== NOTE SMS ==========
-note right of UC12 
-  Action automatique (Edge Function + CRON)
-  Notification SMS 24h et 2h avant RDV
-end note
+' note right of UC12 
+'   Action automatique (Edge Function + CRON)
+'   Notification SMS 2h avant RDV
+'   Acteur : Patient (reçoit le SMS)
+' end note
 
 @enduml
+
+
 
 
 

@@ -83,6 +83,7 @@ CREATE POLICY "patients_write" ON public.patients FOR ALL    USING (public.get_m
 CREATE TABLE IF NOT EXISTS public.rendez_vous (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   patient_id  UUID REFERENCES public.patients(id) ON DELETE SET NULL,
+  medecin_id  UUID REFERENCES public.users_profiles(id) ON DELETE SET NULL,
   date        DATE NOT NULL,
   heure       TEXT NOT NULL,
   type_acte   TEXT NOT NULL DEFAULT 'Consultation',
