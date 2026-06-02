@@ -529,3 +529,19 @@ body { font-family: 'DM Sans', sans-serif; }
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* Animation slide-up pour modale mobile */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

@@ -31,10 +31,15 @@ RETURNS TRIGGER AS $$
 DECLARE
   patient_name TEXT;
   medecin_name TEXT;
+  formatted_time TEXT;
 BEGIN
   -- Récupérer les noms du patient et médecin
   SELECT prenom || ' ' || nom INTO patient_name FROM public.patients WHERE id = NEW.patient_id;
   SELECT prenom || ' ' || nom INTO medecin_name FROM public.users_profiles WHERE id = NEW.medecin_id;
+
+  -- Formater l'heure au format 24h (13h00 au lieu de 01:00 PM)
+  formatted_time := LPAD(EXTRACT(HOUR FROM NEW.heure::time)::text, 2, '0') || 'h' ||
+                    LPAD(EXTRACT(MINUTE FROM NEW.heure::time)::text, 2, '0');
 
   -- Insérer la notification pour le médecin
   INSERT INTO public.notifications (user_id, type, title, message, related_id, related_type)
@@ -42,7 +47,7 @@ BEGIN
     NEW.medecin_id,
     'rdv',
     'Nouveau RDV assigné',
-    'RDV : ' || COALESCE(patient_name, 'Patient inconnu') || ' le ' || TO_CHAR(NEW.date, 'DD/MM/YYYY') || ' à ' || NEW.heure || ' (' || NEW.type_acte || ')',
+    'RDV : ' || COALESCE(patient_name, 'Patient inconnu') || ' le ' || TO_CHAR(NEW.date, 'DD/MM/YYYY') || ' à ' || formatted_time || ' (' || NEW.type_acte || ')',
     NEW.id,
     'rendez_vous'
   );
@@ -65,7 +70,7 @@ CREATE OR REPLACE FUNCTION public.notify_medecin_rdv_modified()
 RETURNS TRIGGER AS $$
 DECLARE
   patient_name TEXT;
-  change_summary TEXT;
+  formatted_time TEXT;
 BEGIN
   -- Notifier seulement si le médecin a changé ou les détails importants
   IF NEW.medecin_id != OLD.medecin_id OR 
@@ -74,6 +79,10 @@ BEGIN
     
     SELECT prenom || ' ' || nom INTO patient_name FROM public.patients WHERE id = NEW.patient_id;
 
+    -- Formater l'heure au format 24h (13h00 au lieu de 01:00 PM)
+    formatted_time := LPAD(EXTRACT(HOUR FROM NEW.heure::time)::text, 2, '0') || 'h' ||
+                      LPAD(EXTRACT(MINUTE FROM NEW.heure::time)::text, 2, '0');
+
     IF NEW.medecin_id != OLD.medecin_id THEN
       -- Notifier le nouveau médecin
       INSERT INTO public.notifications (user_id, type, title, message, related_id, related_type)
@@ -81,7 +90,7 @@ BEGIN
         NEW.medecin_id,
         'rdv',
         'RDV réassigné',
-        'Réassignation : ' || COALESCE(patient_name, 'Patient inconnu') || ' le ' || TO_CHAR(NEW.date, 'DD/MM/YYYY') || ' à ' || NEW.heure,
+        'Réassignation : ' || COALESCE(patient_name, 'Patient inconnu') || ' le ' || TO_CHAR(NEW.date, 'DD/MM/YYYY') || ' à ' || formatted_time,
         NEW.id,
         'rendez_vous'
       );
@@ -92,7 +101,7 @@ BEGIN
         NEW.medecin_id,
         'rdv',
         'RDV modifié',
-        'Modification : ' || COALESCE(patient_name, 'Patient inconnu') || ' le ' || TO_CHAR(NEW.date, 'DD/MM/YYYY') || ' à ' || NEW.heure,
+        'Modification : ' || COALESCE(patient_name, 'Patient inconnu') || ' le ' || TO_CHAR(NEW.date, 'DD/MM/YYYY') || ' à ' || formatted_time,
         NEW.id,
         'rendez_vous'
       );
