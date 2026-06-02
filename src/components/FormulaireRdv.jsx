@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import FormField from './FormField'
+import TimePickerAmPm from './TimePickerAmPm'
 import { usePatients } from '../hooks/usePatients'
 import { supabase } from '../lib/supabase'
 import { ACTES_OPTIONS } from '../lib/actes'
@@ -241,9 +242,7 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
           validationState={dateTouched ? (dateIsValid ? 'success' : 'error') : undefined}
           validationMessage={dateValidationMessage()}
         />
-        <FormField
-          label="Heure"
-          type="time"
+        <TimePickerAmPm
           value={form.heure}
           onChange={set('heure')}
           required
