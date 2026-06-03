@@ -1,9 +1,8 @@
 export const RDV_STATUS = {
-  CONFIRME: 'confirme',
-  ATTENTE: 'attente',
-  URGENT: 'urgent',
-  RECU: 'recu',
-  ANNULE: 'annule',
+  PROGRAMME: 'programmé',
+  CONFIRME: 'confirmé',
+  TERMINE: 'terminé',
+  ANNULE: 'annulé',
 }
 
 export const DEVIS_STATUS = {
@@ -30,11 +29,10 @@ function normalizeText(value = '') {
 
 export function normalizeRdvStatus(statut) {
   const value = normalizeText(statut)
-  if (value === 'recu') return RDV_STATUS.RECU
+  if (value === 'confirme') return RDV_STATUS.CONFIRME
+  if (value === 'termine') return RDV_STATUS.TERMINE
   if (value === 'annule') return RDV_STATUS.ANNULE
-  if (value === 'urgent') return RDV_STATUS.URGENT
-  if (value === 'attente') return RDV_STATUS.ATTENTE
-  return RDV_STATUS.CONFIRME
+  return RDV_STATUS.PROGRAMME
 }
 
 export function normalizeDevisStatus(statut) {
@@ -56,11 +54,10 @@ export function normalizeFactureStatus(statut) {
 }
 
 export const RDV_STATUS_META = {
-  [RDV_STATUS.CONFIRME]: { label: 'Confirme', cls: 'bg-teal-100 text-teal-700', color: '#0d9488' },
-  [RDV_STATUS.ATTENTE]: { label: 'En attente', cls: 'bg-amber-100 text-amber-700', color: '#f59e0b' },
-  [RDV_STATUS.URGENT]: { label: 'Urgent', cls: 'bg-red-100 text-red-700', color: '#f43f5e' },
-  [RDV_STATUS.RECU]: { label: 'Recu au cabinet', cls: 'bg-emerald-100 text-emerald-700', color: '#10b981' },
-  [RDV_STATUS.ANNULE]: { label: 'Annule', cls: 'bg-gray-100 text-gray-500', color: '#94a3b8' },
+  [RDV_STATUS.PROGRAMME]: { label: 'Programmé', cls: 'bg-blue-100 text-blue-700', color: '#3b82f6' },
+  [RDV_STATUS.CONFIRME]: { label: 'Confirmé', cls: 'bg-amber-100 text-amber-700', color: '#f59e0b' },
+  [RDV_STATUS.TERMINE]: { label: 'Terminé', cls: 'bg-emerald-100 text-emerald-700', color: '#10b981' },
+  [RDV_STATUS.ANNULE]: { label: 'Annulé', cls: 'bg-gray-100 text-gray-500', color: '#94a3b8' },
 }
 
 export const DEVIS_STATUS_META = {

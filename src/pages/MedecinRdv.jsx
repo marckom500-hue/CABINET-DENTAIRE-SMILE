@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import { useMedecinRdv } from '../hooks/useMedecinRdv'
-import { RDV_STATUS_META, normalizeRdvStatus } from '../lib/statuses'
-import CalendarView from '../components/CalendarView'
+import { useMissedAppointmentsDetector } from '../hooks/useMissedAppointmentsDetector'
+import { RDV_STATUS, RDV_STATUS_META, normalizeRdvStatus } from '../lib/statuses'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { useNotifications } from '../hooks/NotificationsContext'
+import { supabase } from '../lib/supabase'
 
 export default function MedecinRdv() {
-  const { rdvMedecin, loading, getRdvParJour, getRdvParSemaine, getRdvParMois } = useMedecinRdv()
-  const [viewMode, setViewMode] = useState('jour') // 'jour', 'semaine', 'mois'
+  const { rdvMedecin, loading, getRdvParJour, getRdvParSemaine, getRdvParMois, confirmerRdv, annulerRdv } = useMedecinRdv()
+  useMissedAppointmentsDetector() // Détecter et marquer automatiquement les absents
+  const { notify } = useNotifications()
+  const [viewMode, setViewMode] = useState('jour')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [confirmDialog, setConfirmDialog] = useState(null)
+  const [terminantRdv, setTerminantRdv] = useState(null)
 
   const today = new Date()
   const currentYear = today.getFullYear()
@@ -51,6 +58,69 @@ export default function MedecinRdv() {
 
   const handleToday = () => {
     setSelectedDate(new Date().toISOString().split('T')[0])
+  }
+
+  // Confirmer RDV: programmé → confirmé (médecin approuve)
+  const handleConfirmerRdv = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('rendez_vous')
+        .update({ statut: 'confirmé' })
+        .eq('id', id)
+      
+      if (error) throw error
+      notify({ type: 'success', message: 'RDV confirmé ✓' })
+    } catch (err) {
+      notify({ type: 'error', message: 'Erreur lors de la confirmation' })
+    }
+  }
+
+  // Terminer RDV: confirmé → terminé + patient_present=true
+  const handleTerminerRdv = async (rdv) => {
+    try {
+      const { error } = await supabase
+        .from('rendez_vous')
+        .update({ statut: 'terminé', patient_present: true })
+        .eq('id', rdv.id)
+      
+      if (error) throw error
+      notify({ type: 'success', message: 'RDV terminé ✓' })
+      setTerminantRdv(null)
+    } catch (err) {
+      notify({ type: 'error', message: 'Erreur lors de la fin du RDV' })
+    }
+  }
+
+  // Marquer absent: confirmé → terminé + patient_present=false
+  const handleMarquerAbsent = async (rdv) => {
+    try {
+      const { error } = await supabase
+        .from('rendez_vous')
+        .update({ statut: 'terminé', patient_present: false })
+        .eq('id', rdv.id)
+      
+      if (error) throw error
+      notify({ type: 'success', message: 'Patient marqué absent ✗' })
+      setTerminantRdv(null)
+    } catch (err) {
+      notify({ type: 'error', message: 'Erreur lors du marquage absent' })
+    }
+  }
+
+  // Annuler RDV
+  const handleAnnulerRdv = async () => {
+    try {
+      const { error } = await supabase
+        .from('rendez_vous')
+        .update({ statut: 'annulé' })
+        .eq('id', confirmDialog.id)
+      
+      if (error) throw error
+      notify({ type: 'success', message: 'RDV annulé' })
+      setConfirmDialog(null)
+    } catch (err) {
+      notify({ type: 'error', message: 'Erreur lors de l\'annulation' })
+    }
   }
 
   return (
@@ -108,6 +178,15 @@ export default function MedecinRdv() {
       {/* Titre */}
       <h3 className="text-lg font-semibold text-gray-900">{titre}</h3>
 
+      {/* Guide d'utilisation */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+        <strong>Workflow médecin:</strong> Programmé → 
+        <span className="font-semibold text-blue-600">Confirmer</span> → 
+        <span className="font-semibold text-blue-600">Terminer</span> ou 
+        <span className="font-semibold text-blue-600">Absent</span> ou 
+        <span className="font-semibold text-red-600">Annuler</span>
+      </div>
+
       {/* Liste des RDV */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {loading ? (
@@ -119,7 +198,7 @@ export default function MedecinRdv() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  {['Date', 'Heure', 'Patient', 'Acte', 'Durée', 'Statut'].map(h => (
+                  {['Date', 'Heure', 'Patient', 'Acte', 'Durée', 'Statut', 'Actions'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
                       {h}
                     </th>
@@ -128,8 +207,12 @@ export default function MedecinRdv() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {rdvAffichees.map(r => {
-                  const s = RDV_STATUS_META[normalizeRdvStatus(r.statut)] ?? RDV_STATUS_META['attente']
+                  const statut = normalizeRdvStatus(r.statut)
+                  const s = RDV_STATUS_META[statut] ?? RDV_STATUS_META[RDV_STATUS.PROGRAMME]
                   const patient = r.patients
+                  const estProgramme = statut === RDV_STATUS.PROGRAMME
+                  const estConfirme = statut === 'confirmé'
+                  
                   return (
                     <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900">
@@ -144,6 +227,45 @@ export default function MedecinRdv() {
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${s.cls}`}>{s.label}</span>
                       </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1.5 flex-wrap">
+                          {/* CONFIRMER - Visible quand programmé */}
+                          {estProgramme && (
+                            <button
+                              onClick={() => handleConfirmerRdv(r.id)}
+                              className="px-2.5 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 shadow-md rounded-lg transition-all"
+                              title="Confirmer ce RDV"
+                            >
+                              ✓ Confirmer
+                            </button>
+                          )}
+
+                          {/* TERMINER - Visible et actif seulement si confirmé */}
+                          <button
+                            onClick={() => setTerminantRdv(r)}
+                            disabled={!estConfirme}
+                            className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all ${
+                              estConfirme
+                                ? 'text-white bg-blue-600 hover:bg-blue-700 shadow-md cursor-pointer'
+                                : 'text-gray-400 bg-gray-100 cursor-not-allowed opacity-50'
+                            }`}
+                            title={estConfirme ? 'Terminer ce RDV' : 'Confirmez d\'abord le RDV'}
+                          >
+                            ✓ Terminer
+                          </button>
+
+                          {/* ANNULER - Visible si programmé ou confirmé */}
+                          {(estProgramme || estConfirme) && (
+                            <button
+                              onClick={() => setConfirmDialog(r)}
+                              className="px-2.5 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 shadow-md rounded-lg transition-all"
+                              title="Annuler ce RDV"
+                            >
+                              ✗ Annuler
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   )
                 })}
@@ -154,24 +276,93 @@ export default function MedecinRdv() {
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-sm text-gray-600">Total RDV</p>
           <p className="text-2xl font-bold text-gray-900">{rdvAffichees.length}</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">Confirmés</p>
-          <p className="text-2xl font-bold text-green-600">
-            {rdvAffichees.filter(r => normalizeRdvStatus(r.statut) === 'confirme').length}
+          <p className="text-sm text-gray-600">Programmés</p>
+          <p className="text-2xl font-bold text-blue-600">
+            {rdvAffichees.filter(r => normalizeRdvStatus(r.statut) === RDV_STATUS.PROGRAMME).length}
           </p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">En attente</p>
-          <p className="text-2xl font-bold text-yellow-600">
-            {rdvAffichees.filter(r => normalizeRdvStatus(r.statut) === 'attente').length}
+          <p className="text-sm text-gray-600">Confirmés</p>
+          <p className="text-2xl font-bold text-green-600">
+            {rdvAffichees.filter(r => normalizeRdvStatus(r.statut) === 'confirmé').length}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">Terminés</p>
+          <p className="text-2xl font-bold text-emerald-600">
+            {rdvAffichees.filter(r => normalizeRdvStatus(r.statut) === RDV_STATUS.TERMINE).length}
           </p>
         </div>
       </div>
+
+      {/* Dialog pour terminer RDV (présent/absent) */}
+      <ConfirmDialog
+        isOpen={!!terminantRdv}
+        onConfirm={() => handleTerminerRdv(terminantRdv)}
+        onCancel={() => setTerminantRdv(null)}
+        title="Terminer le RDV"
+        message={terminantRdv ? `Patient ${terminantRdv.patients?.prenom} ${terminantRdv.patients?.nom} présent et consultation terminée?` : ''}
+        confirmLabel="Oui, terminé"
+        cancelLabel="Annuler"
+        tone="success"
+      />
+
+      {/* Dialog pour absence patient */}
+      {terminantRdv && (
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center p-4 z-50 pointer-events-none">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/40 pointer-events-auto"
+            onClick={() => setTerminantRdv(null)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 pointer-events-auto space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Marquer absent?</h3>
+            <p className="text-sm text-gray-600">
+              Patient <strong>{terminantRdv?.patients?.prenom} {terminantRdv?.patients?.nom}</strong> n'est pas venu?
+            </p>
+            
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setTerminantRdv(null)}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleMarquerAbsent(terminantRdv)}
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                ✗ Absent
+              </button>
+              <button
+                onClick={() => handleTerminerRdv(terminantRdv)}
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+              >
+                ✓ Présent
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog annulation */}
+      <ConfirmDialog
+        isOpen={!!confirmDialog}
+        onConfirm={handleAnnulerRdv}
+        onCancel={() => setConfirmDialog(null)}
+        title="Annuler le RDV"
+        message={confirmDialog ? `Êtes-vous sûr de vouloir annuler ce RDV avec ${confirmDialog.patients?.prenom} ${confirmDialog.patients?.nom}?` : ''}
+        confirmLabel="Annuler"
+        tone="warning"
+      />
     </div>
   )
 }

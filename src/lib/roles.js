@@ -55,6 +55,7 @@ export function getNavItems(role) {
     { path:'/rappels',      label:'Rappels SMS',       module:'rappels',       icon:'bell'     },
     { path:'/rapports',     label:'Rapports',         module:'rapports',      icon:'chart'    },
     { path:'/utilisateurs', label:'Utilisateurs',     module:'gestion_users', icon:'admin'    },
+    { path:'/admin-settings', label:'Paramètres Admin', module:'gestion_users', icon:'admin'  },
   ]
   return all.filter(item => canAccess(role, item.module))
 }

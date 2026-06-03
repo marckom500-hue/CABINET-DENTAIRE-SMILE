@@ -10,15 +10,14 @@ import { RDV_STATUS, RDV_STATUS_META, normalizeRdvStatus } from '../lib/statuses
 const FILTERS = [
   { key: 'tous', label: 'Tous' },
   { key: "aujourd'hui", label: "Aujourd'hui" },
-  { key: RDV_STATUS.CONFIRME, label: 'Confirmes' },
-  { key: RDV_STATUS.URGENT, label: 'Urgents' },
-  { key: RDV_STATUS.ATTENTE, label: 'En attente' },
-  { key: RDV_STATUS.RECU, label: 'Recus au cabinet' },
-  { key: RDV_STATUS.ANNULE, label: 'Annules' },
+  { key: RDV_STATUS.PROGRAMME, label: 'Programmés' },
+  { key: 'confirmé', label: 'Confirmés' },
+  { key: RDV_STATUS.TERMINE, label: 'Terminés' },
+  { key: RDV_STATUS.ANNULE, label: 'Annulés' },
 ]
 
 export default function RendezVous() {
-  const { rendezVous, loading, ajouterRdv, modifierRdv, supprimerRdv } = useRendezVous()
+  const { rendezVous, loading, ajouterRdv, modifierRdv, annulerRdv } = useRendezVous()
   const [modal, setModal] = useState(false)
   const [editR, setEditR] = useState(null)
   const [confirmD, setConfirmD] = useState(null)
@@ -124,18 +123,18 @@ export default function RendezVous() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  {['Date', 'Heure', 'Patient', 'Médecin', 'Acte', 'Duree', 'Statut', 'Actions'].map(h => (
+                  {['Date', 'Heure', 'Patient', 'Médecin', 'Acte', 'Duree', 'Statut', 'Présence', 'Actions'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  <tr><td colSpan={8} className="text-center py-12 text-gray-400">Chargement...</td></tr>
+                  <tr><td colSpan={9} className="text-center py-12 text-gray-400">Chargement...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="text-center py-12 text-gray-400">Aucun rendez-vous trouve</td></tr>
+                  <tr><td colSpan={9} className="text-center py-12 text-gray-400">Aucun rendez-vous trouve</td></tr>
                 ) : filtered.map(r => {
-                  const s = RDV_STATUS_META[normalizeRdvStatus(r.statut)] ?? RDV_STATUS_META[RDV_STATUS.ATTENTE]
+                  const s = RDV_STATUS_META[normalizeRdvStatus(r.statut)] ?? RDV_STATUS_META[RDV_STATUS.PROGRAMME]
                   const patient = r.patients
                   const medecin = r.users_profiles
                   return (
@@ -156,6 +155,15 @@ export default function RendezVous() {
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${s.cls}`}>{s.label}</span>
                       </td>
                       <td className="px-4 py-3">
+                        {r.statut === 'terminé' && (
+                          r.patient_present === true ? (
+                            <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">✓ Présent</span>
+                          ) : r.patient_present === false ? (
+                            <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded font-medium">✗ Absent</span>
+                          ) : null
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
                         <PermissionGate module="rendez_vous" requireWrite>
                           <div className="flex gap-1">
                             <button onClick={() => openEdit(r)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">
@@ -165,7 +173,7 @@ export default function RendezVous() {
                             </button>
                             <button onClick={() => setConfirmD(r)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
                           </div>
@@ -183,9 +191,11 @@ export default function RendezVous() {
       <Modal isOpen={modal} onClose={() => setModal(false)} title={editR ? 'Modifier le RDV' : 'Nouveau rendez-vous'} confirmOnClose>
         <FormulaireRdv rdv={editR} onSubmit={handleSubmit} onCancel={() => setModal(false)} />
       </Modal>
-      <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await supprimerRdv(confirmD.id); setConfirmD(null) } catch {} }}
-        onCancel={() => setConfirmD(null)} title="Supprimer le RDV"
-        message="Supprimer definitivement ce rendez-vous ?" />
+      <ConfirmDialog isOpen={!!confirmD} onConfirm={async () => { try { await annulerRdv(confirmD.id); setConfirmD(null) } catch {} }}
+        onCancel={() => setConfirmD(null)} title="Annuler le RDV"
+        message="Êtes-vous sûr de vouloir annuler ce rendez-vous ?"
+        confirmLabel="Annuler"
+        tone="warning" />
     </div>
   )
 }

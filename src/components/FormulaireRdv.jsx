@@ -11,11 +11,9 @@ import { checkSlotAvailability, getAvailableSlots } from '../hooks/useSlotAvaila
 import { useNotifications } from '../hooks/NotificationsContext'
 
 const STATUTS = [
-  { value: RDV_STATUS.CONFIRME, label: RDV_STATUS_META[RDV_STATUS.CONFIRME].label },
-  { value: RDV_STATUS.ATTENTE,  label: RDV_STATUS_META[RDV_STATUS.ATTENTE].label  },
-  { value: RDV_STATUS.URGENT,   label: RDV_STATUS_META[RDV_STATUS.URGENT].label   },
-  { value: RDV_STATUS.RECU,     label: RDV_STATUS_META[RDV_STATUS.RECU].label     },
-  { value: RDV_STATUS.ANNULE,   label: RDV_STATUS_META[RDV_STATUS.ANNULE].label   },
+  { value: RDV_STATUS.PROGRAMME, label: RDV_STATUS_META[RDV_STATUS.PROGRAMME].label },
+  { value: RDV_STATUS.TERMINE,   label: RDV_STATUS_META[RDV_STATUS.TERMINE].label   },
+  { value: RDV_STATUS.ANNULE,    label: RDV_STATUS_META[RDV_STATUS.ANNULE].label    },
 ]
 
 const DUREES = [
@@ -29,7 +27,7 @@ const DUREES = [
 const empty = {
   patient_id: '', medecin_id: '', date: '', heure: '',
   type_acte: 'Consultation', duree: '30',
-  statut: RDV_STATUS.CONFIRME, notes: '',
+  statut: RDV_STATUS.PROGRAMME, notes: '',
 }
 const today = new Date().toISOString().split('T')[0]
 
@@ -264,13 +262,6 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
           value={form.duree}
           onChange={set('duree')}
           options={DUREES}
-        />
-        <FormField
-          label="Statut"
-          type="select"
-          value={form.statut}
-          onChange={set('statut')}
-          options={STATUTS}
         />
       </div>
 

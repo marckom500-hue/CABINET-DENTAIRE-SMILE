@@ -134,7 +134,7 @@ export default function Dashboard() {
   }))
 
   const recentPatients = rendezVous
-    .filter(r => r.patients && normalizeRdvStatus(r.statut) === RDV_STATUS.RECU)
+    .filter(r => r.patients && normalizeRdvStatus(r.statut) === RDV_STATUS.TERMINE && r.patient_present === true)
     .sort((a, b) => getRdvDateTime(b) - getRdvDateTime(a))
     .reduce((list, rdv) => {
       const id = rdv.patient_id ?? `${rdv.patients.nom}-${rdv.patients.prenom}-${rdv.patients.telephone}`
@@ -170,7 +170,6 @@ export default function Dashboard() {
     }))
 
   const totalPatients = patients.length
-  const urgentToday = todayAppointments.filter(a => normalizeRdvStatus(a.statut) === RDV_STATUS.URGENT).length
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
 
@@ -194,8 +193,8 @@ export default function Dashboard() {
     {
       id: 2,
       label: "RDV aujourd'hui",
-      value: todayAppointments.length.toString(),
-      trend: `${urgentToday} urgents`,
+      value: todayAppointments.filter(r => normalizeRdvStatus(r.statut) === RDV_STATUS.PROGRAMME).length.toString(),
+      trend: `${todayAppointments.filter(r => normalizeRdvStatus(r.statut) === RDV_STATUS.TERMINE && r.patient_present).length} termines`,
       trendUp: null,
       color: 'blue',
       icon: 'calendar',
@@ -208,15 +207,6 @@ export default function Dashboard() {
       trendUp: true,
       color: 'green',
       icon: 'money',
-    },
-    {
-      id: 4,
-      label: 'Urgences',
-      value: urgentToday.toString(),
-      trend: `${rendezVous.filter(r => normalizeRdvStatus(r.statut) === RDV_STATUS.URGENT).length} au total`,
-      trendUp: urgentToday > 0 ? false : null,
-      color: 'red',
-      icon: 'alert',
     },
   ]
 

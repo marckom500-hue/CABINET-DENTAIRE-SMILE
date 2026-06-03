@@ -14,6 +14,7 @@ import Stock from './pages/Stock'
 import Rappels from './pages/Rappels'
 import Rapports from './pages/Rapports'
 import Utilisateurs from './pages/Utilisateurs'
+import AdminSettings from './pages/AdminSettings'
 import { NotificationsProvider } from './hooks/NotificationsContext'
 
 function AppRoutes() {
@@ -44,6 +45,7 @@ function AppRoutes() {
         <Route path="/rappels"      element={<RoleGuard module="rappels"><Rappels /></RoleGuard>} />
         <Route path="/rapports"     element={<RoleGuard module="rapports"><Rapports /></RoleGuard>} />
         <Route path="/utilisateurs" element={<RoleGuard module="gestion_users"><Utilisateurs /></RoleGuard>} />
+        <Route path="/admin-settings" element={<RoleGuard module="gestion_users"><AdminSettings /></RoleGuard>} />
         <Route path="*"             element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

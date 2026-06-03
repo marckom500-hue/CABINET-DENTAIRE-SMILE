@@ -43,12 +43,26 @@ export function useMedecinRdv() {
     })
   }
 
+  const confirmerRdv = async (id) => {
+    const { error } = await supabase.from('rendez_vous').update({ statut: 'confirme' }).eq('id', id)
+    if (error) throw error
+    await fetch()
+  }
+
+  const annulerRdv = async (id) => {
+    const { error } = await supabase.from('rendez_vous').update({ statut: 'annule' }).eq('id', id)
+    if (error) throw error
+    await fetch()
+  }
+
   return {
     rdvMedecin,
     loading,
     getRdvParJour,
     getRdvParSemaine,
     getRdvParMois,
+    confirmerRdv,
+    annulerRdv,
     refresh: fetch
   }
 }

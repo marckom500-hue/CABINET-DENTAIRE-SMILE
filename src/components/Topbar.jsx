@@ -107,24 +107,55 @@ export default function Topbar() {
 
   return (
     <>
-      {/* ── En-tête ── */}
-      <div className="flex flex-col gap-4 pb-6">
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-lg sm:text-xl md:text-2xl font-medium opacity-90">Bienvenue</p>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif mt-2">
-                {(role === 'medecin' || role === 'superadmin') && 'Dr. '}
-                {profile?.prenom ? `${profile.prenom} ${profile?.nom || ''}`.trim() : 'Utilisateur'}
-              </h1>
-              <p className="text-lg sm:text-xl md:text-2xl font-medium opacity-90">
-                {title}
-              </p>
+      {/* ── En-tête Réduit avec Défilement Auto ── */}
+      <div className="flex flex-col gap-3 pb-4">
+        {/* Bandeau Principal Réduit */}
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-4 sm:p-5 text-white shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 overflow-hidden">
+              <p className="text-sm sm:text-base font-medium opacity-90">Bienvenue</p>
+              
+              {/* Défilement Automatique du Nom */}
+              <div className="overflow-hidden bg-white/10 rounded-lg py-1 px-2 mt-1">
+                <style>{`
+                  @keyframes scroll-text {
+                    0% { transform: translateX(100%); }
+                    100% { transform: translateX(-100%); }
+                  }
+                  .auto-scroll {
+                    animation: scroll-text 10s linear infinite;
+                    display: inline-block;
+                    white-space: nowrap;
+                  }
+                `}</style>
+                <h1 className="text-lg sm:text-2xl md:text-2xl font-bold font-serif auto-scroll">
+                  {(role === 'medecin' || role === 'superadmin') && 'Dr. '}
+                  {profile?.prenom ? `${profile.prenom} ${profile?.nom || ''}`.trim() : 'Utilisateur'}
+                </h1>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm sm:text-base font-medium opacity-90 capitalize">{today}</p>
-              <p className="text-2xl sm:text-3xl font-mono font-bold mt-1">{time}</p>
+            <div className="text-right flex-shrink-0">
+              <p className="text-xs sm:text-sm font-medium opacity-90 capitalize">{today}</p>
+              <p className="text-lg sm:text-xl font-mono font-bold">{time}</p>
             </div>
+          </div>
+          
+          {/* Défilement Automatique du Titre de Page */}
+          <div className="mt-2 overflow-hidden bg-black/20 rounded-lg py-1 px-2">
+            <style>{`
+              @keyframes scroll-text-page {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(-100%); }
+              }
+              .auto-scroll-page {
+                animation: scroll-text-page 8s linear infinite;
+                display: inline-block;
+                white-space: nowrap;
+              }
+            `}</style>
+            <p className="text-xs sm:text-sm font-medium auto-scroll-page">
+              📍 {title}
+            </p>
           </div>
         </div>
 

@@ -39,16 +39,16 @@ export function useRendezVous() {
     await fetch()
   }
 
-  const supprimerRdv = async (id) => {
+  const annulerRdv = async (id) => {
     const rdv = rendezVous.find(r => r.id === id)
-    const { error } = await supabase.from('rendez_vous').delete().eq('id', id)
+    const { error } = await supabase.from('rendez_vous').update({ statut: 'annule' }).eq('id', id)
     if (error) {
-      notify({ type:'error', message:`RDV non supprime : ${error.message}` })
+      notify({ type:'error', message:`RDV non annule : ${error.message}` })
       throw error
     }
-    notify({ type:'rdv', message:`RDV supprime${rdv ? ` : ${rdv.date} a ${rdv.heure}` : ''}` })
+    notify({ type:'rdv', message:`RDV annule${rdv ? ` : ${rdv.date} a ${rdv.heure}` : ''}` })
     await fetch()
   }
 
-  return { rendezVous, loading, ajouterRdv, modifierRdv, supprimerRdv, refresh: fetch }
+  return { rendezVous, loading, ajouterRdv, modifierRdv, annulerRdv, refresh: fetch }
 }
