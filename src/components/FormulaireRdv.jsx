@@ -31,6 +31,27 @@ const empty = {
 }
 const today = new Date().toISOString().split('T')[0]
 
+function timeToMinutes(time) {
+  const [hours, minutes] = String(time || '').split(':').map(Number)
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null
+  return hours * 60 + minutes
+}
+
+function hasOverlap(startTime, duration, rdvList, currentRdvId = null) {
+  const start = timeToMinutes(startTime)
+  if (start == null) return false
+  const end = start + Number(duration || 30)
+
+  return rdvList.some(rdv => {
+    if (currentRdvId && String(rdv.id) === String(currentRdvId)) return false
+    if (normalizeRdvStatus(rdv.statut) === RDV_STATUS.ANNULE) return false
+    const rdvStart = timeToMinutes(rdv.heure)
+    if (rdvStart == null) return false
+    const rdvEnd = rdvStart + Number(rdv.duree || 30)
+    return start < rdvEnd && end > rdvStart
+  })
+}
+
 function normalizeRdv(rdv) {
   if (!rdv) return empty
   return {
@@ -55,6 +76,9 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
   const [showQuickForm, setShowQuickForm] = useState(false)
   const [slotError, setSlotError] = useState(null)
   const [availableSlots, setAvailableSlots] = useState([])
+  const [doctorAgenda, setDoctorAgenda] = useState([])
+  const [loadingAgenda, setLoadingAgenda] = useState(false)
+  const [agendaError, setAgendaError] = useState(null)
   const { notify } = useNotifications()
 
   // ── Charger les médecins ──
@@ -96,6 +120,54 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
   useEffect(() => { setForm(normalizeRdv(rdv)) }, [rdv])
   useEffect(() => { onFormChange?.(form) }, [form, onFormChange])
 
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchDoctorAgenda = async () => {
+      if (!form.medecin_id || !form.date) {
+        setDoctorAgenda([])
+        setAvailableSlots([])
+        setAgendaError(null)
+        return
+      }
+
+      setLoadingAgenda(true)
+      setAgendaError(null)
+      try {
+        const [{ data, error }, slots] = await Promise.all([
+          supabase
+            .from('rendez_vous')
+            .select('id, date, heure, duree, statut, type_acte, patients(nom, prenom)')
+            .eq('date', form.date)
+            .eq('medecin_id', form.medecin_id)
+            .order('heure', { ascending: true }),
+          getAvailableSlots(form.date, form.medecin_id, Number(form.duree || 30)),
+        ])
+
+        if (cancelled) return
+        if (error) {
+          setAgendaError(error.message)
+          setDoctorAgenda([])
+          setAvailableSlots([])
+        } else {
+          setDoctorAgenda(data ?? [])
+          setAvailableSlots(slots ?? [])
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setAgendaError(err.message)
+          setDoctorAgenda([])
+          setAvailableSlots([])
+        }
+      } finally {
+        if (!cancelled) setLoadingAgenda(false)
+      }
+    }
+
+    fetchDoctorAgenda()
+    return () => { cancelled = true }
+  }, [form.medecin_id, form.date, form.duree])
+
   const patientOptions = patients.map(p => ({
     value: String(p.id),
     label: `${p.prenom ?? ''} ${p.nom ?? ''}${p.telephone ? ` - ${formatPhone(p.telephone)}` : ''}`.trim(),
@@ -105,6 +177,13 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
     value: String(m.id),
     label: `Dr. ${m.prenom ?? ''} ${m.nom ?? ''}`.trim(),
   }))
+
+  const selectedMedecin = medecins.find(m => String(m.id) === String(form.medecin_id))
+  const selectedDoctorLabel = selectedMedecin
+    ? `Dr. ${selectedMedecin.prenom ?? ''} ${selectedMedecin.nom ?? ''}`.trim()
+    : 'Medecin'
+  const activeAgenda = doctorAgenda.filter(r => normalizeRdvStatus(r.statut) !== RDV_STATUS.ANNULE)
+  const proposedSlotConflicts = hasOverlap(form.heure, form.duree, doctorAgenda, rdv?.id)
 
   const dateTouched = Boolean(form.date)
 
@@ -123,12 +202,13 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
     setSlotError(null)
     try {
       // Vérifier la disponibilité du créneau (sauf en mode édition)
-      if (!isEdit) {
+      if (form.date && form.heure && form.medecin_id) {
         const { available } = await checkSlotAvailability(
           form.date,
           form.heure,
           form.medecin_id,
-          rdv?.id
+          rdv?.id,
+          Number(form.duree || 30)
         )
         if (!available) {
           const slots = await getAvailableSlots(form.date, form.medecin_id, Number(form.duree))
@@ -264,6 +344,68 @@ export default function FormulaireRdv({ rdv, onSubmit, onCancel, onFormChange })
           options={DUREES}
         />
       </div>
+
+      {form.medecin_id && form.date && (
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between gap-3 px-3 py-2 bg-gray-50 border-b border-gray-200">
+            <div>
+              <p className="text-sm font-medium text-gray-900">Agenda du praticien</p>
+              <p className="text-xs text-gray-500">{selectedDoctorLabel} - {form.date}</p>
+            </div>
+            {loadingAgenda && (
+              <span className="text-xs text-gray-500">Chargement...</span>
+            )}
+          </div>
+
+          {agendaError ? (
+            <div className="p-3 text-xs text-red-600 bg-red-50">
+              Impossible de charger l'agenda : {agendaError}
+            </div>
+          ) : activeAgenda.length === 0 ? (
+            <div className="p-3 text-sm text-gray-500">
+              Aucun rendez-vous planifie pour cette date.
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {activeAgenda.map(item => {
+                const statut = normalizeRdvStatus(item.statut)
+                const meta = RDV_STATUS_META[statut] ?? RDV_STATUS_META[RDV_STATUS.PROGRAMME]
+                const patientName = item.patients
+                  ? `${item.patients.prenom ?? ''} ${item.patients.nom ?? ''}`.trim()
+                  : 'Patient'
+
+                return (
+                  <div key={item.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900">
+                        {item.heure} - {Number(item.duree || 30)} min
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {patientName} - {item.type_acte || 'Acte non renseigne'}
+                      </p>
+                    </div>
+                    <span className={`shrink-0 text-xs font-medium px-2 py-1 rounded-full ${meta.cls}`}>
+                      {meta.label}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {form.heure && proposedSlotConflicts && (
+            <div className="px-3 py-2 text-xs text-red-700 bg-red-50 border-t border-red-100">
+              Le creneau choisi chevauche un rendez-vous existant.
+            </div>
+          )}
+
+          {!proposedSlotConflicts && availableSlots.length > 0 && (
+            <div className="px-3 py-2 text-xs text-gray-500 bg-white border-t border-gray-100">
+              {availableSlots.length} creneaux compatibles avec cette duree sont disponibles.
+            </div>
+          )}
+        </div>
+      )}
 
       <FormField
         label="Notes"

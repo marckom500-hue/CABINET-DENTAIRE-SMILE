@@ -1,12 +1,18 @@
 import { supabase } from '../lib/supabase'
+import { RDV_STATUS, normalizeRdvStatus } from '../lib/statuses'
 
-export async function checkSlotAvailability(date, heure, medecinId, excludeRdvId = null) {
+function timeToMinutes(time) {
+  const [hours, minutes] = String(time || '').split(':').map(Number)
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null
+  return hours * 60 + minutes
+}
+
+export async function checkSlotAvailability(date, heure, medecinId, excludeRdvId = null, duration = 30) {
   const query = supabase
     .from('rendez_vous')
-    .select('id, heure, duree')
+    .select('id, heure, duree, statut')
     .eq('date', date)
     .eq('medecin_id', medecinId)
-    .neq('statut', 'annule')
 
   if (excludeRdvId) {
     query.neq('id', excludeRdvId)
@@ -18,15 +24,21 @@ export async function checkSlotAvailability(date, heure, medecinId, excludeRdvId
     return { available: true, alternatives: [] }
   }
 
-  // Convertir les horaires en minutes pour comparaison
-  const [newHour, newMin] = heure.split(':').map(Number)
-  const newTimeInMinutes = newHour * 60 + newMin
+  const activeRdv = conflictingRdv.filter(rdv => normalizeRdvStatus(rdv.statut) !== RDV_STATUS.ANNULE)
+  if (activeRdv.length === 0) {
+    return { available: true, alternatives: [] }
+  }
 
-  for (const rdv of conflictingRdv) {
-    const [existingHour, existingMin] = rdv.heure.split(':').map(Number)
-    const existingTimeInMinutes = existingHour * 60 + existingMin
+  const newTimeInMinutes = timeToMinutes(heure)
+  if (newTimeInMinutes == null) {
+    return { available: false, alternatives: [] }
+  }
+
+  for (const rdv of activeRdv) {
+    const existingTimeInMinutes = timeToMinutes(rdv.heure)
+    if (existingTimeInMinutes == null) continue
     const existingEndTime = existingTimeInMinutes + (rdv.duree || 30)
-    const newEndTime = newTimeInMinutes + 30
+    const newEndTime = newTimeInMinutes + duration
 
     // Chevauchement si : nouveau start < existing end ET nouveau end > existing start
     if (newTimeInMinutes < existingEndTime && newEndTime > existingTimeInMinutes) {
@@ -41,10 +53,9 @@ export async function getAvailableSlots(date, medecinId, duration = 30) {
   // Récupérer tous les RDV du médecin ce jour-là
   const { data: existingRdv } = await supabase
     .from('rendez_vous')
-    .select('heure, duree')
+    .select('heure, duree, statut')
     .eq('date', date)
     .eq('medecin_id', medecinId)
-    .neq('statut', 'annule')
 
   // Créneaux de travail : 08:00 à 18:00
   const workStart = 8 * 60 // 8:00 en minutes
@@ -54,9 +65,9 @@ export async function getAvailableSlots(date, medecinId, duration = 30) {
 
   // Marquer les créneaux occupés
   if (existingRdv && existingRdv.length > 0) {
-    for (const rdv of existingRdv) {
-      const [h, m] = rdv.heure.split(':').map(Number)
-      const start = h * 60 + m
+    for (const rdv of existingRdv.filter(r => normalizeRdvStatus(r.statut) !== RDV_STATUS.ANNULE)) {
+      const start = timeToMinutes(rdv.heure)
+      if (start == null) continue
       const end = start + (rdv.duree || 30)
       for (let i = start; i < end; i += 15) {
         booked.add(i)

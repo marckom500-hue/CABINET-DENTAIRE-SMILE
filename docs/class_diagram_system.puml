@@ -4,7 +4,10 @@ skinparam backgroundColor #ffffff
 skinparam classBackgroundColor #f0f8ff
 skinparam classBorderColor #0d9488
 skinparam arrowColor #0d9488
-skinparam classAttributeIconSize 0
+skinparam classAttributeIconSize 10
+skinparam classAttributeFontSize 40
+skinparam classFontSize 30
+skinparam classArrowFontSize 20
 
 
 ' ============================================================
@@ -162,43 +165,43 @@ UserProfile "1" -- "*" Notification : reçoit
 ' NOTES
 ' ============================================================
 
-note right of User
-  Authentification Supabase
-  Gestion des sessions
-  JWT tokens
-end note
+' note right of User
+'   Authentification Supabase
+'   Gestion des sessions
+'   JWT tokens
+' end note
 
-note right of UserProfile
-  Profil utilisateur
-  Rôles et permissions
-  Spécialité médicale
-  Avatar utilisateur
-end note
+' note right of UserProfile
+'   Profil utilisateur
+'   Rôles et permissions
+'   Spécialité médicale
+'   Avatar utilisateur
+' end note
 
-note right of Patient
-  Informations patient
-  Historique médical
-  Coordonnées
-end note
+' note right of Patient
+'   Informations patient
+'   Historique médical
+'   Coordonnées
+' end note
 
-note right of RendezVous
-  Gestion des RDV
-  Filtrage par médecin
-  Statuts multiples
-  Lié à un acte dentaire
-end note
+' note right of RendezVous
+'   Gestion des RDV
+'   Filtrage par médecin
+'   Statuts multiples
+'   Lié à un acte dentaire
+' end note
 
-note right of Facture
-  Facturation patient
-  Suivi des paiements
-  Montants variables
-end note
+' note right of Facture
+'   Facturation patient
+'   Suivi des paiements
+'   Montants variables
+' end note
 
-note right of RappelSMS
-  Rappels automatiques
-  Intégration SMS
-  Gestion des erreurs
-  Retry logic
-end note
+' note right of RappelSMS
+'   Rappels automatiques
+'   Intégration SMS
+'   Gestion des erreurs
+'   Retry logic
+' end note
 
 @enduml

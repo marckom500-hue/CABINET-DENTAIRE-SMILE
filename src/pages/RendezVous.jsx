@@ -110,7 +110,7 @@ export default function RendezVous() {
 
       {viewMode === 'calendar' && (
         <CalendarView
-          rendezVous={rendezVous}
+          rendezVous={filtered}
           onRdvClick={handleCalendarRdvClick}
           onDateClick={handleCalendarDateClick}
           loading={loading}

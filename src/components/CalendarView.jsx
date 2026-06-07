@@ -1,13 +1,5 @@
 import { useState } from 'react'
-import { RDV_STATUS, normalizeRdvStatus } from '../lib/statuses'
-
-const STATUS_COLORS = {
-  confirme: { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300' },
-  attente: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
-  urgent: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-300' },
-  recu: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300' },
-  annule: { bg: 'bg-gray-100', text: 'text-gray-500', border: 'border-gray-300' },
-}
+import { RDV_STATUS, RDV_STATUS_META, normalizeRdvStatus } from '../lib/statuses'
 
 export default function CalendarView({ rendezVous = [], onRdvClick, onDateClick, loading = false }) {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -19,12 +11,14 @@ export default function CalendarView({ rendezVous = [], onRdvClick, onDateClick,
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
   const daysInMonth = lastDay.getDate()
-  const startingDayOfWeek = (firstDay.getDay() + 6) % 7
+  // getDay(): 0=Dimanche, 1=Lundi... 6=Samedi
+  // On veut: 0=Lundi, 1=Mardi... 6=Dimanche
+  const startingDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1
 
   // Créer la grille du calendrier
   const days = []
   for (let i = 0; i < startingDayOfWeek; i++) {
-    days.push(null) // Jours vides avant le 1er du mois
+    days.push(null)
   }
   for (let i = 1; i <= daysInMonth; i++) {
     days.push(new Date(year, month, i))
@@ -58,7 +52,10 @@ export default function CalendarView({ rendezVous = [], onRdvClick, onDateClick,
 
   // Formater une date pour la clé
   const formatDateKey = (date) => {
-    return date.toISOString().split('T')[0]
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   const isToday = (date) => {
@@ -185,7 +182,11 @@ export default function CalendarView({ rendezVous = [], onRdvClick, onDateClick,
                   {/* RDV items */}
                   <div className="space-y-1">
                     {dayRdv.slice(0, 3).map((rdv, idx) => {
-                      const colors = STATUS_COLORS[normalizeRdvStatus(rdv.statut)] || STATUS_COLORS[RDV_STATUS.ATTENTE]
+                      const statut = normalizeRdvStatus(rdv.statut)
+                      const meta = RDV_STATUS_META[statut]
+                      
+                      if (!meta) return null
+                      
                       return (
                         <div
                           key={rdv.id}
@@ -198,7 +199,7 @@ export default function CalendarView({ rendezVous = [], onRdvClick, onDateClick,
                           }}
                           className={`
                             text-xs p-1.5 rounded cursor-move transition-all
-                            ${colors.bg} ${colors.text} border ${colors.border}
+                            ${meta.cls}
                             hover:shadow-md hover:scale-105
                             ${draggedRdv?.id === rdv.id ? 'opacity-50' : 'opacity-100'}
                           `}

@@ -81,17 +81,20 @@ CREATE POLICY "patients_write" ON public.patients FOR ALL    USING (public.get_m
 -- 3. TABLE RENDEZ_VOUS
 -- ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.rendez_vous (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  patient_id  UUID REFERENCES public.patients(id) ON DELETE SET NULL,
-  medecin_id  UUID REFERENCES public.users_profiles(id) ON DELETE SET NULL,
-  date        DATE NOT NULL,
-  heure       TEXT NOT NULL,
-  type_acte   TEXT NOT NULL DEFAULT 'Consultation',
-  duree       INTEGER DEFAULT 30,
-  statut      TEXT DEFAULT 'attente' CHECK (statut IN ('confirme','attente','urgent','annule')),
-  notes       TEXT,
-  created_at  TIMESTAMPTZ DEFAULT now()
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  patient_id      UUID REFERENCES public.patients(id) ON DELETE SET NULL,
+  medecin_id      UUID REFERENCES public.users_profiles(id) ON DELETE SET NULL,
+  date            DATE NOT NULL,
+  heure           TEXT NOT NULL,
+  type_acte       TEXT NOT NULL DEFAULT 'Consultation',
+  duree           INTEGER DEFAULT 30,
+  statut          TEXT DEFAULT 'programmé' CHECK (statut IN ('programmé','confirmé','terminé','annulé')),
+  patient_present BOOLEAN DEFAULT NULL,
+  notes           TEXT,
+  created_at      TIMESTAMPTZ DEFAULT now()
 );
+
+COMMENT ON COLUMN public.rendez_vous.patient_present IS 'NULL=non défini, TRUE=patient présent, FALSE=patient absent';
 
 ALTER TABLE public.rendez_vous ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "rdv_read"  ON public.rendez_vous FOR SELECT USING (public.get_my_role() IN ('superadmin','medecin','secretaire','assistant'));

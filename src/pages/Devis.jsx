@@ -7,16 +7,16 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import FormulaireDevis from '../components/FormulaireDevis'
 import { PermissionGate } from '../components/RoleGuard'
 import PreviewPDFModal from '../components/PreviewPDFModal'
-import { DEVIS_STATUS, DEVIS_STATUS_META, normalizeDevisStatus } from '../lib/statuses'
+import { DEVIS_STATUS, DEVIS_STATUS_META, normalizeDevisStatus, canTransitionDevis, getNextStatuses } from '../lib/statuses'
 
 const FILTERS = [
   { key: 'tous', label: 'Tous' },
-  { key: DEVIS_STATUS.BROUILLON, label: 'Brouillons' },
-  { key: DEVIS_STATUS.ENVOYE, label: 'Envoyes' },
+  { key: DEVIS_STATUS.EN_ATTENTE, label: 'En attente' },
   { key: DEVIS_STATUS.ACCEPTE, label: 'Acceptes' },
+  { key: DEVIS_STATUS.CONVERTI_FACTURE, label: 'Convertis en facture' },
   { key: DEVIS_STATUS.REJETE, label: 'Rejetes' },
-  { key: DEVIS_STATUS.FACTURISE, label: 'Facturises' },
   { key: DEVIS_STATUS.ANNULE, label: 'Annules' },
+  { key: DEVIS_STATUS.EXPIRE, label: 'Expires' },
 ]
 
 export default function Devis() {
@@ -37,7 +37,26 @@ export default function Devis() {
 
   const handleStatusChange = async (id, newStatut) => {
     try {
-      await modifierDevis(id, { statut: newStatut })
+      const currentDevis = devis.find(d => d.id === id)
+      if (!currentDevis) return
+
+      // Validate transition before update
+      const validationResult = canTransitionDevis(currentDevis.statut, newStatut)
+      if (!validationResult.valid) {
+        alert(`❌ Transition non autorisée: ${validationResult.error}`)
+        return
+      }
+
+      const normalizedNewStatus = normalizeDevisStatus(newStatut)
+      await modifierDevis(id, {
+        statut: normalizedNewStatus,
+        ...(normalizedNewStatus === DEVIS_STATUS.ACCEPTE
+          ? { date_acceptation: new Date().toISOString().split('T')[0] }
+          : {}),
+        ...(normalizedNewStatus === DEVIS_STATUS.EN_ATTENTE
+          ? { date_acceptation: null, facture_id: null }
+          : {}),
+      })
     } catch (error) {
       console.error(error)
     }
@@ -51,8 +70,20 @@ export default function Devis() {
   const handleConvertir = async (d) => {
     setConverting(d.id)
     try {
-      await creerDepuisDevis(d.id)
-      await modifierDevis(d.id, { statut: DEVIS_STATUS.FACTURISE })
+      // Validate transition to FACTURISE
+      const validationResult = canTransitionDevis(d.statut, DEVIS_STATUS.CONVERTI_FACTURE)
+      if (!validationResult.valid) {
+        alert(`❌ Conversion impossible: ${validationResult.error}`)
+        return
+      }
+
+      const facture = await creerDepuisDevis(d.id)
+      // Conversion en facture = terminal, ne peut pas revenir en arrière
+      await modifierDevis(d.id, {
+        statut: DEVIS_STATUS.CONVERTI_FACTURE,
+        ...(facture?.id ? { facture_id: facture.id } : {}),
+      })
+
     } catch (e) {
       console.error(e)
     } finally {
@@ -104,7 +135,13 @@ export default function Devis() {
                 <tr><td colSpan={7} className="text-center py-12 text-gray-400">Aucun devis trouve</td></tr>
               ) : filtered.map(d => {
                 const status = normalizeDevisStatus(d.statut)
-                const meta = DEVIS_STATUS_META[status] ?? DEVIS_STATUS_META[DEVIS_STATUS.BROUILLON]
+                const meta = DEVIS_STATUS_META[status] ?? DEVIS_STATUS_META[DEVIS_STATUS.EN_ATTENTE]
+                const statusValueList = Array.from(new Set([
+                  status,
+                  ...getNextStatuses(status, 'devis'),
+                ].filter(Boolean))).filter(value => (
+                  status === DEVIS_STATUS.CONVERTI_FACTURE || value !== DEVIS_STATUS.CONVERTI_FACTURE
+                ))
                 return (
                   <tr key={d.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-900">{d.numero}</td>
@@ -129,10 +166,13 @@ export default function Devis() {
                           onChange={(e) => handleStatusChange(d.id, e.target.value)}
                           className={`text-xs font-medium px-2 py-1 rounded-full cursor-pointer border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 ${meta.cls}`}
                         >
-                          {Object.values(DEVIS_STATUS).map(value => (
-                            <option key={value} value={value}>{DEVIS_STATUS_META[value].label}</option>
+                          {statusValueList.map(value => (
+                            <option key={value} value={value}>
+                              {(DEVIS_STATUS_META[value] ?? DEVIS_STATUS_META[status])?.label ?? value}
+                            </option>
                           ))}
                         </select>
+
                       </PermissionGate>
                     </td>
                     <td className="px-4 py-3">
@@ -156,9 +196,10 @@ export default function Devis() {
                         <PermissionGate module="devis" requireWrite>
                           <button
                             onClick={() => handleConvertir(d)}
-                            disabled={converting === d.id || status === DEVIS_STATUS.FACTURISE}
+                            disabled={converting === d.id || status !== DEVIS_STATUS.ACCEPTE}
+
                             className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                            title={status === DEVIS_STATUS.FACTURISE ? 'Deja converti' : 'Convertir en facture'}>
+                            title={status !== DEVIS_STATUS.ACCEPTE ? 'Devis doit etre accepte pour convertir' : 'Convertir en facture'}>
                             {converting === d.id ? (
                               <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

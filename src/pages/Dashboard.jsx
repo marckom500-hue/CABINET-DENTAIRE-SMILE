@@ -122,6 +122,14 @@ export default function Dashboard() {
       : r.date?.split('T')[0]
     return rdvDate === today
   })
+  const rdvHonores = rendezVous.filter(r =>
+  normalizeRdvStatus(r.statut) === RDV_STATUS.TERMINE && r.patient_present === true
+).length
+
+const rdvManques = rendezVous.filter(r =>
+  normalizeRdvStatus(r.statut) === RDV_STATUS.ANNULE ||
+  (normalizeRdvStatus(r.statut) === RDV_STATUS.TERMINE && r.patient_present === false)
+).length
 
   const appointmentsForList = todayAppointments.map(r => ({
     id: r.id,
@@ -208,6 +216,17 @@ export default function Dashboard() {
       color: 'green',
       icon: 'money',
     },
+    {
+    id: 4,
+    label: 'RDV honorés / manqués',
+    value: `${rdvHonores} / ${rdvManques}`,
+    trend: `${rdvHonores + rdvManques > 0
+      ? Math.round((rdvHonores / (rdvHonores + rdvManques)) * 100)
+      : 0}% de présence`,
+    trendUp: rdvHonores >= rdvManques,
+    color: 'indigo',
+    icon: 'calendar',
+  },
   ]
 
   const totalFacture = factures.reduce((sum, f) => sum + (normalizeFactureStatus(f.statut) !== FACTURE_STATUS.ANNULE ? toAmount(f.montant) : 0), 0)

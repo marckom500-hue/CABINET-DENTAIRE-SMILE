@@ -5,7 +5,13 @@ import { useNotifications } from '../hooks/NotificationsContext'
 import { supabase } from '../lib/supabase'
 import { DEVIS_STATUS } from '../lib/statuses'
 
-const empty = { patient_id: '', date_validite: '', notes: '', conditions: '' }
+function getDefaultValidityDate() {
+  const date = new Date()
+  date.setDate(date.getDate() + 30)
+  return date.toISOString().split('T')[0]
+}
+
+const createEmpty = () => ({ patient_id: '', date_validite: getDefaultValidityDate(), notes: '', conditions: '' })
 
 export default function FormulaireDevis({ devis, onCancel, onClose }) {
   const { ajouter, modifier } = useDevis()
@@ -13,7 +19,7 @@ export default function FormulaireDevis({ devis, onCancel, onClose }) {
   const { actes } = useActesDentaires()
   const { notify } = useNotifications()
   
-  const [form, setForm] = useState(empty)
+  const [form, setForm] = useState(createEmpty)
   const [lignes, setLignes] = useState([])
   const [newLigne, setNewLigne] = useState({ description: '', quantite: 1, prix_unitaire: 0 })
   const [saving, setSaving] = useState(false)
@@ -27,6 +33,9 @@ export default function FormulaireDevis({ devis, onCancel, onClose }) {
         conditions: devis.conditions || '',
       })
       setLignes(devis.lignes_devis || [])
+    } else {
+      setForm(createEmpty())
+      setLignes([])
     }
   }, [devis])
 
@@ -70,7 +79,9 @@ export default function FormulaireDevis({ devis, onCancel, onClose }) {
       const payload = {
         ...form,
         montant_total: montantTotal,
-        statut: devis?.statut ?? DEVIS_STATUS.BROUILLON,
+        statut: devis?.statut ?? DEVIS_STATUS.EN_ATTENTE,
+
+
       }
 
       if (devis) {

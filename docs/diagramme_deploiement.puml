@@ -1,93 +1,72 @@
 @startuml
-left header Cabinet Dentaire SMILE
-right header Diagramme de Déploiement
-footer Page %page% sur %lastpage%
+title Architecture Système
 
-title Diagramme de Déploiement - Architecture du Système
-
-' Configuration simple et claire
+' ===== CONFIGURATION =====
 skinparam node {
   BackgroundColor WhiteSmoke
-  BorderColor DeepSkyBlue
+  BorderColor #1E3A8A
   RoundCorner 10
 }
 skinparam artifact {
   BackgroundColor White
-  BorderColor DeepSkyBlue
-  RoundCorner 5
+  BorderColor #1E3A8A
 }
 skinparam cloud {
   BackgroundColor LightCyan
-  BorderColor DeepSkyBlue
+  BorderColor #0284C7
 }
 skinparam database {
-  BackgroundColor White
-  BorderColor DeepSkyBlue
+  BackgroundColor #FEF3C7
+  BorderColor #D97706
 }
 skinparam shadowing false
-skinparam defaultTextAlignment center
 
-' === NŒUDS DE DÉPLOIEMENT ===
+' ===== NŒUDS =====
 
 cloud "Internet" as internet
 
 node "Poste Secrétaire" as poste_secretaire {
-  artifact "Navigateur Web" as navigateur
+  artifact "Navigateur Web" as nav_secretaire
 }
 
 node "Poste Médecin" as poste_medecin {
-  artifact "Navigateur Web" as navigateur_med
+  artifact "Navigateur Web" as nav_medecin
 }
 
 node "Poste Comptable" as poste_comptable {
-  artifact "Navigateur Web" as navigateur_compta
+  artifact "Navigateur Web" as nav_comptable
+}
+
+node "Poste Assistant" as poste_assistant {
+  artifact "Navigateur Web" as nav_assistant
 }
 
 node "Serveur Supabase" as supabase {
-  database "Base de données PostgreSQL" as db
+  database "PostgreSQL" as db
   artifact "Authentification" as auth
-  artifact "Storage" as storage
   artifact "Edge Functions" as functions
 }
 
 node "Services Externes" as externes {
-  artifact "API SMS" as sms_api
-  artifact "pg_cron" as cron
+  artifact "API SMS" as sms
 }
 
-' === CONNEXIONS ===
+' ===== CONNEXIONS =====
 
-internet -[hidden]down-> poste_secretaire
-poste_secretaire -[hidden]down-> poste_medecin
-poste_medecin -[hidden]down-> poste_comptable
+internet --> poste_secretaire
+internet --> poste_medecin
+internet --> poste_comptable
+internet --> poste_assistant
 
-navigateur --> supabase : HTTPS
-navigateur_med --> supabase : HTTPS
-navigateur_compta --> supabase : HTTPS
+poste_secretaire --> supabase : HTTPS
+poste_medecin --> supabase : HTTPS
+poste_comptable --> supabase : HTTPS
+poste_assistant --> supabase : HTTPS
 
-supabase -[hidden]down-> externes
+supabase --> externes : API
 
-auth --> db : Utilise
-storage --> db : Stocke
-functions --> db : Interroge
-functions --> sms_api : Envoie SMS
-cron --> functions : Planifie
-
-note top of poste_secretaire
-  <b>Côté Client</b>
-  Application React/Vite
-  dans le navigateur
-end note
-
-note right of supabase
-  <b>Backend</b>
-  Supabase
-  PostgreSQL + Auth + Storage
-end note
-
-note left of externes
-  <b>Services tiers</b>
-  SMS et automatisation
-end note
+auth --> db
+functions --> db
+functions --> sms
 
 @enduml

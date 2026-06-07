@@ -2124,7 +2124,7 @@ export default function Login() {
             <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
 
               <AnimatedField id="email" label="Adresse email" type="email"
-                value={email} onChange={setEmail} placeholder="personnel@cabinet.fr"
+                value={email} onChange={setEmail} placeholder="personnel@cabinet.com"
                 autoComplete="email" focused={focused==="email"}
                 onFocus={() => setFocused("email")} onBlur={() => setFocused(null)}
                 animDelay="1.1s" icon={EmailIcon}
