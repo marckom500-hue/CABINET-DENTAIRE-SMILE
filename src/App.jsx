@@ -16,6 +16,7 @@ import Rapports from './pages/Rapports'
 import Utilisateurs from './pages/Utilisateurs'
 import AdminSettings from './pages/AdminSettings'
 import { NotificationsProvider } from './hooks/NotificationsContext'
+import FichePatient from './components/FichePatient'
 
 function AppRoutes() {
   const { user, loading } = useAuthContext()
@@ -47,6 +48,7 @@ function AppRoutes() {
         <Route path="/utilisateurs" element={<RoleGuard module="gestion_users"><Utilisateurs /></RoleGuard>} />
         <Route path="/admin-settings" element={<RoleGuard module="gestion_users"><AdminSettings /></RoleGuard>} />
         <Route path="*"             element={<Navigate to="/" replace />} />
+        <Route path="/patients/:id" element={<FichePatient />} /> 
       </Routes>
     </Layout>
   )

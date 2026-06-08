@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'// modif1
 import { usePatients } from '../hooks/usePatients'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import FormulairePatient from '../components/FormulairePatient'
-import MedicalRecord from '../components/MedicalRecord'
+// import MedicalRecord from '../components/MedicalRecord'
 import { PermissionGate } from '../components/RoleGuard'
 import { formatPhone } from '../utils/phone'
 
@@ -15,8 +16,9 @@ export default function Patients() {
   const [modal, setModal]       = useState(false)
   const [editP, setEditP]       = useState(null)
   const [confirmD, setConfirmD] = useState(null)
-  const [medicalRecordOpen, setMedicalRecordOpen] = useState(false)
-  const [selectedPatient, setSelectedPatient] = useState(null)
+  const navigate = useNavigate()//modif2
+  // const [medicalRecordOpen, setMedicalRecordOpen] = useState(false)
+  // const [selectedPatient, setSelectedPatient] = useState(null)
 
   const filtered = patients.filter(p =>
     `${p.nom} ${p.prenom} ${p.telephone}`.toLowerCase().includes(search.toLowerCase())
@@ -24,7 +26,8 @@ export default function Patients() {
 
   const openCreate = () => { setEditP(null); setModal(true) }
   const openEdit   = (p) => { setEditP(p);   setModal(true) }
-  const openMedicalRecord = (p) => { setSelectedPatient(p); setMedicalRecordOpen(true) }
+  // const openMedicalRecord = (p) => { setSelectedPatient(p); setMedicalRecordOpen(true) }
+  const openMedicalRecord = (p) => navigate(`/patients/${p.id}`) //modif3
 
   const handleSubmit = async (data) => {
     if (editP) await modifierPatient(editP.id, data)
@@ -120,12 +123,7 @@ export default function Patients() {
           </table>
         </div>
       </div>
-
-        <MedicalRecord 
-          patient={selectedPatient} 
-          isOpen={medicalRecordOpen} 
-          onClose={() => setMedicalRecordOpen(false)} 
-        />
+    
 
       <Modal isOpen={modal} onClose={() => setModal(false)} title={editP ? 'Modifier le patient' : 'Nouveau patient'} confirmOnClose>
         <FormulairePatient patient={editP} onSubmit={handleSubmit} onCancel={() => setModal(false)} />
