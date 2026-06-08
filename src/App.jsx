@@ -16,7 +16,7 @@ import Rapports from './pages/Rapports'
 import Utilisateurs from './pages/Utilisateurs'
 import AdminSettings from './pages/AdminSettings'
 import { NotificationsProvider } from './hooks/NotificationsContext'
-import FichePatient from './components/FichePatient'
+import FichePatient from './components/Fichepatient'
 
 function AppRoutes() {
   const { user, loading } = useAuthContext()
