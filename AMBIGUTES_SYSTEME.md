@@ -426,7 +426,7 @@ ALTER TABLE rendez_vous ADD CHECK (
 ### 9. **Rôle "Médecin" — Permissions en lecture sur Facturation**
 
 ```javascript
-facturation: { 
+ofacturation: { 
   superadmin: 'crud',
   medecin: 'lecture',      // ← Peut LIRE les factures
   secretaire: 'crud',

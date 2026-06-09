@@ -48,7 +48,7 @@ export default function TimePickerAmPm({ value, onChange, required = false }) {
         )}
       </div>
       <p className="text-xs text-gray-400 mt-1">
-        Heure sélectionnée affichée automatiquement en AM/PM
+        {/* Heure sélectionnée affichée automatiquement en AM/PM */}
       </p>
     </div>
   )

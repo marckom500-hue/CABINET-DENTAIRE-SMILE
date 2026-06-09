@@ -1,0 +1,112 @@
+Date : 2026-06-08 14:28:50
+Directory : c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src
+Total : 79 files,  12390 codes, 5132 comments, 1878 blanks, all 19400 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| JavaScript JSX |         50 |      9,472 |      4,289 |      1,268 |     15,029 |
+| JavaScript     |         28 |      2,448 |        821 |        555 |      3,824 |
+| PostCSS        |          1 |        470 |         22 |         55 |        547 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                     | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                        |         79 |     12,390 |      5,132 |      1,878 |     19,400 |
+| . (Files)                                                                                |          3 |        541 |         22 |         63 |        626 |
+| components                                                                               |         33 |      5,073 |      1,793 |        648 |      7,514 |
+| data                                                                                     |          1 |         33 |          0 |          5 |         38 |
+| hooks                                                                                    |         20 |      1,854 |        713 |        443 |      3,010 |
+| lib                                                                                      |          5 |        401 |         69 |         76 |        546 |
+| pages                                                                                    |         13 |      4,236 |      2,496 |        593 |      7,325 |
+| utils                                                                                    |          4 |        252 |         39 |         50 |        341 |
++------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                 | language       | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\App.jsx                                 | JavaScript JSX |         62 |          0 |          6 |         68 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\AppointmentList.jsx          | JavaScript JSX |         27 |          0 |          2 |         29 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Avatar.jsx                   | JavaScript JSX |         24 |          3 |          2 |         29 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\BottomNav.jsx                | JavaScript JSX |         50 |          1 |          4 |         55 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\CalendarView.jsx             | JavaScript JSX |        194 |         16 |         28 |        238 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\ConfirmDialog.jsx            | JavaScript JSX |         58 |          0 |          2 |         60 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\DateNaissancePicker.jsx      | JavaScript JSX |        129 |          7 |         22 |        158 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\DiagnosticsRLS.jsx           | JavaScript JSX |        106 |          5 |         22 |        133 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\DonutChart.jsx               | JavaScript JSX |         58 |          0 |          3 |         61 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Fichepatient.jsx             | JavaScript JSX |        632 |        789 |         96 |      1,517 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\FormField.jsx                | JavaScript JSX |        110 |          0 |         12 |        122 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\FormulaireDevis.jsx          | JavaScript JSX |        225 |          9 |         32 |        266 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\FormulairePatient.jsx        | JavaScript JSX |        194 |         23 |         22 |        239 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\FormulaireRdv.jsx            | JavaScript JSX |        401 |         10 |         43 |        454 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\FormulaireUtilisateur.jsx    | JavaScript JSX |        156 |          3 |         17 |        176 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\KPICard.jsx                  | JavaScript JSX |         20 |          0 |          1 |         21 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Layout.jsx                   | JavaScript JSX |         70 |          8 |         12 |         90 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\MedicalRecord.jsx            | JavaScript JSX |        358 |          7 |         23 |        388 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Modal.jsx                    | JavaScript JSX |         51 |          0 |          6 |         57 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\NotificationCenter.jsx       | JavaScript JSX |        177 |         11 |         14 |        202 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Notifications.jsx            | JavaScript JSX |         40 |          0 |          2 |         42 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\PatientList.jsx              | JavaScript JSX |         34 |          0 |          3 |         37 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\PreviewPDFModal.jsx          | JavaScript JSX |        323 |        836 |        127 |      1,286 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\QuickPatientForm.jsx         | JavaScript JSX |         77 |          1 |          5 |         83 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\RappelsFailedSMS.jsx         | JavaScript JSX |        212 |         11 |         20 |        243 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\ReminderNotificationBell.jsx | JavaScript JSX |        197 |         10 |         14 |        221 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\RevenueChart.jsx             | JavaScript JSX |         42 |          3 |          8 |         53 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\RoleGuard.jsx                | JavaScript JSX |         35 |          0 |          6 |         41 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Sidebar.jsx                  | JavaScript JSX |        591 |         13 |         51 |        655 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\SignaturePad.jsx             | JavaScript JSX |         60 |          1 |          4 |         65 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\StockList.jsx                | JavaScript JSX |         32 |          0 |          1 |         33 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\ThemeSelector.jsx            | JavaScript JSX |        125 |         11 |         14 |        150 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\TimePickerAmPm.jsx           | JavaScript JSX |         50 |          1 |          5 |         56 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\components\Topbar.jsx                   | JavaScript JSX |        215 |         14 |         25 |        254 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\data\mockData.js                        | JavaScript     |         33 |          0 |          5 |         38 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\AuthContext.jsx                   | JavaScript JSX |         12 |          0 |          4 |         16 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\NotificationsContext.jsx          | JavaScript JSX |         80 |          0 |         15 |         95 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useAllergies.js                   | JavaScript     |         67 |          0 |          9 |         76 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useAntecedents.js                 | JavaScript     |         67 |          0 |          9 |         76 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useAppConfig.js                   | JavaScript     |         55 |          1 |         10 |         66 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useAuth.js                        | JavaScript     |        126 |          5 |         26 |        157 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useDatabaseNotifications.js       | JavaScript     |         85 |          2 |         16 |        103 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useDevis.js                       | JavaScript     |        168 |          2 |         28 |        198 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useFactures.js                    | JavaScript     |        153 |        341 |         76 |        570 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useFailedReminders.js             | JavaScript     |        172 |          2 |         26 |        200 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useMedecinRdv.js                  | JavaScript     |         59 |          0 |         10 |         69 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useMissedAppointmentsDetector.js  | JavaScript     |         58 |         13 |         15 |         86 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useMissedReminders.js             | JavaScript     |         82 |          7 |         13 |        102 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\usePatientData.js                 | JavaScript     |        131 |        143 |         55 |        329 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\usePatients.js                    | JavaScript     |         44 |          0 |          8 |         52 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useRappels.js                     | JavaScript     |        126 |        116 |         43 |        285 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useRendezVous.js                  | JavaScript     |         76 |         55 |         28 |        159 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useSlotAvailability.js            | JavaScript     |         75 |          5 |         17 |         97 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useStock.js                       | JavaScript     |        151 |         21 |         26 |        198 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\hooks\useTraitements.js                 | JavaScript     |         67 |          0 |          9 |         76 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\index.css                               | PostCSS        |        470 |         22 |         55 |        547 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\lib\actes.js                            | JavaScript     |         14 |          0 |          2 |         16 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\lib\rdvStateMachine.js                  | JavaScript     |        159 |         44 |         23 |        226 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\lib\roles.js                            | JavaScript     |         73 |         22 |         19 |        114 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\lib\statuses.js                         | JavaScript     |        148 |          3 |         28 |        179 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\lib\supabase.js                         | JavaScript     |          7 |          0 |          4 |         11 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\main.jsx                                | JavaScript JSX |          9 |          0 |          2 |         11 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\AdminSettings.jsx                 | JavaScript JSX |        109 |          5 |         11 |        125 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Dashboard.jsx                     | JavaScript JSX |        171 |        433 |         75 |        679 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Devis.jsx                         | JavaScript JSX |        228 |          3 |         20 |        251 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Facturation.jsx                   | JavaScript JSX |        306 |          8 |         22 |        336 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Login.jsx                         | JavaScript JSX |        984 |      1,126 |        166 |      2,276 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\MedecinRdv.jsx                    | JavaScript JSX |        245 |        344 |         57 |        646 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Ordonnances.jsx                   | JavaScript JSX |        420 |          3 |         39 |        462 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Patients.jsx                      | JavaScript JSX |        122 |          4 |         11 |        137 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Rappels.jsx                       | JavaScript JSX |        305 |         12 |         23 |        340 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Rapports.jsx                      | JavaScript JSX |        169 |         13 |         21 |        203 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\RendezVous.jsx                    | JavaScript JSX |        187 |          0 |         15 |        202 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Stock.jsx                         | JavaScript JSX |        444 |         28 |         38 |        510 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\pages\Utilisateurs.jsx                  | JavaScript JSX |        546 |        517 |         95 |      1,158 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\utils\pdfGenerator.js                   | JavaScript     |        192 |          2 |         28 |        222 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\utils\phone.js                          | JavaScript     |         20 |          0 |          6 |         26 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\utils\timeConversion.js                 | JavaScript     |         22 |         23 |          9 |         54 |
+| c:\Users\DELL\Desktop\STAGE DB DIGITAL\smile\src\utils\timeFormat.js                     | JavaScript     |         18 |         14 |          7 |         39 |
+| Total                                                                                    |                |     12,390 |      5,132 |      1,878 |     19,400 |
++------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

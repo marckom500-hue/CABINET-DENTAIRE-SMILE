@@ -2024,18 +2024,18 @@ export default function Login() {
 
               {/* Badge */}
               <div style={{
-                display:"inline-flex", alignItems:"center", gap:6,
-                background:"rgba(0,172,193,0.08)",
-                border:"1px solid rgba(0,172,193,0.2)",
-                borderRadius:20, padding:"5px 14px", marginBottom:20,
-                animation:"badgePop 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s both",
+                // display:"inline-flex", alignItems:"center", gap:6,
+                // background:"rgba(0,172,193,0.08)",
+                // border:"1px solid rgba(0,172,193,0.2)",
+                // borderRadius:20, padding:"5px 14px", marginBottom:20,
+                // animation:"badgePop 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s both",
               }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="#00838f">
+                {/* <svg width="10" height="10" viewBox="0 0 24 24" fill="#00838f">
                   <rect x="9" y="2" width="6" height="20" rx="2"/>
                   <rect x="2" y="9" width="20" height="6" rx="2"/>
-                </svg>
+                </svg> */}
                 <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, fontWeight:600, letterSpacing:"0.18em", textTransform:"uppercase", color:"#00838f" }}>
-                  Cabinet Dentaire SMILE
+                  {/* Cabinet Dentaire SMILE */}
                 </span>
               </div>
 
