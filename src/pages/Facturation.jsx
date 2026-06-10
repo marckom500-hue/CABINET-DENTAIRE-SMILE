@@ -482,7 +482,8 @@ export default function Facturation() {
 
   // Le comptable et le superadmin peuvent exporter
   // (canAccess sur 'patients' suffit : comptable a 'read' depuis le patch roles.js)
-  const canExport = canAccess(role, 'patients') && canAccess(role, 'facturation')
+  // const canExport = canAccess(role, 'patients') && canAccess(role, 'facturation')
+  const canExport = role === 'comptable' || role === 'superadmin' || (canAccess(role, 'patients') && canAccess(role, 'facturation'))
 
   const dateTouched = Boolean(form.date)
   const dateIsValid = form.date ? form.date <= today : false
