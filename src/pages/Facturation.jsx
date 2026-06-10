@@ -355,8 +355,73 @@ import { canAccess } from '../lib/roles'
 // Fonctionne sans dépendance externe — génère un fichier .csv compatible Excel
 // (séparateur point-virgule, encodage UTF-8 BOM pour Excel Windows/Mac)
 // ─────────────────────────────────────────────────────────────────────────────
+// function exportComptableCSV(factures, getPatientName) {
+//   const BOM = '\uFEFF'   // UTF-8 BOM — nécessaire pour qu'Excel détecte l'encodage
+
+//   const headers = [
+//     'N° Facture',
+//     'Date',
+//     'Patient',
+//     'Acte',
+//     'Montant (FCFA)',
+//     'Statut',
+//   ]
+
+//   const statutLabel = {
+//     paye:    'Payée',
+//     attente: 'En attente',
+//     annule:  'Annulée',
+//   }
+
+//   const rows = factures.map(f => {
+//     const patientName = f.patients
+//       ? `${f.patients.prenom ?? ''} ${f.patients.nom ?? ''}`.trim()
+//       : getPatientName(f.patient_id)
+
+//     const statut = statutLabel[normalizeFactureStatus(f.statut)] ?? f.statut ?? '—'
+//     const date   = f.date ? new Date(f.date).toLocaleDateString('fr-FR') : '—'
+//     const num    = f.numero ?? `#${f.id?.slice(0, 8)?.toUpperCase() ?? '—'}`
+
+//     // Echapper les guillemets dans les cellules texte
+//     const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+
+//     return [
+//       cell(num),
+//       cell(date),
+//       cell(patientName),
+//       cell(f.acte ?? '—'),
+//       Number(f.montant ?? 0),   // numérique : pas de guillemets
+//       cell(statut),
+//     ].join(';')
+//   })
+
+//   // Ligne de totaux
+//   const totalMontant = factures.reduce((s, f) => s + Number(f.montant ?? 0), 0)
+//   const totalPayees  = factures
+//     .filter(f => normalizeFactureStatus(f.statut) === FACTURE_STATUS.PAYE)
+//     .reduce((s, f) => s + Number(f.montant ?? 0), 0)
+//   const totalAttente = factures
+//     .filter(f => normalizeFactureStatus(f.statut) === FACTURE_STATUS.ATTENTE)
+//     .reduce((s, f) => s + Number(f.montant ?? 0), 0)
+
+//   rows.push('')  // ligne vide
+//   rows.push(`"TOTAL FACTURÉ";;; ;${totalMontant};`)
+//   rows.push(`"TOTAL PAYÉ";;; ;${totalPayees};"Payée"`)
+//   rows.push(`"TOTAL EN ATTENTE";;; ;${totalAttente};"En attente"`)
+
+//   const csvContent = BOM + [headers.join(';'), ...rows].join('\r\n')
+//   const blob       = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+//   const url        = URL.createObjectURL(blob)
+
+//   const dateExport = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')
+//   const link       = document.createElement('a')
+//   link.href        = url
+//   link.download    = `export-comptable-${dateExport}.csv`
+//   link.click()
+//   URL.revokeObjectURL(url)
+// }
 function exportComptableCSV(factures, getPatientName) {
-  const BOM = '\uFEFF'   // UTF-8 BOM — nécessaire pour qu'Excel détecte l'encodage
+  const BOM = '\uFEFF'
 
   const headers = [
     'N° Facture',
@@ -382,7 +447,6 @@ function exportComptableCSV(factures, getPatientName) {
     const date   = f.date ? new Date(f.date).toLocaleDateString('fr-FR') : '—'
     const num    = f.numero ?? `#${f.id?.slice(0, 8)?.toUpperCase() ?? '—'}`
 
-    // Echapper les guillemets dans les cellules texte
     const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
 
     return [
@@ -390,12 +454,11 @@ function exportComptableCSV(factures, getPatientName) {
       cell(date),
       cell(patientName),
       cell(f.acte ?? '—'),
-      Number(f.montant ?? 0),   // numérique : pas de guillemets
+      Number(f.montant ?? 0),
       cell(statut),
     ].join(';')
   })
 
-  // Ligne de totaux
   const totalMontant = factures.reduce((s, f) => s + Number(f.montant ?? 0), 0)
   const totalPayees  = factures
     .filter(f => normalizeFactureStatus(f.statut) === FACTURE_STATUS.PAYE)
@@ -404,21 +467,30 @@ function exportComptableCSV(factures, getPatientName) {
     .filter(f => normalizeFactureStatus(f.statut) === FACTURE_STATUS.ATTENTE)
     .reduce((s, f) => s + Number(f.montant ?? 0), 0)
 
-  rows.push('')  // ligne vide
+  rows.push('')
   rows.push(`"TOTAL FACTURÉ";;; ;${totalMontant};`)
   rows.push(`"TOTAL PAYÉ";;; ;${totalPayees};"Payée"`)
   rows.push(`"TOTAL EN ATTENTE";;; ;${totalAttente};"En attente"`)
 
   const csvContent = BOM + [headers.join(';'), ...rows].join('\r\n')
-  const blob       = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const url        = URL.createObjectURL(blob)
-
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
   const dateExport = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')
-  const link       = document.createElement('a')
-  link.href        = url
-  link.download    = `export-comptable-${dateExport}.csv`
+
+  // ✅ SOLUTION POUR MOBILE : utiliser un élément <a> avec attribut download
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `export-comptable-${dateExport}.csv`
+  link.style.display = 'none'
+  
+  document.body.appendChild(link)
   link.click()
-  URL.revokeObjectURL(url)
+  
+  // Nettoyage après un délai
+  setTimeout(() => {
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }, 100)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
